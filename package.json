@@ -1,0 +1,82 @@
+{
+  "name": "sete-backend",
+  "version": "1.0.0",
+  "description": "Act as the middleware for the PGSB, PVSB devices and serve the content to the users through SE Tracking Engine Frontend by consuming RESTful APIs",
+  "main": "dist/index.js",
+  "scripts": {
+    "prestart": "npm run -s build",
+    "start": "npm run build && node dist/index.js",
+    "clean": "rimraf dist",
+    "lint": "eslint --fix --config .eslintrc.json \"src/**/*.js\"",
+    "build": "npm run clean && babel src -s -D -d dist && cp -R public dist",
+    "watch": "nodemon -e js --watch src --exec \"npm run start\""
+  },
+  "keywords": [
+    "Smart Electricity Tracking Engine Backend",
+    "SE Tracking Engine Backend"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aravindakr95/sete-backend.git"
+  },
+  "author": {
+    "name": "Aravinda Rathnayake",
+    "email": "aravindacloud@gmail.com",
+    "url": "https://github.com/aravindakr95"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aravindakr95/sete-backend/issues"
+  },
+  "homepage": "https://github.com/aravindakr95/sete-backend",
+  "dependencies": {
+    "@sendgrid/mail": "^7.2.6",
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.0.2",
+    "express": "^4.17.1",
+    "express-validator": "^6.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.7",
+    "multer": "^1.4.2",
+    "rimraf": "^3.0.2",
+    "sharp": "^0.26.1",
+    "uuid": "^8.3.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/register": "^7.8.6",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.3",
+    "babel-core": "^6.26.3",
+    "chalk": "^4.1.0",
+    "eslint": "^7.10.0",
+    "faker": "^5.1.0",
+    "nodemon": "^2.0.2",
+    "regenerator-runtime": "^0.13.1"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/env",
+        {
+          "targets": {
+            "node": "10.16.1"
+          }
+        }
+      ]
+    ]
+  },
+  "engines": {
+    "node": "10.16.1"
+  }
+}
