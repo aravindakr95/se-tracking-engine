@@ -105,4 +105,3 @@ dist/
 # Intellij Cache
 .idea/
 .idea/workspace.xml
-package-lock.json
