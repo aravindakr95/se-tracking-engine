@@ -1,0 +1,71 @@
+import { body, param, validationResult } from 'express-validator';
+import { errorResponse } from '../helpers/response/response-dispatcher';
+import HttpResponseType from '../models/http-response-type';
+
+function fieldStateChecker(req, res, next) {
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+        return next();
+    }
+
+    const extractedErrors = [];
+    errors.array().map(error => extractedErrors.push(error.msg));
+
+    return errorResponse(res, {
+        code: HttpResponseType.UNPROCESSABLE_ENTITY,
+        message: extractedErrors.join(', ')
+    });
+}
+
+const validate = (main, route, method) => {
+    switch (main) {
+        case 'auth':
+            return authValidator(route);
+        default:
+            return [];
+    }
+};
+
+function authValidator(route) {
+    switch (route) {
+        case '/login':
+            return [
+                body('email')
+                    .exists().withMessage('Email is not valid')
+                    .isEmail().withMessage('Email is in invalid format'),
+                body('password')
+                    .exists().withMessage('Password is required')
+                    .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
+                    .matches(/\d/).withMessage('Password must contain a number')
+            ];
+        case '/register':
+            return [
+                body('email')
+                    .exists().withMessage('Email is not valid')
+                    .isEmail().withMessage('Email is not in valid format'),
+                body('password')
+                    .exists().withMessage('Password is required')
+                    .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
+                    .matches(/\d/).withMessage('Password must contain a number'),
+                body('nic')
+                    .exists().withMessage('NIC is required')
+                    .isString().withMessage('NIC should be String')
+                    .isLength({ min: 10, max: 12 }).withMessage('NIC should be between 10 to 12 characters long'),
+                body('contactNumber')
+                    .exists().withMessage('Contact number is required')
+                    .isString().withMessage('Contact number should be String'),
+                body('supplier').exists().withMessage('Supplier is required')
+                    .isString().withMessage('Supplier should be String'),
+                body('accountNumber').exists().withMessage('Account number is required')
+                    .isNumeric().withMessage('Account number should be Number')
+                    .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
+                body('premiseId').exists().withMessage('Premise ID is required')
+                    .isString().withMessage('Premise ID should be String')
+            ];
+        default:
+            return [];
+    }
+}
+
+module.exports = { validate, fieldStateChecker };
