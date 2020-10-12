@@ -1,7 +1,7 @@
 import PGStat from '../models/pg-stat';
 import PGError from '../models/pg-error';
 
-export default function makePowerGridList() {
+export default function makePGSBList() {
     return Object.freeze({
         addPGStats,
         addPGErrors
@@ -16,9 +16,9 @@ export default function makePowerGridList() {
         }
     }
 
-    async function addPGErrors(stats) {
+    async function addPGErrors(error) {
         try {
-            return new PGError(stats).save();
+            return new PGError(error).save();
         } catch (error) {
             console.log(error.message);
             return error;
