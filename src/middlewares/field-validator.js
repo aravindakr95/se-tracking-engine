@@ -22,6 +22,8 @@ const validate = (main, route, method) => {
     switch (main) {
         case 'auth':
             return authValidator(route);
+        case 'pgsb':
+            return pgsbValidator(route);
         default:
             return [];
     }
@@ -32,7 +34,7 @@ function authValidator(route) {
         case '/login':
             return [
                 body('email')
-                    .exists().withMessage('Email is not valid')
+                    .exists().withMessage('Email is required')
                     .isEmail().withMessage('Email is in invalid format'),
                 body('password')
                     .exists().withMessage('Password is required')
@@ -42,7 +44,7 @@ function authValidator(route) {
         case '/register':
             return [
                 body('email')
-                    .exists().withMessage('Email is not valid')
+                    .exists().withMessage('Email is required')
                     .isEmail().withMessage('Email is not in valid format'),
                 body('password')
                     .exists().withMessage('Password is required')
@@ -62,6 +64,70 @@ function authValidator(route) {
                     .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
                 body('premiseId').exists().withMessage('Premise ID is required')
                     .isString().withMessage('Premise ID should be String')
+            ];
+        default:
+            return [];
+    }
+}
+
+function pgsbValidator(route) {
+    switch (route) {
+        case '/payloads':
+            return [
+                body('deviceId')
+                    .exists().withMessage('Device ID is required')
+                    .isMACAddress().withMessage('Device ID should be MAC address'),
+                body('slaveId')
+                    .exists().withMessage('Slave ID is required')
+                    .isString().withMessage('Slave ID should be String'),
+                body('currentRound')
+                    .exists().withMessage('Current round is required')
+                    .isNumeric().withMessage('Current round should be Number'),
+                body('current')
+                    .exists().withMessage('Current is required')
+                    .isNumeric().withMessage('Current should be Number'),
+                body('voltage')
+                    .exists().withMessage('Voltage is required')
+                    .isNumeric().withMessage('Voltage should be Number'),
+                body('power')
+                    .exists().withMessage('Power is required')
+                    .isNumeric().withMessage('Power should be Number'),
+                body('frequency')
+                    .exists().withMessage('Frequency is required')
+                    .isNumeric().withMessage('Frequency should be Number'),
+                body('totalPower')
+                    .exists().withMessage('Total power is required')
+                    .isNumeric().withMessage('Total power should be Number'),
+                body('importPower')
+                    .exists().withMessage('Import power is required')
+                    .isNumeric().withMessage('Import power should be Number'),
+                body('exportPower')
+                    .exists().withMessage('Export power is required')
+                    .isNumeric().withMessage('Export power should be Number'),
+                body('powerFactor')
+                    .exists().withMessage('Power factor is required')
+                    .isNumeric().withMessage('Power factor should be Number'),
+                body('rssi')
+                    .exists().withMessage('RSSI is required')
+                    .isNumeric().withMessage('RSSI should be Number')
+            ];
+        case '/errors':
+            return [
+                body('deviceId')
+                    .exists().withMessage('Device ID is required')
+                    .isString().withMessage('Device ID should be String'),
+                body('error')
+                    .exists().withMessage('Error is required')
+                    .isString().withMessage('Error should be String'),
+                body('rssi')
+                    .exists().withMessage('RSSI is required')
+                    .isNumeric().withMessage('RSSI should be Number'),
+                body('wifiFailCount')
+                    .exists().withMessage('Wifi fail count is required')
+                    .isNumeric().withMessage('Wifi fail count should be Number'),
+                body('httpFailCount')
+                    .exists().withMessage('Http fail count is required')
+                    .isNumeric().withMessage('Http fail count should be Number')
             ];
         default:
             return [];

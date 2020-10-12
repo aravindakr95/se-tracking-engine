@@ -8,7 +8,7 @@ import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makeAuthEndPointHandler({ userList }) {
+export default function makeAuthEndPointHandler({ authList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/login':
@@ -28,7 +28,7 @@ export default function makeAuthEndPointHandler({ userList }) {
             let validPassword = false;
             const { email, password } = httpRequest.body;
             if (email) {
-                let user = await userList.findByEmail({
+                let user = await authList.findByEmail({
                     email
                 });
 
@@ -98,7 +98,7 @@ export default function makeAuthEndPointHandler({ userList }) {
                     premiseId
                 };
 
-                let user = await userList.addUser(userObj);
+                let user = await authList.addUser(userObj);
 
                 await sendEmail({
                     from: config.adminEmail,

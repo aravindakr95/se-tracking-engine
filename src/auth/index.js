@@ -1,9 +1,9 @@
 import makeAuthList from './auth-list';
 import makeAuthEndPointHandler from './auth-endpoint';
 
-const userList = makeAuthList();
+const authList = makeAuthList();
 const authEndpointHandler = makeAuthEndPointHandler({
-    userList
+    authList
 });
 
 export default authEndpointHandler;

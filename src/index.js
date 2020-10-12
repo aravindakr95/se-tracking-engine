@@ -11,6 +11,7 @@ import { errorResponse } from './helpers/response/response-dispatcher';
 
 import authRouter from './routes/auth';
 import userRouter from './routes/user';
+import pgsbRouter from './routes/pgsb';
 import apiDocsRouter from './routes/api-docs';
 
 import HttpResponseType from './models/http-response-type';
@@ -24,6 +25,7 @@ initializeDB();
 
 app.use('/v1/sete/auth', authRouter);
 app.use('/v1/sete/users', userRouter);
+app.use('/v1/sete/pgsb', pgsbRouter);
 
 app.use('/api-docs', apiDocsRouter);
 

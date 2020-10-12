@@ -18,7 +18,6 @@ export default function makeAuthList() {
 
     async function findByEmail(email) {
         try {
-            console.log("ddd")
             return User.findOne(email);
         } catch (error) {
             console.log(error.message);
