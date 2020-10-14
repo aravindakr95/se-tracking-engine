@@ -3,7 +3,7 @@ import User from '../models/user';
 export default function makeUserList() {
     return Object.freeze({
         getAllUsers,
-        findUserById
+        findUserByAccNumber
     });
 
     async function getAllUsers() {
@@ -18,11 +18,9 @@ export default function makeUserList() {
         }
     }
 
-    async function findUserById(id) {
+    async function findUserByAccNumber(accNumber) {
         try {
-            return User.findOne({
-                _id: id
-            }).lean(true).then((data) => {
+            return User.findOne(accNumber).lean(true).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;

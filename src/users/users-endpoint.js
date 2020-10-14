@@ -18,8 +18,8 @@ export default function makeUsersEndpointHandler({
 
     async function getUsers(httpRequest) {
         let result = null;
-        const pathParams = httpRequest.pathParams;
-        if (!pathParams.id) {
+        const { accountNumber } = httpRequest.queryParams;
+        if (!accountNumber) {
             try {
                 result = await userList.getAllUsers();
                 return objectHandler({
@@ -35,8 +35,8 @@ export default function makeUsersEndpointHandler({
             }
         } else {
             try {
-                result = await userList.findUserById(pathParams.id);
-                if (result && result._id) {
+                result = await userList.findUserByAccNumber({ accountNumber });
+                if (result) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
                         data: result,
@@ -45,7 +45,7 @@ export default function makeUsersEndpointHandler({
                 } else {
                     return objectHandler({
                         code: HttpResponseType.NOT_FOUND,
-                        message: `Requested user '${pathParams.id}' not found in users`
+                        message: `Requested user account '${accountNumber}' not found`
                     });
                 }
             } catch (error) {
