@@ -11,9 +11,9 @@ export default async function initializeDB() {
         useCreateIndex: true,
         useFindAndModify: false
     }).then(() => {
-        console.log(`Connected to  ${dbUrl}`);
+        console.log(`Connected to ${dbUrl}`);
     }).catch((error) => {
-        console.log(`Database starting error:  ${error.message}`);
+        console.log(`Database starting error: ${error.message}`);
 
         process.exit(1);
     });

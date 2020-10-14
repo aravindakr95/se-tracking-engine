@@ -74,54 +74,28 @@ export default function makeAuthEndPointHandler({ authList }) {
     }
 
     async function registerUser(httpRequest) {
-        const {
-            email,
-            password,
-            nic,
-            contactNumber,
-            supplier,
-            accountNumber,
-            premiseId
-        } = httpRequest.body;
+        const body = httpRequest.body;
 
         try {
-            if (httpRequest.body) {
-                const userObj = {
-                    email,
-                    password: hasher({
-                        password
-                    }),
-                    nic,
-                    contactNumber,
-                    supplier,
-                    accountNumber,
-                    premiseId
-                };
+            Object.assign(body, { password: hasher({ password: body.password }) });
+            let user = await authList.addUser(body);
 
-                let user = await authList.addUser(userObj);
+            await sendEmail({
+                from: config.adminEmail,
+                to: user.email,
+                subject: 'SETE Registration',
+                text: 'Registration successful. Thanks for choosing us.',
+                html: ''
+            });
 
-                await sendEmail({
-                    from: config.adminEmail,
-                    to: user.email,
-                    subject: 'Registration successful',
-                    text: 'Registration successful. Thanks for choosing our store.',
-                    html: ''
-                });
-
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    message: `${user.email} account created successful`
-                });
-            } else {
-                return objectHandler({
-                    code: HttpResponseType.CLIENT_ERROR,
-                    message: 'Request body does not contain a body'
-                });
-            }
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                message: `${user.email} account created successful`
+            });
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.code === 11000 ? `Email '${email}' is already exists` : error.message
+                message: error.code === 11000 ? `Email '${body.email}' or unique property already exists` : error.message
             });
         }
     }

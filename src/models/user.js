@@ -21,6 +21,7 @@ let userSchema = UserSchema({
     nic: {
         type: String,
         required: true,
+        unique: true,
         minlength: 10,
         maxlength: 12
     },
@@ -39,10 +40,24 @@ let userSchema = UserSchema({
         minlength: 10,
         maxlength: 10
     },
-    premiseId: {
-        type: String,
-        required: true
-    }
+    devices: [
+        {
+            _id: false,
+            type: {
+                type: String,
+                required: true,
+                enum: ['PGSB', 'PVSB']
+            },
+            deviceId: {
+                type: String,
+                required: true
+            },
+            slaveId: {
+                type: String,
+                default: null
+            }
+        }
+    ]
 });
 
 let User = mongoose.model('User', userSchema, 'users');

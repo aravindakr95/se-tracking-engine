@@ -64,8 +64,14 @@ function authValidator(route) {
                 body('accountNumber').exists().withMessage('Account number is required')
                     .isNumeric().withMessage('Account number should be Number')
                     .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
-                body('premiseId').exists().withMessage('Premise ID is required')
-                    .isString().withMessage('Premise ID should be String')
+                body('devices', 'Devices is required').exists()
+                    .isArray().withMessage('Devices should be Array'),
+                body('devices.*.type')
+                    .exists().withMessage('Devices.Type is required')
+                    .isString().withMessage('Devices.Type should be String'),
+                body('devices.*.deviceId')
+                    .exists().withMessage('Devices.DeviceId is required')
+                    .isString().withMessage('Devices.DeviceId should be String')
             ];
         default:
             return [];
