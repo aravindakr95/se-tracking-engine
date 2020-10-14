@@ -24,6 +24,8 @@ const validate = (main, route, method) => {
             return authValidator(route);
         case 'pgsb':
             return pgsbValidator(route);
+        case 'pvsb':
+            return pvsbValidator(route);
         default:
             return [];
     }
@@ -72,14 +74,9 @@ function authValidator(route) {
 
 function pgsbValidator(route) {
     switch (route) {
+        //todo: add query parameter validators
         case '/payloads':
             return [
-                body('deviceId')
-                    .exists().withMessage('Device ID is required')
-                    .isMACAddress().withMessage('Device ID should be MAC address'),
-                body('slaveId')
-                    .exists().withMessage('Slave ID is required')
-                    .isString().withMessage('Slave ID should be String'),
                 body('currentRound')
                     .exists().withMessage('Current round is required')
                     .isNumeric().withMessage('Current round should be Number'),
@@ -113,9 +110,42 @@ function pgsbValidator(route) {
             ];
         case '/errors':
             return [
-                body('deviceId')
-                    .exists().withMessage('Device ID is required')
-                    .isString().withMessage('Device ID should be String'),
+                body('error')
+                    .exists().withMessage('Error is required')
+                    .isString().withMessage('Error should be String'),
+                body('rssi')
+                    .exists().withMessage('RSSI is required')
+                    .isNumeric().withMessage('RSSI should be Number'),
+                body('wifiFailCount')
+                    .exists().withMessage('Wifi fail count is required')
+                    .isNumeric().withMessage('Wifi fail count should be Number'),
+                body('httpFailCount')
+                    .exists().withMessage('Http fail count is required')
+                    .isNumeric().withMessage('Http fail count should be Number')
+            ];
+        default:
+            return [];
+    }
+}
+
+function pvsbValidator(route) {
+    switch (route) {
+        //todo: add query parameter validators
+        case '/payloads':
+            return [
+                body('isOwn')
+                    .exists().withMessage('Is own is required')
+                    .isBoolean().withMessage('Is own should be Boolean'),
+                body('success')
+                    .exists().withMessage('Success is required')
+                    .isBoolean().withMessage('Success should be Boolean'),
+                body('messageCode')
+                    .exists().withMessage('Message code is required'),
+                body('results')
+                    .exists().withMessage('results is required')
+            ];
+        case '/errors':
+            return [
                 body('error')
                     .exists().withMessage('Error is required')
                     .isString().withMessage('Error should be String'),

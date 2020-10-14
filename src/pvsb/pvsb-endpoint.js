@@ -2,13 +2,13 @@ import HttpResponseType from '../models/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makePGSBEndPointHandler({ pgsbList }) {
+export default function makePVSBEndPointHandler({ pvsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/payloads':
-                return addPGStat(httpRequest);
+                return addPVStat(httpRequest);
             case '/errors':
-                return addPGError(httpRequest)
+                return addPVError(httpRequest)
             default:
                 return objectHandler({
                     code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -17,22 +17,28 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
         }
     };
 
-    async function addPGStat(httpRequest) {
+    async function addPVStat(httpRequest) {
         const body = httpRequest.body;
-        const { deviceId, slaveId } = httpRequest.queryParams;
+        const { deviceId } = httpRequest.queryParams;
 
         try {
-            Object.assign(body, { deviceId, slaveId });
-            const payload = await pgsbList.addPGStats(body);
+            const customPayload = pvsbList.mapPayload(deviceId, body);
 
-            if (payload) {
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: null,
-                    message: `PGSB ${result.deviceId} payload statistics received`
-                });
+            if (!customPayload) {
+                console.log('Custom payload is empty');
+                return;
             }
+
+            const result = await pvsbList.addPVStats(customPayload);
+
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                data: null,
+                message: `PVSB '${result.deviceId}' payload statistics received`
+            });
+
         } catch (error) {
+            console.log(error.message)
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
                 message: error.message
@@ -40,13 +46,13 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
         }
     }
 
-    async function addPGError(httpRequest) {
+    async function addPVError(httpRequest) {
         const body = httpRequest.body;
         const { deviceId } = httpRequest.queryParams;
 
         try {
             Object.assign(body, { deviceId });
-            const payload = await pgsbList.addPGError(body);
+            const payload = await pvsbList.addPVError(body);
 
             console.log(payload);
 
@@ -54,7 +60,7 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: null,
-                    message: `PGSB ${result.deviceId} error log received`
+                    message: `PVSB '${result.deviceId}' error log received`
                 });
             }
         } catch (error) {

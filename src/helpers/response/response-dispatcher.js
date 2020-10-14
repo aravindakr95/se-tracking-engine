@@ -6,7 +6,7 @@ const successResponse = (res, obj) => {
     const data = {
         status: obj.status,
         message: obj.message,
-        data: obj.data || []
+        data: obj.data || null
     };
     return res
         .set(headers)

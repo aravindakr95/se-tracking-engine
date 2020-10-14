@@ -4,7 +4,7 @@ import PGError from '../models/pg-error';
 export default function makePGSBList() {
     return Object.freeze({
         addPGStats,
-        addPGErrors
+        addPGError
     });
 
     async function addPGStats(stats) {
@@ -16,7 +16,7 @@ export default function makePGSBList() {
         }
     }
 
-    async function addPGErrors(error) {
+    async function addPGError(error) {
         try {
             return new PGError(error).save();
         } catch (error) {
