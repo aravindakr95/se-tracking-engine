@@ -26,6 +26,8 @@ const validate = (main, route, method) => {
             return pgsbValidator(route);
         case 'pvsb':
             return pvsbValidator(route);
+        case 'users':
+            return usersValidator(method);
         default:
             return [];
     }
@@ -61,6 +63,8 @@ function authValidator(route) {
                     .isString().withMessage('Contact number should be String'),
                 body('supplier').exists().withMessage('Supplier is required')
                     .isString().withMessage('Supplier should be String'),
+                body('tariff').exists().withMessage('Tariff is required')
+                    .isString().withMessage('Tariff should be String'),
                 body('accountNumber').exists().withMessage('Account number is required')
                     .isNumeric().withMessage('Account number should be Number')
                     .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
@@ -164,6 +168,45 @@ function pvsbValidator(route) {
                 body('httpFailCount')
                     .exists().withMessage('Http fail count is required')
                     .isNumeric().withMessage('Http fail count should be Number')
+            ];
+        default:
+            return [];
+    }
+}
+
+function usersValidator(method) {
+    switch (method) {
+        case 'PUT':
+            return [
+                body('email')
+                    .exists().withMessage('Email is required')
+                    .isEmail().withMessage('Email is not in valid format'),
+                body('password')
+                    .exists().withMessage('Password is required')
+                    .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
+                    .matches(/\d/).withMessage('Password must contain a number'),
+                body('nic')
+                    .exists().withMessage('NIC is required')
+                    .isString().withMessage('NIC should be String')
+                    .isLength({ min: 10, max: 12 }).withMessage('NIC should be between 10 to 12 characters long'),
+                body('contactNumber')
+                    .exists().withMessage('Contact number is required')
+                    .isString().withMessage('Contact number should be String'),
+                body('supplier').exists().withMessage('Supplier is required')
+                    .isString().withMessage('Supplier should be String'),
+                body('tariff').exists().withMessage('Tariff is required')
+                    .isString().withMessage('Tariff should be String'),
+                body('accountNumber').exists().withMessage('Account number is required')
+                    .isNumeric().withMessage('Account number should be Number')
+                    .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
+                body('devices', 'Devices is required').exists()
+                    .isArray().withMessage('Devices should be Array'),
+                body('devices.*.type')
+                    .exists().withMessage('Devices.Type is required')
+                    .isString().withMessage('Devices.Type should be String'),
+                body('devices.*.deviceId')
+                    .exists().withMessage('Devices.DeviceId is required')
+                    .isString().withMessage('Devices.DeviceId should be String')
             ];
         default:
             return [];

@@ -34,6 +34,11 @@ let userSchema = UserSchema({
         required: true,
         enum: ['CEB', 'LECO']
     },
+    tariff: {
+        type: String,
+        required: true,
+        enum: ['NetMetering', 'NetAccounting']
+    },
     accountNumber: {
         type: Number,
         required: true,

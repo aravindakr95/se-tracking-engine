@@ -29,7 +29,7 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: null,
-                    message: `PGSB ${result.deviceId} payload statistics received`
+                    message: `PGSB ${deviceId} payload statistics received`
                 });
             }
         } catch (error) {
@@ -54,7 +54,7 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: null,
-                    message: `PGSB ${result.deviceId} error log received`
+                    message: `PGSB ${deviceId} error log received`
                 });
             }
         } catch (error) {
