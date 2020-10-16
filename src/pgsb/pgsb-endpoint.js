@@ -2,11 +2,12 @@ import HttpResponseType from '../models/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makePGSBEndPointHandler({ pgsbList }) {
+export default function makePGSBEndPointHandler({ pgsbList, userList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/payloads':
-                return addPGStat(httpRequest);
+                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getUserPGStats(httpRequest) :
+                    addPGStat(httpRequest);
             case '/errors':
                 return addPGError(httpRequest)
             default:
@@ -40,6 +41,50 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
         }
     }
 
+    async function getUserPGStats(httpRequest) {
+        const { accountNumber } = httpRequest.queryParams;
+
+        try {
+            const user = await userList.findUserByAccNumber({ accountNumber });
+
+            if (!user && !user.selected) {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested account number '${accountNumber}' is not exists`
+                });
+            }
+
+            const deviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PGSB');
+
+            if (!deviceId) {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: `PGSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`
+                });
+            }
+
+            const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId });
+
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested user account '${accountNumber}' PG statistics not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
     async function addPGError(httpRequest) {
         const body = httpRequest.body;
         const { deviceId } = httpRequest.queryParams;
@@ -47,8 +92,6 @@ export default function makePGSBEndPointHandler({ pgsbList }) {
         try {
             Object.assign(body, { deviceId });
             const payload = await pgsbList.addPGError(body);
-
-            console.log(payload);
 
             if (payload) {
                 return objectHandler({

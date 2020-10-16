@@ -46,6 +46,50 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
         }
     }
 
+    async function getUserPVStats(httpRequest) {
+        const { accountNumber } = httpRequest.queryParams;
+
+        try {
+            const user = await userList.findUserByAccNumber({ accountNumber });
+
+            if (!user && !user.selected) {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested account number '${accountNumber}' is not exists`
+                });
+            }
+
+            const deviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PVSB');
+
+            if (!deviceId) {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`
+                });
+            }
+
+            const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId });
+
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested user account '${accountNumber}' PV statistics not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
     async function addPVError(httpRequest) {
         const body = httpRequest.body;
         const { deviceId } = httpRequest.queryParams;
@@ -64,56 +108,6 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
-            });
-        }
-    }
-
-    async function getUserPVStats(httpRequest) {
-        const { accountNumber } = httpRequest.queryParams;
-
-        try {
-            const user = await userList.findUserByAccNumber({ accountNumber });
-
-            console.log(user);
-
-            if (!user && !user.selected) {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested account number '${accountNumber}' is not exists`
-                });
-            }
-
-            const deviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PVSB');
-
-            if (!deviceId) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`
-                });
-            }
-
-            console.log(deviceId)
-
-            const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId });
-
-            console.log(result)
-
-            if (result) {
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: result,
-                    message: ''
-                });
-            } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested user account '${accountNumber}' PV statistics not found`
-                });
-            }
-        } catch (error) {
-            return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
             });
         }

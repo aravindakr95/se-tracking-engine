@@ -16,6 +16,12 @@ pgsbRouter.post('/payloads',
         pgsbController(req, res);
     });
 
+pgsbRouter.get('/payloads',
+    filterRoute,
+    (req, res) => {
+        pgsbController(req, res);
+    });
+
 pgsbRouter.post('/errors',
     filterRoute,
     validate('pgsb', '/errors', 'POST'),

@@ -54,7 +54,6 @@ export default function makeUserList() {
 
             if (user && user.devices) {
                 const { deviceId } = user.devices.find(device => device.type === type);
-                console.log(deviceId);
 
                 return deviceId;
             } else {
