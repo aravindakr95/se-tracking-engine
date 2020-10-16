@@ -7,6 +7,14 @@ let userSchema = UserSchema({
         type: Number,
         default: new Date().getTime()
     },
+    isStartTimestamp: {
+        type: Boolean,
+        default: false
+    },
+    isEndTimestamp: {
+        type: Boolean,
+        default: false
+    },
     email: {
         type: String,
         required: true,

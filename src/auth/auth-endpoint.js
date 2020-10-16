@@ -7,6 +7,7 @@ import HttpResponseType from '../models/http-response-type';
 import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
+import { configSMS, sendSMS } from '../helpers/sms/messenger';
 
 export default function makeAuthEndPointHandler({ authList }) {
     return async function handle(httpRequest) {
@@ -80,22 +81,54 @@ export default function makeAuthEndPointHandler({ authList }) {
             Object.assign(body, { password: hasher({ password: body.password }) });
             let user = await authList.addUser(body);
 
-            await sendEmail({
+            const message = 'Registration successful. You will keep receiving monthly Electricity Statement each month ending day through this stream. Thank You for helping us to automate this service!';
+            const mobile = `+94${body.contactNumber.substring(1)}`;
+            const dataset = configSMS(mobile, message);
+            const options = {
+                url: 'https://ideabiz.lk/apicall/smsmessaging/v3/outbound/SETE/requests',
+                method: 'post'
+            };
+
+            //WARNING: limited resource use with care
+            const smsStatus = await sendSMS(options, dataset)
+                .then(response => {
+                    return true
+                })
+                .catch(error => {
+                    console.log(error)
+                    return error;
+                });
+
+            //WARNING: limited resource use with care
+            const emailStatus = await sendEmail({
                 from: config.adminEmail,
                 to: user.email,
                 subject: 'SETE Registration',
-                text: 'Registration successful. Thanks for choosing us.',
+                text: message,
                 html: ''
+            }).then(response => {
+                return true;
+            }).catch(error => {
+                console.log(error);
+                return error
             });
 
-            return objectHandler({
-                status: HttpResponseType.SUCCESS,
-                message: `${user.email} account created successful`
-            });
+            if (smsStatus && emailStatus) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    message: `${user.email} account created successful`
+                });
+            } else {
+                return objectHandler({
+                    status: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: 'Registration Email or SMS sending failed'
+                });
+            }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.code === 11000 ? `Email '${body.email}' or unique property already exists` : error.message
+                message: error.code === 11000 ? `Email '${body.email}' or unique property already exists` :
+                    error.message
             });
         }
     }

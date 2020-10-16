@@ -16,6 +16,12 @@ pvsbRouter.post('/payloads',
         pvsbController(req, res);
     });
 
+pvsbRouter.get('/payloads',
+    filterRoute,
+    (req, res) => {
+        pvsbController(req, res);
+    });
+
 pvsbRouter.post('/errors',
     filterRoute,
     validate('pvsb', '/errors', 'POST'),

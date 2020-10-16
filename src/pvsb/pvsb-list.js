@@ -5,6 +5,7 @@ export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
         addPVError,
+        findAllPVStatsByDeviceId,
         mapPayload
     });
 
@@ -22,6 +23,18 @@ export default function makePVSBList() {
             return new PVError(error).save();
         } catch (error) {
             console.log(error.message);
+            return error;
+        }
+    }
+
+    async function findAllPVStatsByDeviceId(deviceId) {
+        try {
+            return PVStat.find(deviceId).lean(true).then((data) => {
+                return data;
+            }).catch((error) => {
+                return error;
+            });
+        } catch (error) {
             return error;
         }
     }

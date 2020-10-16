@@ -5,7 +5,8 @@ export default function makeUsersEndpointHandler({ userList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.method) {
             case 'GET':
-                return getUsers(httpRequest);
+                return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId ?
+                    getUser(httpRequest) : getUsers();
             case 'PUT':
                 return updateUser(httpRequest);
             case 'DELETE':
@@ -18,25 +19,31 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
     };
 
-    async function getUsers(httpRequest) {
+    async function getUsers() {
         let result = null;
-        const { accountNumber } = httpRequest.queryParams;
 
-        if (!accountNumber) {
-            try {
-                result = await userList.getAllUsers();
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: result,
-                    message: ''
-                });
-            } catch (error) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
-            }
-        } else {
+        try {
+            result = await userList.getAllUsers();
+
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                data: result,
+                message: ''
+            });
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
+    async function getUser(httpRequest) {
+        let result = null;
+
+        if (httpRequest.queryParams.accountNumber) {
+            const { accountNumber } = httpRequest.queryParams;
+
             try {
                 result = await userList.findUserByAccNumber({ accountNumber });
                 if (result) {
@@ -49,6 +56,31 @@ export default function makeUsersEndpointHandler({ userList }) {
                     return objectHandler({
                         code: HttpResponseType.NOT_FOUND,
                         message: `Requested user account '${accountNumber}' not found`
+                    });
+                }
+            } catch (error) {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            }
+        }
+
+        if (httpRequest.queryParams.deviceId) {
+            const { deviceId } = httpRequest.queryParams;
+
+            try {
+                result = await userList.findUserByDeviceId(deviceId);
+                if (result) {
+                    return objectHandler({
+                        status: HttpResponseType.SUCCESS,
+                        data: result,
+                        message: ''
+                    });
+                } else {
+                    return objectHandler({
+                        code: HttpResponseType.NOT_FOUND,
+                        message: `Requested Device Id '${deviceId}' not found`
                     });
                 }
             } catch (error) {
@@ -87,7 +119,6 @@ export default function makeUsersEndpointHandler({ userList }) {
     }
 
     async function deleteUser(httpRequest) {
-        console.log(httpRequest.queryParams);
         const { accountNumber } = httpRequest.queryParams;
 
         let result = await userList.deleteUserByAccNumber({ accountNumber });

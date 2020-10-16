@@ -5,12 +5,7 @@ import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
 let userRouter = express.Router();
 
-/* GET user by id */
-userRouter.get('/:id', filterRoute, (req, res) => {
-    userController(req, res);
-});
-
-/* GET all users */
+/* GET all users or specific user */
 userRouter.get('/', filterRoute, (req, res) => {
     userController(req, res);
 });

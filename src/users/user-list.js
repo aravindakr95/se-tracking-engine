@@ -4,7 +4,8 @@ export default function makeUserList() {
     return Object.freeze({
         getAllUsers,
         findUserByAccNumber,
-        getUserByDeviceId,
+        findUserByDeviceId,
+        findDeviceIdByAccNumber,
         updateUserByAccNumber,
         deleteUserByAccNumber
     });
@@ -33,8 +34,36 @@ export default function makeUserList() {
         }
     }
 
-    //todo: to be implemented
-    async function getUserByDeviceId(deviceId) {}
+    async function findUserByDeviceId(deviceId) {
+        try {
+            return User.findOne({
+                'devices.deviceId': deviceId
+            }).then((data) => {
+                return data;
+            }).catch((error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async function findDeviceIdByAccNumber(accNumber, type) {
+        try {
+            const user = await findUserByAccNumber(accNumber);
+
+            if (user && user.devices) {
+                const { deviceId } = user.devices.find(device => device.type === type);
+                console.log(deviceId);
+
+                return deviceId;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return error;
+        }
+    }
 
     async function updateUserByAccNumber(accNumber, data) {
         try {

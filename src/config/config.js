@@ -10,7 +10,8 @@ const config = {
     jwtSecret: process.env.JWT_SECRET_KEY,
     saltRounds: process.env.BCRYPT_ROUNDS,
     sendGridApiKey: process.env.SENDGRID_API_KEY,
-    adminEmail: process.env.ADMIN_EMAIL
+    adminEmail: process.env.ADMIN_EMAIL,
+    ideabizAuthToken: 'fglEm1ZVF4vxXQhH7rb6Or46dWEa'
 };
 
 export default config;
