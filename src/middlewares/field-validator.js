@@ -47,6 +47,9 @@ function authValidator(route) {
             ];
         case '/register':
             return [
+                body('establishedYear')
+                    .exists().withMessage('Established year is required')
+                    .isNumeric().withMessage('Established year should be number'),
                 body('email')
                     .exists().withMessage('Email is required')
                     .isEmail().withMessage('Email is not in valid format'),
@@ -178,6 +181,9 @@ function usersValidator(method) {
     switch (method) {
         case 'PUT':
             return [
+                body('establishedYear')
+                    .exists().withMessage('Established year is required')
+                    .isNumeric().withMessage('Established year should be number'),
                 body('email')
                     .exists().withMessage('Email is required')
                     .isEmail().withMessage('Email is not in valid format'),

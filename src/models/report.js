@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-const RecordSchema = mongoose.Schema;
+const ReportSchema = mongoose.Schema;
 
-let recordSchema = RecordSchema({
+let reportSchema = ReportSchema({
     timestamp: {
         type: Number,
         default: new Date().getTime()
@@ -21,17 +21,14 @@ let recordSchema = RecordSchema({
     month: {
         type: String,
         required: true,
-        enum: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Nov', 'Dec']
+        minlength: 1,
+        maxlength: 12
     },
     year: {
         type: String,
         required: true
     },
-    avDailyProduction: {
-        type: Number,
-        required: true
-    },
-    avDailyConsumption: {
+    avDailyProduction: { //todo: avDailyConsumption should be added
         type: Number,
         required: true
     },
@@ -40,6 +37,10 @@ let recordSchema = RecordSchema({
         required: true
     },
     totalConsumption: {
+        type: Number,
+        required: true
+    },
+    totalGridImported: {
         type: Number,
         required: true
     },
@@ -57,6 +58,6 @@ let recordSchema = RecordSchema({
     }
 });
 
-let record = mongoose.model('Record', recordSchema, 'records');
+let report = mongoose.model('Report', reportSchema, 'reports');
 
-module.exports = record;
+module.exports = report;

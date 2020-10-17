@@ -7,13 +7,9 @@ let userSchema = UserSchema({
         type: Number,
         default: new Date().getTime()
     },
-    isStartTimestamp: {
-        type: Boolean,
-        default: false
-    },
-    isEndTimestamp: {
-        type: Boolean,
-        default: false
+    establishedYear: { //connection established year (for yield)
+        type: Number,
+        required: true
     },
     email: {
         type: String,
@@ -41,6 +37,11 @@ let userSchema = UserSchema({
         type: String,
         required: true,
         enum: ['CEB', 'LECO']
+    },
+    billingCategory: {
+        type: String,
+        required: true,
+        enum: ['D-1']
     },
     tariff: {
         type: String,

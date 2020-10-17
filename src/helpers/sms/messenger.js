@@ -45,8 +45,6 @@ async function sendSMS(httpOptions, body) {
         }
     }
 
-    console.log(body);
-
     return await axios.post(httpOptions.url, body, options);
 }
 

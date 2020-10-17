@@ -6,7 +6,9 @@ import { fieldStateChecker, validate } from '../middlewares/field-validator';
 let userRouter = express.Router();
 
 /* GET all users or specific user */
-userRouter.get('/', filterRoute, (req, res) => {
+userRouter.get('/',
+    filterRoute,
+    (req, res) => {
     userController(req, res);
 });
 
@@ -22,8 +24,6 @@ userRouter.put('/',
 /* DELETE user */
 userRouter.delete('/',
     filterRoute,
-    validate('users', '/', 'DELETE'),
-    fieldStateChecker,
     (req, res) => {
         userController(req, res);
     });
