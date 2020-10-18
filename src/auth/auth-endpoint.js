@@ -25,47 +25,36 @@ export default function makeAuthEndPointHandler({ authList }) {
     };
 
     async function loginUser(httpRequest) {
+        let validPassword = false;
+        const { email, password } = httpRequest.body;
+
         try {
-            let validPassword = false;
-            const { email, password } = httpRequest.body;
-            if (email) {
-                let user = await authList.findByEmail({
-                    email
-                });
+            let user = await authList.findByEmail({
+                email
+            });
 
-                if (user) {
-                    validPassword = await hashValidator({
-                        password,
-                        hash: user.password
-                    });
-                }
-
-                if (validPassword) {
-                    let accessToken = await jwtHandler(user);
-                    const { _id, email } = user;
-
-                    return objectHandler({
-                        status: HttpResponseType.SUCCESS,
-                        data: {
-                            _id,
-                            email,
-                            accessToken
-                        },
-                        message: `User authentication successful`
-                    });
-                } else {
-                    return objectHandler({
-                        code: HttpResponseType.CLIENT_ERROR,
-                        message: 'Invalid email or password'
-                    });
-                }
-            } else {
-                return objectHandler({
-                    code: HttpResponseType.CLIENT_ERROR,
-                    message: 'Request body does not contain a body'
+            if (user) {
+                validPassword = await hashValidator({
+                    password,
+                    hash: user.password
                 });
             }
 
+            if (validPassword) {
+                const { email } = user;
+                let accessToken = await jwtHandler(user);
+
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: { accessToken },
+                    message: `User '${email}' authentication successful`
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.CLIENT_ERROR,
+                    message: 'Invalid email or password'
+                });
+            }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
@@ -81,7 +70,8 @@ export default function makeAuthEndPointHandler({ authList }) {
             Object.assign(body, { password: hasher({ password: body.password }) });
             let user = await authList.addUser(body);
 
-            const message = 'Registration successful. You will keep receiving monthly Electricity Statement each month ending day through this stream. Thank You for helping us to automate this service!';
+            const message = 'Registration successful. ' +
+                'You will keep receiving monthly Electricity Statement each month ending day through a SMS and Email';
             const mobile = `+94${body.contactNumber.substring(1)}`;
             const dataset = configSMS(mobile, message);
             const options = {

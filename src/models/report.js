@@ -28,7 +28,11 @@ let reportSchema = ReportSchema({
         type: String,
         required: true
     },
-    avDailyProduction: { //todo: avDailyConsumption should be added
+    avgDailyProduction: {
+        type: Number,
+        required: true
+    },
+    avgDailyConsumption: {
         type: Number,
         required: true
     },

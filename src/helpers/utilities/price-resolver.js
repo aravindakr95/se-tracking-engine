@@ -1,6 +1,5 @@
-function calculateIncome(user, bfUnits) {
-    const date = new Date();
-    const establishedDuration = date.getFullYear() - user.establishedYear;
+function calculateIncome(dateTime, user, bfUnits) {
+    const establishedDuration = dateTime.getFullYear() - user.establishedYear;
 
     if (establishedDuration <= 7 && establishedDuration > 0) {
         return user.tariff === 'NetMetering' ? 0 : bfUnits * 22.00;

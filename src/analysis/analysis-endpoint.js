@@ -42,6 +42,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             const currentMonth = dateTime.getMonth() + 1;
             const currentYear = dateTime.getFullYear();
 
+            const billingDuration = daysInMonth();
+
             const log = await analysisList.findReportLog(currentMonth, currentYear);
 
             if (log && log.isCompleted) {
@@ -68,32 +70,40 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
                     const energyToday = pvsbStats.map(stat => stat.energyToday);
 
-                    const production = calculateProduction(sortedPVSBStats, energyToday, energyToday.length);
-                    const consumption = calculateConsumption(user, sortedPGSBStats, production);
+                    const productionDetails = calculateProduction(
+                        sortedPVSBStats,
+                        energyToday,
+                        energyToday.length);
 
-                    const billingDuration = daysInMonth();
+                    const consumptionDetails = calculateConsumption(
+                        dateTime,
+                        user,
+                        sortedPGSBStats,
+                        productionDetails,
+                        billingDuration);
 
-                    const report = {
+                    const commonDetails = {
                         accountNumber,
                         billingDuration,
                         month: currentMonth,
                         year: currentYear
                     }
 
-                    Object.assign(report, production, consumption);
-
-                    console.log(report)
+                    const report = Object.assign({},
+                        commonDetails,
+                        productionDetails,
+                        consumptionDetails);
 
                     await analysisList.addReport(report);
                 }
 
-                const log = {
+                const reportLog = {
                     month: currentMonth,
                     year: currentYear,
                     isCompleted: true
                 }
 
-                const status = await analysisList.addReportLog(log);
+                const status = await analysisList.addReportLog(reportLog);
 
                 if (status && status.isCompleted) {
                     return objectHandler({

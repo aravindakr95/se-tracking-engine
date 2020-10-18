@@ -7,15 +7,15 @@ function calculateProduction(pvsb, energy, length) {
 
     const totalProduction = makeTwoDecimalFixed(endingValue.totalEnergy -
         startingValue.totalEnergy);
-    const avDailyProduction = makeTwoDecimalFixed(energyTotal / length);
+    const avgDailyProduction = makeTwoDecimalFixed(energyTotal / length);
 
     return {
         totalProduction,
-        avDailyProduction
+        avgDailyProduction
     }
 }
 
-function calculateConsumption(user, pgsb, production) {
+function calculateConsumption(dateTime, user, pgsb, production, duration) {
     let bfUnits = 0;
     let totalGridImported = 0;
     let income = 0.00;
@@ -26,6 +26,8 @@ function calculateConsumption(user, pgsb, production) {
     const totalConsumption = makeTwoDecimalFixed(endingValue.totalPower - startingValue.totalPower);
     const excessEnergy = makeTwoDecimalFixed(production.totalProduction - totalConsumption);
 
+    const avgDailyConsumption = makeTwoDecimalFixed(totalConsumption / duration);
+
     if (excessEnergy > 0) {
         bfUnits = user.tariff === 'NetMetering' ? excessEnergy : 0;
     } else {
@@ -33,7 +35,7 @@ function calculateConsumption(user, pgsb, production) {
     }
 
     if (excessEnergy) {
-        income = calculateIncome(user, excessEnergy);
+        income = calculateIncome(dateTime, user, excessEnergy);
     }
 
     if (totalGridImported) {
@@ -45,7 +47,8 @@ function calculateConsumption(user, pgsb, production) {
         payableAmount,
         bfUnits,
         totalGridImported,
-        totalConsumption
+        totalConsumption,
+        avgDailyConsumption
     }
 }
 
