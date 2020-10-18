@@ -1,32 +1,33 @@
 import HttpResponseType from '../models/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInMonth } from '../helpers/utilities/date-resolver';
+import { daysInMonth, dateComparePG, dateComparePV } from '../helpers/utilities/date-resolver';
+import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
 
 export default function makeAnalysisEndPointHandler({ analysisList, userList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/reports':
-                if (httpRequest.pathParams &&
-                    httpRequest.pathParams.accountNumber) {
-                    return getSpecificAllReports(httpRequest);
-                }
-
                 if (httpRequest.queryParams &&
-                    httpRequest.queryParams.year) {
-                    return getSpecificYearReports(httpRequest);
-                }
-
-                if (httpRequest.queryParams &&
+                    httpRequest.queryParams.accountNumber &&
                     httpRequest.queryParams.year &&
                     httpRequest.queryParams.month) {
-                    return getSpecificReport(httpRequest);
+                    return getReportForMonth(httpRequest);
                 }
 
-                if (httpRequest.method === 'POST') {
-                    return generateReports();
+                if (httpRequest.queryParams &&
+                    httpRequest.queryParams.accountNumber &&
+                    httpRequest.queryParams.year) {
+                    return getReportsForYear(httpRequest);
                 }
 
-                break;
+                if (httpRequest.queryParams &&
+                    httpRequest.queryParams.accountNumber) {
+                    return getAllReportsForAccount(httpRequest);
+                }
+
+                return getAllReports(httpRequest);
+            case '/reports/generate':
+                return generateReports();
             default:
                 return objectHandler({
                     code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -37,11 +38,22 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
     async function generateReports() {
         try {
+            const dateTime = new Date();
+            const currentMonth = dateTime.getMonth() + 1;
+            const currentYear = dateTime.getFullYear();
+
+            const log = await analysisList.findReportLog(currentMonth, currentYear);
+
+            if (log && log.isCompleted) {
+                return objectHandler({
+                    code: HttpResponseType.CONFLICT,
+                    message: `Reports already generated for '${currentYear}-${currentMonth}' current month`
+                });
+            }
+
             const response = await userList.getAllUsers();
 
             if (response && response.length) {
-                const dateTime = new Date();
-
                 for (const user of response) {
                     let { accountNumber } = user;
 
@@ -60,13 +72,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                     const consumption = calculateConsumption(user, sortedPGSBStats, production);
 
                     const billingDuration = daysInMonth();
-                    const date = new Date();
 
                     const report = {
                         accountNumber,
                         billingDuration,
-                        month: date.getMonth() + 1,
-                        year: date.getFullYear()
+                        month: currentMonth,
+                        year: currentYear
                     }
 
                     Object.assign(report, production, consumption);
@@ -76,10 +87,20 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                     await analysisList.addReport(report);
                 }
 
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    message: `Reports generated for ${dateTime.getFullYear()}-${dateTime.getMonth() + 1} completed`
-                });
+                const log = {
+                    month: currentMonth,
+                    year: currentYear,
+                    isCompleted: true
+                }
+
+                const status = await analysisList.addReportLog(log);
+
+                if (status && status.isCompleted) {
+                    return objectHandler({
+                        status: HttpResponseType.SUCCESS,
+                        message: `Reports generated for '${currentYear}-${currentMonth}' completed`
+                    });
+                }
             }
 
             return objectHandler({
@@ -94,44 +115,101 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
         }
     }
 
-    //todo: tobe implemented
-    async function getSpecificAllReports(httpRequest) {}
+    async function getAllReportsForAccount(httpRequest) {
+        const { accountNumber } = httpRequest.queryParams;
 
-    //todo: tobe implemented
-    async function getSpecificYearReports(httpRequest) {}
-
-    //todo: tobe implemented
-    async function getSpecificReport(httpRequest) {}
-
-    function dateComparePG(objectOne, objectTwo) {
-        const startingDateTime = new Date();
-        startingDateTime.setDate(1);
-
-        const endingDateTime = new Date();
-        endingDateTime.setDate(daysInMonth);
-
-        const startingMillis = startingDateTime.setHours(0, 0, 0, 0);
-        const endingMillis = endingDateTime.setHours(23, 59, 59, 999);
-
-        if ((objectOne.timestamp >= startingMillis && objectOne.timestamp <= endingMillis) &&
-            (objectTwo.timestamp >= startingMillis && objectTwo.timestamp <= endingMillis)) {
-            return objectOne.timestamp - objectTwo.timestamp;
+        try {
+            const result = await analysisList.findReportsByAccNumber({ accountNumber });
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested Reports for user '${accountNumber}' not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
         }
     }
 
-    function dateComparePV(objectOne, objectTwo) {
-        const startingDateTime = new Date();
-        startingDateTime.setDate(1);
+    async function getReportsForYear(httpRequest) {
+        const { accountNumber, year } = httpRequest.queryParams;
 
-        const endingDateTime = new Date();
-        endingDateTime.setDate(daysInMonth);
+        try {
+            const result = await analysisList.findReportsForYear(accountNumber, year);
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested Reports for user '${accountNumber}' in '${year}' not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
 
-        const startingMillis = startingDateTime.setHours(0, 0, 0, 0);
-        const endingMillis = endingDateTime.setHours(23, 59, 59, 999);
+    async function getAllReports() {
+        try {
+            const result = await analysisList.findAllReports();
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Reports collection is empty`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
 
-        if ((objectOne.snapshotTimestamp >= startingMillis && objectOne.snapshotTimestamp <= endingMillis) &&
-            (objectTwo.snapshotTimestamp >= startingMillis && objectTwo.snapshotTimestamp <= endingMillis)) {
-            return objectOne.snapshotTimestamp - objectTwo.snapshotTimestamp;
+    async function getReportForMonth(httpRequest) {
+        const { accountNumber, year, month } = httpRequest.queryParams;
+
+        try {
+            const result = await analysisList.findReportForMonth(accountNumber, year, month);
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested Reports for user '${accountNumber}' in '${year}-${month}' not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
         }
     }
 
@@ -147,108 +225,6 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
         return {
             startingValue: stats[0],
             endingValue: stats[stats.length - 1]
-        }
-    }
-
-    function calculateProduction(pvsb, energy, length) {
-        const { startingValue, endingValue } = pvsb;
-        const energyTotal = energy.reduce((a, b) => a + b, 0);
-
-        const totalProduction = makeTwoDecimalFixed(endingValue.totalEnergy -
-            startingValue.totalEnergy);
-        const avDailyProduction = makeTwoDecimalFixed(energyTotal / length);
-
-        return {
-            totalProduction,
-            avDailyProduction
-        }
-    }
-
-    function makeTwoDecimalFixed(value) {
-        const formatted = Number.parseFloat(value).toFixed(2);
-        return Number(formatted);
-    }
-
-    function calculateConsumption(user, pgsb, production) {
-        let bfUnits = 0;
-        let totalGridImported = 0;
-        let income = 0.00;
-        let payableAmount = 0.00;
-
-        const { startingValue, endingValue } = pgsb;
-
-        const totalConsumption = makeTwoDecimalFixed(endingValue.totalPower - startingValue.totalPower);
-        const excessEnergy = makeTwoDecimalFixed(production.totalProduction - totalConsumption);
-
-        if (excessEnergy > 0) {
-            bfUnits = user.tariff === 'NetMetering' ? excessEnergy : 0;
-        } else {
-            totalGridImported = Number(Math.abs(excessEnergy).toFixed(2));
-        }
-
-        if (excessEnergy) {
-            income = calculateIncome(user, excessEnergy);
-        }
-
-        if (totalGridImported) {
-            payableAmount = calculateExpense(user.billingCategory, totalGridImported);
-        }
-
-        return {
-            yield: income,
-            payableAmount,
-            bfUnits,
-            totalGridImported,
-            totalConsumption
-        }
-    }
-
-    function calculateIncome(user, bfUnits) {
-        const date = new Date();
-        const establishedDuration = date.getFullYear() - user.establishedYear;
-
-        if (establishedDuration <= 7 && establishedDuration > 0) {
-            return user.tariff === 'NetMetering' ? 0 : bfUnits * 22.00;
-        } else {
-            return user.tariff === 'NetMetering' ? 0 : bfUnits * 15.50;
-        }
-    }
-
-    function calculateExpense(category, units) {
-        if (category !== 'D-1') {
-            return 0;
-        }
-
-        if (units <= 60) {
-            if (units <= 30 && units > 0) {
-                return 30 + (2.50 * units);
-            }
-
-            if (units > 30 && units <= 60) {
-                return 60 + (4.85 * units);
-            }
-        }
-
-        if (units > 60) {
-            if (units <= 61 && units > 0) {
-                return (7.85 * units); // no fixed charge
-            }
-
-            if (units > 60 && units <= 90) {
-                return 90 + (10 * units);
-            }
-
-            if (units > 90 && units <= 120) {
-                return 480 + (27.75 * units);
-            }
-
-            if (units > 120 && units <= 180) {
-                return 480 + (32.00 * units);
-            }
-
-            if (units > 180) {
-                return 540 + (45 * units);
-            }
         }
     }
 }

@@ -28,6 +28,8 @@ const validate = (main, route, method) => {
             return pvsbValidator(route);
         case 'users':
             return usersValidator(method);
+        case 'analysis':
+            return reportsValidator(method);
         default:
             return [];
     }
@@ -214,6 +216,15 @@ function usersValidator(method) {
                     .exists().withMessage('Devices.DeviceId is required')
                     .isString().withMessage('Devices.DeviceId should be String')
             ];
+        default:
+            return [];
+    }
+}
+
+function reportsValidator(method) {
+    switch (method) {
+        case 'POST':
+            return [];
         default:
             return [];
     }

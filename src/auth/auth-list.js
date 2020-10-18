@@ -3,8 +3,7 @@ import User from '../models/user';
 export default function makeAuthList() {
     return Object.freeze({
         addUser,
-        findByEmail,
-        findUserById
+        findByEmail
     });
 
     async function addUser(user) {
@@ -19,15 +18,6 @@ export default function makeAuthList() {
     async function findByEmail(email) {
         try {
             return User.findOne(email);
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
-    }
-
-    async function findUserById(userId) {
-        try {
-            return User.findOne({ _id: { $eq: userId } });
         } catch (error) {
             console.log(error.message);
             return error;
