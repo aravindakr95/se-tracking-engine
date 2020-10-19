@@ -80,7 +80,7 @@ function authValidator(route) {
                     .isString().withMessage('Devices.Type should be String'),
                 body('devices.*.deviceId')
                     .exists().withMessage('Devices.DeviceId is required')
-                    .isString().withMessage('Devices.DeviceId should be String')
+                    .isMACAddress().withMessage('Devices.DeviceId should be MAC address')
             ];
         case '/verify':
             return [
@@ -224,7 +224,7 @@ function usersValidator(method) {
                     .isString().withMessage('Devices.Type should be String'),
                 body('devices.*.deviceId')
                     .exists().withMessage('Devices.DeviceId is required')
-                    .isString().withMessage('Devices.DeviceId should be String')
+                    .isMACAddress().withMessage('Devices.DeviceId should be MAC address')
             ];
         default:
             return [];
