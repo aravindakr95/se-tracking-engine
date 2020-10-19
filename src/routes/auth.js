@@ -19,4 +19,11 @@ authRouter.post('/register',
         authController(req, res);
     });
 
+authRouter.post('/verify',
+    validate('auth', '/verify', 'POST'),
+    fieldStateChecker,
+    (req, res) => {
+        authController(req, res);
+    });
+
 module.exports = authRouter;

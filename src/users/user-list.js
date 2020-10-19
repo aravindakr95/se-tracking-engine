@@ -7,6 +7,7 @@ export default function makeUserList() {
         findUserByDeviceId,
         findDeviceIdByAccNumber,
         updateUserByAccNumber,
+        updateUserStatusByContactNumber,
         deleteUserByAccNumber
     });
 
@@ -68,6 +69,18 @@ export default function makeUserList() {
         try {
             return User.findOneAndUpdate(
                 accNumber, data, { new: true }).then((data) => {
+                return data;
+            }).catch((error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async function updateUserStatusByContactNumber(contactNumber, data) {
+        try {
+            return User.updateOne(contactNumber, data).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;

@@ -5,7 +5,7 @@ function configSMS(contactNumber, message) {
     return {
         outboundSMSMessageRequest: {
             address: [
-                `tel:${contactNumber}`
+                `tel:+${contactNumber}`
             ],
             senderAddress: 'SETE',
             outboundSMSTextMessage: {
@@ -48,4 +48,4 @@ async function sendSMS(httpOptions, body) {
     return await axios.post(httpOptions.url, body, options);
 }
 
-module.exports = { configSMS, sendSMS };
+module.exports = { configSMS, configOTP, configOTPResponse, sendSMS };

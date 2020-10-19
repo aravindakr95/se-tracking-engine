@@ -82,6 +82,16 @@ function authValidator(route) {
                     .exists().withMessage('Devices.DeviceId is required')
                     .isString().withMessage('Devices.DeviceId should be String')
             ];
+        case '/verify':
+            return [
+                body('contactNumber')
+                    .exists().withMessage('Contact number is required')
+                    .isString().withMessage('Contact number should be Number')
+                    .isLength({ min: 11, max: 11 }).withMessage('Contact number should be 11 characters long'),
+                body('pin')
+                    .exists().withMessage('PIN is required')
+                    .isLength({ min: 6, max: 6 }).withMessage('PIN should be 6 characters long')
+            ];
         default:
             return [];
     }

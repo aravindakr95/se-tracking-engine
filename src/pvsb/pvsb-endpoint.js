@@ -101,7 +101,6 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
             if (payload) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
-                    data: null,
                     message: `PVSB '${result.deviceId}' error log received`
                 });
             }

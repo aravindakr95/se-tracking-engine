@@ -29,7 +29,6 @@ export default function makePGSBEndPointHandler({ pgsbList, userList }) {
             if (payload) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
-                    data: null,
                     message: `PGSB ${deviceId} payload statistics received`
                 });
             }

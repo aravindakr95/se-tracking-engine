@@ -54,6 +54,12 @@ let userSchema = UserSchema({
         minlength: 10,
         maxlength: 10
     },
+    status: {
+        type: String,
+        required: true,
+        default: 'PENDING',
+        enum: ['PENDING', 'ACTIVE']
+    },
     devices: [
         {
             _id: false,
