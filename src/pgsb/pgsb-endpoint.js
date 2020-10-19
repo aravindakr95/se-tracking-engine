@@ -44,7 +44,7 @@ export default function makePGSBEndPointHandler({ pgsbList, userList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const user = await userList.findUserByAccNumber({ accountNumber });
+            const user = await userList.findUserByAccNumber(accountNumber);
 
             if (!user && !user.selected) {
                 return objectHandler({

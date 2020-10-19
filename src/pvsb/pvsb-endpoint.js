@@ -50,7 +50,7 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const user = await userList.findUserByAccNumber({ accountNumber });
+            const user = await userList.findUserByAccNumber(accountNumber);
 
             if (!user && !user.selected) {
                 return objectHandler({

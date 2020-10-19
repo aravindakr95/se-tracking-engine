@@ -3,6 +3,7 @@ import User from '../models/user';
 export default function makeUserList() {
     return Object.freeze({
         getAllUsers,
+        findUsersByStatus,
         findUserByAccNumber,
         findUserByDeviceId,
         findDeviceIdByAccNumber,
@@ -23,9 +24,21 @@ export default function makeUserList() {
         }
     }
 
+    async function findUsersByStatus(status) {
+        try {
+            return User.find(status).then((data) => {
+                return data;
+            }).catch((error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
     async function findUserByAccNumber(accNumber) {
         try {
-            return User.findOne(accNumber).lean(true).then((data) => {
+            return User.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean(true).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -38,7 +51,8 @@ export default function makeUserList() {
     async function findUserByDeviceId(deviceId) {
         try {
             return User.findOne({
-                'devices.deviceId': deviceId
+                'devices.deviceId': deviceId,
+                'status': 'ACTIVE'
             }).then((data) => {
                 return data;
             }).catch((error) => {

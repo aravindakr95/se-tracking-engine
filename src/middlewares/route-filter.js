@@ -22,6 +22,14 @@ export default function filterRoute(req, res, next) {
                         message: error.message
                     });
                 }
+
+                if (user.status === 'PENDING') {
+                    return errorResponse(res, {
+                        code: HttpResponseType.FORBIDDEN,
+                        message: 'User is pending for verification'
+                    });
+                }
+
                 next();
             });
         } else {

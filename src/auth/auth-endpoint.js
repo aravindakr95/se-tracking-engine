@@ -31,9 +31,14 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
         const { email, password } = httpRequest.body;
 
         try {
-            let user = await authList.findByEmail({
-                email
-            });
+            let user = await authList.findByEmail({ email });
+
+            if (user && user.status === 'PENDING') {
+                return objectHandler({
+                    code: HttpResponseType.FORBIDDEN,
+                    message: `Account number '${user.accountNumber}' is pending for verification`
+                });
+            }
 
             if (user) {
                 validPassword = await hashValidator({
@@ -185,7 +190,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
 
                 //WARNING: limited resource use with care
                 const smsStatus = await sendSMS(smsOptions, smsDataset)
-                    .then(response => {
+                    .then(() => {
                         return true
                     })
                     .catch(error => {
@@ -200,7 +205,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                     subject: 'SETE Registration',
                     text: message,
                     html: ''
-                }).then(response => {
+                }).then(() => {
                     return true;
                 }).catch(error => {
                     console.log(error);
