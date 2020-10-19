@@ -1,4 +1,4 @@
-import HttpResponseType from '../../models/http-response-type';
+import HttpResponseType from '../../models/common/http-response-type';
 import * as statusMapper from '../utilities/http-error-status-mapper';
 
 const successResponse = (res, obj) => {

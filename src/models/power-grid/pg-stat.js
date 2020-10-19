@@ -9,7 +9,7 @@ let powerGridStatSchema = PgStatSchema({
     },
     deviceId: {
         type: String,
-        required: true //todo: how to make this unique
+        required: true
     },
     slaveId: {
         type: String,

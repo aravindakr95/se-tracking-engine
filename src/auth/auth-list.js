@@ -1,5 +1,5 @@
-import User from '../models/user';
-import TempUser from '../models/temp-user';
+import User from '../models/end-user/user';
+import TempUser from '../models/end-user/temp-user';
 
 export default function makeAuthList() {
     return Object.freeze({

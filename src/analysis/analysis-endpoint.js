@@ -1,4 +1,4 @@
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { daysInMonth, dateComparePG, dateComparePV } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
@@ -59,10 +59,10 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                 for (const user of response) {
                     let { accountNumber } = user;
 
-                    const pgsbDeviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PGSB');
+                    const pgsbDeviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId });
 
-                    const pvsbDeviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PVSB');
+                    const pvsbDeviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
                     const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId });
 
                     const sortedPVSBStats = getCurrentMonthStats('PVSB', pvsbStats);

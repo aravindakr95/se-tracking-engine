@@ -1,5 +1,5 @@
-import PVStat from '../models/pv-stat';
-import PVError from '../models/pv-error';
+import PVStat from '../models/photo-voltaic/pv-stat';
+import PVError from '../models/photo-voltaic/pv-error';
 
 export default function makePVSBList() {
     return Object.freeze({

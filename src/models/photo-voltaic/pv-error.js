@@ -8,7 +8,7 @@ let pvErrorSchema = PvErrorSchema({
         default: new Date().getTime()
     },
     deviceId: {
-        type: String, //todo: how to make this unique
+        type: String,
         required: true
     },
     error: {

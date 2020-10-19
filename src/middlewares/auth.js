@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 import config from '../config/config';
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 
 import { errorResponse } from '../helpers/response/response-dispatcher';
 import { bypassHelper } from '../helpers/utilities/bypass';

@@ -1,6 +1,6 @@
 import handleUserRequest from './';
 import normalizedRequest from '../helpers/utilities/normalize-request';
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
 
 export default function usersController(req, res) {

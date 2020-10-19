@@ -1,5 +1,5 @@
-import Report from '../models/report';
-import ReportLog from '../models/report-log';
+import Report from '../models/analytics/report';
+import ReportLog from '../models/analytics/report-log';
 
 export default function makeAnalysisList() {
     return Object.freeze({

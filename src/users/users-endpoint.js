@@ -1,4 +1,4 @@
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
 export default function makeUsersEndpointHandler({ userList }) {

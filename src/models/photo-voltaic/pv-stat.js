@@ -13,7 +13,7 @@ let pvStatSchema = PVStatSchema({
     },
     deviceId: {
         type: String,
-        required: true //todo: how to make this unique
+        required: true
     },
     load: {
         type: Number,

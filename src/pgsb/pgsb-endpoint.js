@@ -1,4 +1,4 @@
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
@@ -53,12 +53,12 @@ export default function makePGSBEndPointHandler({ pgsbList, userList }) {
                 });
             }
 
-            const deviceId = await userList.findDeviceIdByAccNumber({ accountNumber }, 'PGSB');
+            const deviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
 
             if (!deviceId) {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `PGSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`
+                    message: `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`
                 });
             }
 

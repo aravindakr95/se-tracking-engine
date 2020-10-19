@@ -1,5 +1,5 @@
-import PGStat from '../models/pg-stat';
-import PGError from '../models/pg-error';
+import PGStat from '../models/power-grid/pg-stat';
+import PGError from '../models/power-grid/pg-error';
 
 export default function makePGSBList() {
     return Object.freeze({

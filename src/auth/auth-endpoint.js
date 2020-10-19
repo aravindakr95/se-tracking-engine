@@ -3,7 +3,7 @@ import hashValidator from '../helpers/validators/hash-validator';
 import jwtHandler from '../helpers/validators/token-handler';
 import hasher from '../helpers/hasher';
 
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';

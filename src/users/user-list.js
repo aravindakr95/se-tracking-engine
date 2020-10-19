@@ -1,4 +1,4 @@
-import User from '../models/user';
+import User from '../models/end-user/user';
 
 export default function makeUserList() {
     return Object.freeze({

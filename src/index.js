@@ -16,7 +16,7 @@ import pvsbRouter from './routes/pvsb';
 import analysisRouter from './routes/analysis';
 import apiDocsRouter from './routes/api-docs';
 
-import HttpResponseType from './models/http-response-type';
+import HttpResponseType from './models/common/http-response-type';
 
 const app = express();
 

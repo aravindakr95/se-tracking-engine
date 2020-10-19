@@ -1,6 +1,6 @@
 import { body, param, validationResult } from 'express-validator';
 import { errorResponse } from '../helpers/response/response-dispatcher';
-import HttpResponseType from '../models/http-response-type';
+import HttpResponseType from '../models/common/http-response-type';
 
 function fieldStateChecker(req, res, next) {
     const errors = validationResult(req);
