@@ -8,6 +8,7 @@ export default function makeAnalysisList() {
         findReportsByAccNumber,
         findReportsForYear,
         findReportForMonth,
+        findAllReportsForMonth,
         addReportLog,
         findReportLog
     });
@@ -60,6 +61,18 @@ export default function makeAnalysisList() {
     async function findReportForMonth(accountNumber, year, month) {
         try {
             return Report.findOne({ accountNumber, year, month }).lean(true).then((data) => {
+                return data;
+            }).catch((error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async function findAllReportsForMonth(month, year) {
+        try {
+            return Report.find({ month, year }).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;

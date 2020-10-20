@@ -20,4 +20,12 @@ analysisRouter.post('/reports/generate',
         analysisController(req, res);
     });
 
+analysisRouter.post('/reports/dispatch',
+    filterRoute,
+    validate('reports', '/reports/dispatch', 'POST'),
+    fieldStateChecker,
+    (req, res) => {
+        analysisController(req, res);
+    });
+
 module.exports = analysisRouter;

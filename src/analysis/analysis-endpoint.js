@@ -2,6 +2,9 @@ import HttpResponseType from '../models/common/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { daysInMonth, dateComparePG, dateComparePV } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
+import { configSMS, sendSMS } from '../helpers/sms/messenger';
+import sendEmail from '../helpers/mail/mailer';
+import config from '../config/config';
 
 export default function makeAnalysisEndPointHandler({ analysisList, userList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
@@ -28,6 +31,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                 return getAllReports(httpRequest);
             case '/reports/generate':
                 return generateReports();
+            case '/reports/dispatch':
+                return dispatchReports();
             default:
                 return objectHandler({
                     code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -57,7 +62,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
             if (response && response.length) {
                 for (const user of response) {
-                    let { accountNumber } = user;
+                    let { accountNumber, contactNumber, email } = user;
 
                     const pgsbDeviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId });
@@ -84,10 +89,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
                     const commonDetails = {
                         accountNumber,
+                        contactNumber,
+                        email,
                         billingDuration,
                         month: currentMonth,
                         year: currentYear
-                    }
+                    };
 
                     const report = Object.assign({},
                         commonDetails,
@@ -101,7 +108,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                     month: currentMonth,
                     year: currentYear,
                     isCompleted: true
-                }
+                };
 
                 const status = await analysisList.addReportLog(reportLog);
 
@@ -116,6 +123,61 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             return objectHandler({
                 code: HttpResponseType.NOT_FOUND,
                 message: 'Users collection is empty'
+            });
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
+    async function dispatchReports() {
+        try {
+            let smsMessage = null;
+            let emailBody = null;
+
+            const smsOptions = {
+                url: 'https://ideabiz.lk/apicall/smsmessaging/v3/outbound/SETE/requests',
+                method: 'post'
+            };
+
+            const dateTime = new Date();
+            const year = dateTime.getFullYear();
+            const month = dateTime.getMonth() + 1;
+            const date = dateTime.getDate();
+
+            const reports = await analysisList.findAllReportsForMonth(month, year);
+
+            if (reports && !reports.length) {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Zero reports found for the '${year}-${month}'`
+                });
+            }
+
+            for (const report of reports) {
+                smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${month}-${date}-${year}. This month you have to pay ${report.payableAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
+
+                emailBody = `<p>Your electricity account number <strong>${report.accountNumber}</strong> able to produce <strong>${report.totalProduction} kWh</strong> and consumed <strong>${report.totalConsumption} kWh</strong> as of <strong>${month}-${date}-${year}</strong>. This month you have to pay <strong>${report.payableAmount} LKR</strong> for the excess energy used. Your Income was <strong>${report.yield}</strong> and you can bring forward <strong>${report.bfUnits} kWh</strong> to next months. According to usage patterns you have daily <strong>${report.avgDailyProduction} kWh</strong> average production rate and <strong>${report.avgDailyConsumption} kWh</strong> average consumption rate.</p>`;
+
+                const sms = configSMS(report.contactNumber, smsMessage);
+
+                //WARNING: limited resource use with care
+                await sendSMS(smsOptions, sms).catch(error => console.log(error));
+
+                //WARNING: limited resource use with care
+                await sendEmail({
+                    from: config.adminEmail,
+                    to: report.email,
+                    subject: `Statement for ${year}-${month} on SETE Account ${report.accountNumber}`,
+                    html: emailBody
+                }).catch(error => console.log(error));
+            }
+
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                message: `All users reports summary sent for '${year}-${month}'`
             });
         } catch (error) {
             return objectHandler({

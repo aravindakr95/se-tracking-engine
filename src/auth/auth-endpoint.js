@@ -135,9 +135,6 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
     async function verifyUser(httpRequest) {
         const { contactNumber, pin } = httpRequest.body;
 
-        const message = 'Registration successful. ' +
-            'You will keep receiving monthly Electricity Statement each month ending day through a SMS and Email';
-        const smsDataset = configSMS(contactNumber, message);
         const smsOptions = {
             url: 'https://ideabiz.lk/apicall/smsmessaging/v3/outbound/SETE/requests',
             method: 'post'
@@ -149,6 +146,9 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
 
         try {
             let tempUser = await authList.findUserOnPending({ msisdn: contactNumber });
+
+            const message = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempUser.msisdn} and descriptive details to your email ${tempUser.email}. Thank you for partnering with us.`;
+            const smsDataset = configSMS(contactNumber, message);
 
             if (!tempUser) {
                 return objectHandler({
@@ -194,7 +194,6 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                         return true
                     })
                     .catch(error => {
-                        console.log(error)
                         return error;
                     });
 
@@ -202,9 +201,8 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                 const emailStatus = await sendEmail({
                     from: config.adminEmail,
                     to: tempUser.email,
-                    subject: 'SETE Registration',
-                    text: message,
-                    html: ''
+                    subject: 'SETE Account Registration',
+                    text: message
                 }).then(() => {
                     return true;
                 }).catch(error => {

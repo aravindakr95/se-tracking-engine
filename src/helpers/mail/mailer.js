@@ -1,17 +1,19 @@
 import sgMail from '@sendgrid/mail';
 import config from '../../config/config';
 
-async function sendEmail(data) {
-    sgMail.setApiKey(config.sendGridApiKey);
-    const msg = {
-        to: data.to,
-        from: data.from,
-        subject: data.subject,
-        text: data.text,
-        html: data.text
+async function sendEmail(email) {
+    const composeEmail = {
+        to: email.to,
+        from: email.from,
+        subject: email.subject,
+        ...(email.text && {text: email.text}),
+        ...(email.html && {html: email.html})
     };
+
+    sgMail.setApiKey(config.sendGridApiKey);
+
     try {
-        return await sgMail.send(msg);
+        return await sgMail.send(composeEmail);
     } catch (error) {
         return error;
     }

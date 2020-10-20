@@ -29,7 +29,7 @@ const validate = (main, route, method) => {
         case 'users':
             return usersValidator(method);
         case 'analysis':
-            return reportsValidator(method);
+            return reportsValidator(route);
         default:
             return [];
     }
@@ -231,10 +231,12 @@ function usersValidator(method) {
     }
 }
 
-function reportsValidator(method) {
-    switch (method) {
-        case 'POST':
+function reportsValidator(route) {
+    switch (route) {
+        case '/reports/generate':
             return [];
+        case '/reports/dispatch':
+            return []
         default:
             return [];
     }

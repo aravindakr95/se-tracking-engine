@@ -13,6 +13,15 @@ let reportSchema = ReportSchema({
         minlength: 10,
         maxlength: 10
     },
+    contactNumber: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        lowercase: true
+    },
     billingDuration: {
         type: Number,
         required: true,

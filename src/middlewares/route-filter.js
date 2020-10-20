@@ -26,7 +26,7 @@ export default function filterRoute(req, res, next) {
                 if (user.status === 'PENDING') {
                     return errorResponse(res, {
                         code: HttpResponseType.FORBIDDEN,
-                        message: 'User is pending for verification'
+                        message: 'Unauthorized to access this resource, user is pending for verification'
                     });
                 }
 
