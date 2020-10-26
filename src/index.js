@@ -48,5 +48,5 @@ app.listen(config.serverPort, () => {
     console.log(chalk.green(`Listening URL: ${config.serverHost}:${config.serverPort}`));
     console.log(chalk.green(`API Docs URL: ${config.serverHost}:${config.serverPort}/api-docs`));
     console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-    console.log(chalk.green.bold('SE Electricity Tracking Engine is up and running...'));
+    console.log(chalk.green.bold('Smart Electricity Tracking Engine (SETE) is up and running...'));
 });
