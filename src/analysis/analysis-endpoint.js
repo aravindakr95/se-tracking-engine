@@ -6,7 +6,7 @@ import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
 
-export default function makeAnalysisEndPointHandler({ analysisList, userList, pvsbList, pgsbList }) {
+export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/reports':
@@ -58,16 +58,16 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
                 });
             }
 
-            const response = await userList.getAllUsers();
+            const response = await consumerList.getAllConsumers();
 
             if (response && response.length) {
-                for (const user of response) {
-                    let { accountNumber, contactNumber, email } = user;
+                for (const consumer of response) {
+                    let { accountNumber, contactNumber, email } = consumer;
 
-                    const pgsbDeviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
+                    const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId });
 
-                    const pvsbDeviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
+                    const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
                     const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId });
 
                     const sortedPVSBStats = getCurrentMonthStats('PVSB', pvsbStats);
@@ -82,7 +82,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
                     const consumptionDetails = calculateConsumption(
                         dateTime,
-                        user,
+                        consumer,
                         sortedPGSBStats,
                         productionDetails,
                         billingDuration);
@@ -122,7 +122,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
             return objectHandler({
                 code: HttpResponseType.NOT_FOUND,
-                message: 'Users collection is empty'
+                message: 'Consumers collection is empty'
             });
         } catch (error) {
             return objectHandler({
@@ -138,7 +138,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             let emailBody = null;
 
             const smsOptions = {
-                url: 'https://ideabiz.lk/apicall/smsmessaging/v3/outbound/SETE/requests',
+                url: config.ideabizSMSOut,
                 method: 'post'
             };
 
@@ -177,7 +177,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `All users reports summary sent for '${year}-${month}'`
+                message: `All consumer reports summary sent for '${year}-${month}'`
             });
         } catch (error) {
             return objectHandler({
@@ -201,7 +201,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested Reports for user '${accountNumber}' not found`
+                    message: `Requested Reports for consumer '${accountNumber}' not found`
                 });
             }
         } catch (error) {
@@ -226,7 +226,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested Reports for user '${accountNumber}' in '${year}' not found`
+                    message: `Requested Reports for consumer '${accountNumber}' in '${year}' not found`
                 });
             }
         } catch (error) {
@@ -274,7 +274,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, userList, pv
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested Reports for user '${accountNumber}' in '${year}-${month}' not found`
+                    message: `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`
                 });
             }
         } catch (error) {

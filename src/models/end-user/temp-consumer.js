@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-const TempUserSchema = mongoose.Schema;
+const TempConsumerSchema = mongoose.Schema;
 
-let tempUserSchema = TempUserSchema({
+let tempConsumerSchema = TempConsumerSchema({
     timestamp: {
         type: Number,
         default: new Date().getTime()
@@ -23,6 +23,6 @@ let tempUserSchema = TempUserSchema({
     }
 });
 
-let TempUser = mongoose.model('TempUser', tempUserSchema, 'temp-users');
+let TempConsumer = mongoose.model('TempConsumer', tempConsumerSchema, 'temp-consumers');
 
-module.exports = TempUser;
+module.exports = TempConsumer;

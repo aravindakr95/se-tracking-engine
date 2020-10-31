@@ -10,7 +10,7 @@ import initializeDB from './helpers/database';
 import { errorResponse } from './helpers/response/response-dispatcher';
 
 import authRouter from './routes/auth';
-import userRouter from './routes/user';
+import consumerRouter from './routes/consumer';
 import pgsbRouter from './routes/pgsb';
 import pvsbRouter from './routes/pvsb';
 import analysisRouter from './routes/analysis';
@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 initializeDB();
 
 app.use('/v1/sete/auth', authRouter);
-app.use('/v1/sete/users', userRouter);
+app.use('/v1/sete/consumers', consumerRouter);
 app.use('/v1/sete/pgsb', pgsbRouter);
 app.use('/v1/sete/pvsb', pvsbRouter);
 app.use('/v1/sete/analysis', analysisRouter);

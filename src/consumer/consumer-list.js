@@ -1,20 +1,20 @@
-import User from '../models/end-user/user';
+import Consumer from '../models/end-user/consumer';
 
-export default function makeUserList() {
+export default function makeConsumerList() {
     return Object.freeze({
-        getAllUsers,
-        findUsersByStatus,
-        findUserByAccNumber,
-        findUserByDeviceId,
+        getAllConsumers,
+        findConsumersByStatus,
+        findConsumerByAccNumber,
+        findConsumerByDeviceId,
         findDeviceIdByAccNumber,
-        updateUserByAccNumber,
-        updateUserStatusByContactNumber,
-        deleteUserByAccNumber
+        updateConsumerByAccNumber,
+        updateConsumerStatusByContactNumber,
+        deleteConsumerByAccNumber
     });
 
-    async function getAllUsers() {
+    async function getAllConsumers() {
         try {
-            return User.find().then((data) => {
+            return Consumer.find().then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -24,9 +24,9 @@ export default function makeUserList() {
         }
     }
 
-    async function findUsersByStatus(status) {
+    async function findConsumersByStatus(status) {
         try {
-            return User.find(status).then((data) => {
+            return Consumer.find(status).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -36,9 +36,9 @@ export default function makeUserList() {
         }
     }
 
-    async function findUserByAccNumber(accNumber) {
+    async function findConsumerByAccNumber(accNumber) {
         try {
-            return User.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean(true).then((data) => {
+            return Consumer.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean(true).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -48,9 +48,9 @@ export default function makeUserList() {
         }
     }
 
-    async function findUserByDeviceId(deviceId) {
+    async function findConsumerByDeviceId(deviceId) {
         try {
-            return User.findOne({
+            return Consumer.findOne({
                 'devices.deviceId': deviceId,
                 'status': 'ACTIVE'
             }).then((data) => {
@@ -65,10 +65,10 @@ export default function makeUserList() {
 
     async function findDeviceIdByAccNumber(accNumber, type) {
         try {
-            const user = await findUserByAccNumber(accNumber);
+            const consumer = await findConsumerByAccNumber(accNumber);
 
-            if (user && user.devices) {
-                const { deviceId } = user.devices.find(device => device.type === type);
+            if (consumer && consumer.devices) {
+                const { deviceId } = consumer.devices.find(device => device.type === type);
 
                 return deviceId;
             } else {
@@ -79,9 +79,9 @@ export default function makeUserList() {
         }
     }
 
-    async function updateUserByAccNumber(accNumber, data) {
+    async function updateConsumerByAccNumber(accNumber, data) {
         try {
-            return User.findOneAndUpdate(
+            return Consumer.findOneAndUpdate(
                 accNumber, data, { new: true }).then((data) => {
                 return data;
             }).catch((error) => {
@@ -92,9 +92,9 @@ export default function makeUserList() {
         }
     }
 
-    async function updateUserStatusByContactNumber(contactNumber, data) {
+    async function updateConsumerStatusByContactNumber(contactNumber, data) {
         try {
-            return User.updateOne(contactNumber, data).then((data) => {
+            return Consumer.updateOne(contactNumber, data).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -104,9 +104,9 @@ export default function makeUserList() {
         }
     }
 
-    async function deleteUserByAccNumber(accNumber) {
+    async function deleteConsumerByAccNumber(accNumber) {
         try {
-            return User.deleteOne(accNumber).then((data) => {
+            return Consumer.deleteOne(accNumber).then((data) => {
                 return data;
             }).catch((error) => {
                 return error;

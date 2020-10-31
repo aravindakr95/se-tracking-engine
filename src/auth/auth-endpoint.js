@@ -9,15 +9,15 @@ import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms/messenger';
 
-export default function makeAuthEndPointHandler({ authList, userList }) {
+export default function makeAuthEndPointHandler({ authList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/login':
-                return loginUser(httpRequest);
+                return loginConsumer(httpRequest);
             case '/register':
-                return registerUser(httpRequest);
+                return registerConsumer(httpRequest);
             case '/verify':
-                return verifyUser(httpRequest);
+                return verifyConsumer(httpRequest);
             default:
                 return objectHandler({
                     code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -26,35 +26,35 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
         }
     };
 
-    async function loginUser(httpRequest) {
-        let validPassword = false;
+    async function loginConsumer(httpRequest) {
+        let isValidPw = false;
         const { email, password } = httpRequest.body;
 
         try {
-            let user = await authList.findByEmail({ email });
+            let consumer = await authList.findConsumerByEmail({ email });
 
-            if (user && user.status === 'PENDING') {
+            if (consumer && consumer.status === 'PENDING') {
                 return objectHandler({
                     code: HttpResponseType.FORBIDDEN,
-                    message: `Account number '${user.accountNumber}' is pending for verification`
+                    message: `Account number '${consumer.accountNumber}' is pending for verification`
                 });
             }
 
-            if (user) {
-                validPassword = await hashValidator({
+            if (consumer) {
+                isValidPw = await hashValidator({
                     password,
-                    hash: user.password
+                    hash: consumer.password
                 });
             }
 
-            if (validPassword) {
-                const { email } = user;
-                let accessToken = await jwtHandler(user);
+            if (isValidPw) {
+                const { email } = consumer;
+                let accessToken = await jwtHandler(consumer);
 
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: { accessToken },
-                    message: `User '${email}' authentication successful`
+                    message: `Consumer '${email}' authentication successful`
                 });
             } else {
                 return objectHandler({
@@ -70,24 +70,24 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
         }
     }
 
-    async function registerUser(httpRequest) {
+    async function registerConsumer(httpRequest) {
         const body = httpRequest.body;
 
         const otpDataset = configOTP(body.contactNumber);
         const otpOptions = {
-            url: 'https://ideabiz.lk/apicall/pin/subscription/v1/subscribe',
+            url: config.ideabizOTPSubscribe,
             method: 'post'
         };
 
         try {
             Object.assign(body, { password: hasher({ password: body.password }) });
 
-            let user = await authList.addUser(body);
+            let consumer = await authList.addConsumer(body);
 
-            if (!user) {
+            if (!consumer) {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `User '${body.email}' pending account create failed`
+                    message: `Consumer '${body.email}' pending account create failed`
                 });
             }
 
@@ -106,22 +106,22 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
 
             const { serverRef, msisdn } = otpRef.data;
 
-            const tempUser = await authList.addUserOnPending({
+            const tempConsumer = await authList.addConsumerOnPending({
                 msisdn,
                 email: body.email,
                 serverRef
             });
 
-            if (!tempUser) {
+            if (!tempConsumer) {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `User '${body.email}' pending user failed to insert on database`
+                    message: `Consumer '${body.email}' pending account failed to insert on database`
                 });
             }
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `${user.email} account created and on hold`
+                message: `${consumer.email} account created and on hold`
             });
         } catch (error) {
             return objectHandler({
@@ -132,32 +132,32 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
         }
     }
 
-    async function verifyUser(httpRequest) {
+    async function verifyConsumer(httpRequest) {
         const { contactNumber, pin } = httpRequest.body;
 
         const smsOptions = {
-            url: 'https://ideabiz.lk/apicall/smsmessaging/v3/outbound/SETE/requests',
+            url: config.ideabizSMSOut,
             method: 'post'
         };
         const otpOptions = {
-            url: 'https://ideabiz.lk/apicall/pin/subscription/v1/submitPin',
+            url: config.ideabizOTPVerify,
             method: 'post'
         };
 
         try {
-            let tempUser = await authList.findUserOnPending({ msisdn: contactNumber });
+            let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber });
 
-            const message = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempUser.msisdn} and descriptive details to your email ${tempUser.email}. Thank you for partnering with us.`;
+            const message = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempConsumer.msisdn} and descriptive details to your email ${tempConsumer.email}. Thank you for partnering with us.`;
             const smsDataset = configSMS(contactNumber, message);
 
-            if (!tempUser) {
+            if (!tempConsumer) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: 'Contact number is invalid or not found in temporary user collection'
+                    message: 'Contact number is invalid or not found in temporary consumer collection'
                 });
             }
 
-            const verifyDataset = configOTPResponse({ serverRef: tempUser.serverRef, pin });
+            const verifyDataset = configOTPResponse({ serverRef: tempConsumer.serverRef, pin });
 
             const verifyStatus = await sendSMS(otpOptions, verifyDataset).then(response => {
                 return response.data
@@ -172,8 +172,8 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                 });
             }
 
-            const activeStatus = await userList.updateUserStatusByContactNumber(
-                { contactNumber: tempUser.msisdn },
+            const activeStatus = await consumerList.updateConsumerStatusByContactNumber(
+                { contactNumber: tempConsumer.msisdn },
                 { status: 'ACTIVE' }
             );
 
@@ -184,7 +184,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                 });
             }
 
-            const removeStatus = await authList.removeUserOnPending({ msisdn: contactNumber });
+            const removeStatus = await authList.removeConsumerOnPending({ msisdn: contactNumber });
 
             if (removeStatus && removeStatus.deletedCount) {
 
@@ -200,7 +200,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                 //WARNING: limited resource use with care
                 const emailStatus = await sendEmail({
                     from: config.adminEmail,
-                    to: tempUser.email,
+                    to: tempConsumer.email,
                     subject: 'SETE Account Registration',
                     text: message
                 }).then(() => {
@@ -213,7 +213,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
                 if (smsStatus === true && emailStatus === true) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `${tempUser.email} account activated successful`
+                        message: `${tempConsumer.email} account activated successful`
                     });
                 } else {
                     return objectHandler({
@@ -224,7 +224,7 @@ export default function makeAuthEndPointHandler({ authList, userList }) {
             } else {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: 'Temporary user delete failed'
+                    message: 'Temporary consumer delete failed'
                 });
             }
         } catch (error) {

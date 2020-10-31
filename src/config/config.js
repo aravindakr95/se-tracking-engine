@@ -11,7 +11,10 @@ const config = {
     saltRounds: process.env.BCRYPT_ROUNDS,
     sendGridApiKey: process.env.SENDGRID_API_KEY,
     adminEmail: process.env.ADMIN_EMAIL,
-    ideabizAuthToken: 'fglEm1ZVF4vxXQhH7rb6Or46dWEa'
+    ideabizAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
+    ideabizSMSOut: process.env.IDEABIZ_SMS_OUT,
+    ideabizOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
+    ideabizOTPVerify: process.env.IDEABIZ_OTP_VERIFY
 };
 
 export default config;

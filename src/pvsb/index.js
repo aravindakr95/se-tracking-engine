@@ -1,13 +1,13 @@
 import makePVSBList from './pvsb-list';
 import makePVSBEndPointHandler from './pvsb-endpoint';
-import makeUserList from '../users/user-list';
+import makeConsumerList from '../consumer/consumer-list';
 
 const pvsbList = makePVSBList();
-const userList = makeUserList();
+const consumerList = makeConsumerList();
 
 const pvsbEndpointHandler = makePVSBEndPointHandler({
     pvsbList,
-    userList
+    consumerList
 });
 
 export default pvsbEndpointHandler;

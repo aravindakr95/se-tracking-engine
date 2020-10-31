@@ -2,11 +2,11 @@ import HttpResponseType from '../models/common/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makePGSBEndPointHandler({ pgsbList, userList }) {
+export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/payloads':
-                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getUserPGStats(httpRequest) :
+                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPGStats(httpRequest) :
                     addPGStat(httpRequest);
             case '/errors':
                 return addPGError(httpRequest)
@@ -40,20 +40,20 @@ export default function makePGSBEndPointHandler({ pgsbList, userList }) {
         }
     }
 
-    async function getUserPGStats(httpRequest) {
+    async function getConsumerPGStats(httpRequest) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const user = await userList.findUserByAccNumber(accountNumber);
+            const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
 
-            if (!user && !user.selected) {
+            if (!consumer && !consumer.selected) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested account number '${accountNumber}' is not exists`
                 });
             }
 
-            const deviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
 
             if (!deviceId) {
                 return objectHandler({
@@ -73,7 +73,7 @@ export default function makePGSBEndPointHandler({ pgsbList, userList }) {
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested user account '${accountNumber}' PG statistics not found`
+                    message: `Requested consumer account '${accountNumber}' PG statistics not found`
                 });
             }
         } catch (error) {

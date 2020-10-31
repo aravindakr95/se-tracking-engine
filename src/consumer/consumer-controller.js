@@ -1,12 +1,12 @@
-import handleUserRequest from './';
+import handleConsumerRequest from './';
 import normalizedRequest from '../helpers/utilities/normalize-request';
 import HttpResponseType from '../models/common/http-response-type';
 import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
 
-export default function usersController(req, res) {
+export default function consumerController(req, res) {
     const httpRequest = normalizedRequest(req);
 
-    handleUserRequest(httpRequest)
+    handleConsumerRequest(httpRequest)
         .then(({
             data
         }) => {

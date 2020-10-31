@@ -15,7 +15,7 @@ export default function filterRoute(req, res, next) {
     } else {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
-            jwt.verify(token, config.jwtSecret, (error, user) => {
+            jwt.verify(token, config.jwtSecret, (error, consumer) => {
                 if (error) {
                     return errorResponse(res, {
                         code: HttpResponseType.FORBIDDEN,
@@ -23,10 +23,10 @@ export default function filterRoute(req, res, next) {
                     });
                 }
 
-                if (user.status === 'PENDING') {
+                if (consumer.status === 'PENDING') {
                     return errorResponse(res, {
                         code: HttpResponseType.FORBIDDEN,
-                        message: 'Unauthorized to access this resource, user is pending for verification'
+                        message: 'Unauthorized to access this resource, consumer is pending for verification'
                     });
                 }
 

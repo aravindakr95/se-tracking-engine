@@ -26,8 +26,8 @@ const validate = (main, route, method) => {
             return pgsbValidator(route);
         case 'pvsb':
             return pvsbValidator(route);
-        case 'users':
-            return usersValidator(method);
+        case 'consumers':
+            return consumersValidator(method);
         case 'analysis':
             return reportsValidator(route);
         default:
@@ -189,7 +189,7 @@ function pvsbValidator(route) {
     }
 }
 
-function usersValidator(method) {
+function consumersValidator(method) {
     switch (method) {
         case 'PUT':
             return [

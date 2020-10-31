@@ -1,11 +1,15 @@
 import mongoose from 'mongoose';
 
-const UserSchema = mongoose.Schema;
+const ConsumerSchema = mongoose.Schema;
 
-let userSchema = UserSchema({
+let consumerSchema = ConsumerSchema({
     timestamp: {
         type: Number,
         default: new Date().getTime()
+    },
+    deviceToken: {
+        type: String,
+        default: ''
     },
     establishedYear: { //connection established year (for yield)
         type: Number,
@@ -80,6 +84,6 @@ let userSchema = UserSchema({
     ]
 });
 
-let User = mongoose.model('User', userSchema, 'users');
+let Consumer = mongoose.model('Consumer', consumerSchema, 'consumers');
 
-module.exports = User;
+module.exports = Consumer;

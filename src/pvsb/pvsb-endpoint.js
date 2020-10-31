@@ -2,11 +2,11 @@ import HttpResponseType from '../models/common/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makePVSBEndPointHandler({ pvsbList, userList }) {
+export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
             case '/payloads':
-                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getUserPVStats(httpRequest) :
+                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPVStats(httpRequest) :
                     addPVStat(httpRequest);
             case '/errors':
                 return addPVError(httpRequest);
@@ -46,20 +46,20 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
         }
     }
 
-    async function getUserPVStats(httpRequest) {
+    async function getConsumerPVStats(httpRequest) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const user = await userList.findUserByAccNumber(accountNumber);
+            const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
 
-            if (!user && !user.selected) {
+            if (!consumer && !consumer.selected) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested account number '${accountNumber}' is not exists`
                 });
             }
 
-            const deviceId = await userList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
 
             if (!deviceId) {
                 return objectHandler({
@@ -79,7 +79,7 @@ export default function makePVSBEndPointHandler({ pvsbList, userList }) {
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested user account '${accountNumber}' PV statistics not found`
+                    message: `Requested consumer account '${accountNumber}' PV statistics not found`
                 });
             }
         } catch (error) {

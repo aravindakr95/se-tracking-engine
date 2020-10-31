@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 
-export default async function validatePasswordOfUser({
+export default async function validatePasswordOfConsumer({
     password,
     hash
 }) {

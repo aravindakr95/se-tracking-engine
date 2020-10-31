@@ -1,13 +1,13 @@
 import makePGSBList from './pgsb-list';
 import makePGSBEndPointHandler from './pgsb-endpoint';
-import makeUserList from '../users/user-list';
+import makeConsumerList from '../consumer/consumer-list';
 
 const pgsbList = makePGSBList();
-const userList = makeUserList();
+const consumerList = makeConsumerList();
 
 const pgsbEndpointHandler = makePGSBEndPointHandler({
     pgsbList,
-    userList
+    consumerList
 });
 
 export default pgsbEndpointHandler;

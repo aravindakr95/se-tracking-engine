@@ -1,16 +1,16 @@
 import HttpResponseType from '../models/common/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
-export default function makeUsersEndpointHandler({ userList }) {
+export default function makeConsumerEndpointHandler({ consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.method) {
             case 'GET':
                 return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId ?
-                    getUser(httpRequest) : getUsers(httpRequest);
+                    getConsumer(httpRequest) : getConsumers(httpRequest);
             case 'PUT':
-                return updateUser(httpRequest);
+                return updateConsumer(httpRequest);
             case 'DELETE':
-                return deleteUser(httpRequest);
+                return deleteConsumer(httpRequest);
             default:
                 return objectHandler({
                     code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -19,14 +19,14 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
     };
 
-    async function getUsers(httpRequest) {
+    async function getConsumers(httpRequest) {
         const status = (httpRequest.queryParams) && (httpRequest.queryParams.status) ?
             httpRequest.queryParams.status : null;
         let result = null;
 
         if (status) {
             try {
-                result = await userList.findUsersByStatus({ status });
+                result = await consumerList.findConsumersByStatus({ status });
 
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
@@ -42,7 +42,7 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
 
         try {
-            result = await userList.getAllUsers();
+            result = await consumerList.getAllConsumers();
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
@@ -57,14 +57,14 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
     }
 
-    async function getUser(httpRequest) {
+    async function getConsumer(httpRequest) {
         let result = null;
 
         if (httpRequest.queryParams.accountNumber) {
             const { accountNumber } = httpRequest.queryParams;
 
             try {
-                result = await userList.findUserByAccNumber(accountNumber);
+                result = await consumerList.findConsumerByAccNumber(accountNumber);
                 if (result) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
@@ -74,7 +74,7 @@ export default function makeUsersEndpointHandler({ userList }) {
                 } else {
                     return objectHandler({
                         code: HttpResponseType.NOT_FOUND,
-                        message: `Requested user account '${accountNumber}' not found`
+                        message: `Requested Consumer account '${accountNumber}' not found`
                     });
                 }
             } catch (error) {
@@ -89,7 +89,7 @@ export default function makeUsersEndpointHandler({ userList }) {
             const { deviceId } = httpRequest.queryParams;
 
             try {
-                result = await userList.findUserByDeviceId(deviceId);
+                result = await consumerList.findConsumerByDeviceId(deviceId);
                 if (result) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
@@ -111,22 +111,22 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
     }
 
-    async function updateUser(httpRequest) {
+    async function updateConsumer(httpRequest) {
         const body = httpRequest.body;
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const result = await userList.updateUserByAccNumber({ accountNumber }, body);
+            const result = await consumerList.updateConsumerByAccNumber({ accountNumber }, body);
             if (result) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
-                    message: `User account '${accountNumber}' updated successful`
+                    message: `Consumer account '${accountNumber}' updated successful`
                 });
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `User account '${accountNumber}' is not found`
+                    message: `Consumer account '${accountNumber}' is not found`
                 });
             }
         } catch (error) {
@@ -137,10 +137,10 @@ export default function makeUsersEndpointHandler({ userList }) {
         }
     }
 
-    async function deleteUser(httpRequest) {
+    async function deleteConsumer(httpRequest) {
         const { accountNumber } = httpRequest.queryParams;
 
-        let result = await userList.deleteUserByAccNumber({ accountNumber });
+        let result = await consumerList.deleteConsumerByAccNumber({ accountNumber });
 
         if (result && result.deletedCount) {
             return objectHandler({

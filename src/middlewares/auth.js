@@ -17,12 +17,12 @@ export default function authenticateJWT(req, res, next) {
     } else {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
-            jwt.verify(token, config.jwtSecret, (error, user) => {
+            jwt.verify(token, config.jwtSecret, (error, consumer) => {
                 const { email } = jwt.decode(token);
 
                 validateProfile(email).then((valid) => {
                     if (valid) {
-                        req.user = user;
+                        req.consumer = consumer;
                         next();
                     }
                 });
@@ -46,7 +46,7 @@ export default function authenticateJWT(req, res, next) {
 async function validateProfile(email) {
     try {
         const authList = makeAuthList();
-        const result = await authList.findByEmail({ email });
+        const result = await authList.findConsumerByEmail({ email });
 
         return !!result;
     } catch (error) {
