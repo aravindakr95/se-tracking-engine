@@ -46,7 +46,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
 
-            if (!consumer && !consumer.selected) {
+            if (!consumer) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested account number '${accountNumber}' is not exists`

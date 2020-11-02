@@ -9,39 +9,40 @@ function calculateIncome(dateTime, consumer, bfUnits) {
 }
 
 function calculateExpense(category, units) {
+    //todo: for the moment D-1 only
     if (category !== 'D-1') {
-        return 0;
+        return { fixedCharge: 0, payableAmount: 0 };
     }
 
     if (units <= 60) {
         if (units <= 30 && units > 0) {
-            return 30 + (2.50 * units);
+            return { fixedCharge: 30, payableAmount: (2.50 * units) };
         }
 
         if (units > 30 && units <= 60) {
-            return 60 + (4.85 * units);
+            return { fixedCharge: 60, payableAmount: (4.85 * units) };
         }
     }
 
     if (units > 60) {
         if (units <= 61 && units > 0) {
-            return (7.85 * units); // no fixed charge
+            return { fixedCharge: 0, payableAmount: (7.85 * units) }; // no fixed charge
         }
 
         if (units > 60 && units <= 90) {
-            return 90 + (10 * units);
+            return { fixedCharge: 90, payableAmount: (10 * units) };
         }
 
         if (units > 90 && units <= 120) {
-            return 480 + (27.75 * units);
+            return { fixedCharge: 480, payableAmount: (27.75 * units) };
         }
 
         if (units > 120 && units <= 180) {
-            return 480 + (32.00 * units);
+            return { fixedCharge: 480, payableAmount: (32.00 * units) };
         }
 
         if (units > 180) {
-            return 540 + (45 * units);
+            return { fixedCharge: 540, payableAmount: (45 * units) };
         }
     }
 }

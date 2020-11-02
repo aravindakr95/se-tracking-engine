@@ -8,6 +8,7 @@ import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms/messenger';
+import { getRegistrationTemplate } from '../helpers/templates/email/registration';
 
 export default function makeAuthEndPointHandler({ authList, consumerList }) {
     return async function handle(httpRequest) {
@@ -147,8 +148,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         try {
             let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber });
 
-            const message = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempConsumer.msisdn} and descriptive details to your email ${tempConsumer.email}. Thank you for partnering with us.`;
-            const smsDataset = configSMS(contactNumber, message);
+            const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email });
+
+            const sms = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempConsumer.msisdn} and descriptive details to your email ${tempConsumer.email}. Thank you for partnering with us.`;
+            const emailBody = getRegistrationTemplate(consumer);
+
+            const smsDataset = configSMS(contactNumber, sms);
 
             if (!tempConsumer) {
                 return objectHandler({
@@ -202,7 +207,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                     from: config.adminEmail,
                     to: tempConsumer.email,
                     subject: 'SETE Account Registration',
-                    text: message
+                    html: emailBody
                 }).then(() => {
                     return true;
                 }).catch(error => {

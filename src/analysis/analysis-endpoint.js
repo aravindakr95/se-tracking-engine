@@ -5,6 +5,7 @@ import { calculateProduction, calculateConsumption } from '../helpers/utilities/
 import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import sendEmail from '../helpers/mail/mailer';
 import config from '../config/config';
+import { getInvoiceTemplate } from '../helpers/templates/email/invoice';
 
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
@@ -62,7 +63,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
             if (response && response.length) {
                 for (const consumer of response) {
-                    let { accountNumber, contactNumber, email } = consumer;
+                    let {
+                        accountNumber,
+                        contactNumber,
+                        email,
+                        supplier,
+                        tariff,
+                        billingCategory
+                    } = consumer;
 
                     const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId });
@@ -92,14 +100,24 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         contactNumber,
                         email,
                         billingDuration,
+                        supplier,
+                        tariff,
+                        billingCategory,
+                        previousDue: 0.00, //todo: payment API integration required (mock for the moment)
                         month: currentMonth,
                         year: currentYear
                     };
 
+                    const forecastedValues = {
+                        forecastedPayable: 0.00 //todo: create a way to predict the total amount for next month
+                    }
+
                     const report = Object.assign({},
-                        commonDetails,
                         productionDetails,
-                        consumptionDetails);
+                        consumptionDetails,
+                        commonDetails,
+                        forecastedValues
+                    );
 
                     await analysisList.addReport(report);
                 }
@@ -134,9 +152,6 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
     async function dispatchReports() {
         try {
-            let smsMessage = null;
-            let emailBody = null;
-
             const smsOptions = {
                 url: config.ideabizSMSOut,
                 method: 'post'
@@ -157,9 +172,9 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             }
 
             for (const report of reports) {
-                smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${month}-${date}-${year}. This month you have to pay ${report.payableAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
+                const smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${month}-${date}-${year}. This month you have to pay ${report.payableAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
 
-                emailBody = `<p>Your electricity account number <strong>${report.accountNumber}</strong> able to produce <strong>${report.totalProduction} kWh</strong> and consumed <strong>${report.totalConsumption} kWh</strong> as of <strong>${month}-${date}-${year}</strong>. This month you have to pay <strong>${report.payableAmount} LKR</strong> for the excess energy used. Your Income was <strong>${report.yield}</strong> and you can bring forward <strong>${report.bfUnits} kWh</strong> to next months. According to usage patterns you have daily <strong>${report.avgDailyProduction} kWh</strong> average production rate and <strong>${report.avgDailyConsumption} kWh</strong> average consumption rate.</p>`;
+                const emailBody = getInvoiceTemplate(report);
 
                 const sms = configSMS(report.contactNumber, smsMessage);
 
@@ -170,14 +185,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 await sendEmail({
                     from: config.adminEmail,
                     to: report.email,
-                    subject: `Statement for ${year}-${month} on SETE Account ${report.accountNumber}`,
+                    subject: `Statement for ${month}-${year} on SETE Account ${report.accountNumber}`,
                     html: emailBody
                 }).catch(error => console.log(error));
             }
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `All consumer reports summary sent for '${year}-${month}'`
+                message: `All consumer report summaries sent for '${year}-${month}'`
             });
         } catch (error) {
             return objectHandler({

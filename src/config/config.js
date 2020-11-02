@@ -14,7 +14,8 @@ const config = {
     ideabizAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
     ideabizSMSOut: process.env.IDEABIZ_SMS_OUT,
     ideabizOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
-    ideabizOTPVerify: process.env.IDEABIZ_OTP_VERIFY
+    ideabizOTPVerify: process.env.IDEABIZ_OTP_VERIFY,
+    currency: process.env.CURRENCY
 };
 
 export default config;

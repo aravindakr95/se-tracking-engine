@@ -1,11 +1,33 @@
 import mongoose from 'mongoose';
+import config from '../../config/config';
 
 const ReportSchema = mongoose.Schema;
+
+const date = new Date();
+const dueDate = new Date(date.getTime() + 12096e5); // 12096e5 = 14 days (magic number programming)
 
 let reportSchema = ReportSchema({
     timestamp: {
         type: Number,
-        default: new Date().getTime()
+        default: date.getTime()
+    },
+    dueDate: {
+        type: String,
+        default: `${dueDate.getMonth() + '-' + dueDate.getDate() + '-' + dueDate.getFullYear()}`
+    },
+    supplier: {
+        type: String,
+        required: true,
+        enum: ['CEB', 'LECO']
+    },
+    currency: {
+      type: String,
+      default: config.currency
+    },
+    tariff: {
+        type: String,
+        required: true,
+        enum: ['NetMetering', 'NetAccounting']
     },
     accountNumber: {
         type: Number,
@@ -22,6 +44,11 @@ let reportSchema = ReportSchema({
         required: true,
         lowercase: true
     },
+    billingCategory: {
+        type: String,
+        required: true,
+        enum: ['D-1']
+    },
     billingDuration: {
         type: Number,
         required: true,
@@ -30,8 +57,8 @@ let reportSchema = ReportSchema({
     month: {
         type: String,
         required: true,
-        minlength: 1,
-        maxlength: 12
+        min: 1,
+        max: 12
     },
     year: {
         type: String,
@@ -66,6 +93,18 @@ let reportSchema = ReportSchema({
         required: true
     },
     payableAmount: {
+        type: Number,
+        required: true
+    },
+    fixedCharge: {
+        type: Number,
+        default: 0.00
+    },
+    previousDue: {
+        type: Number,
+        default: 0.00
+    },
+    forecastedPayable: {
         type: Number,
         required: true
     }

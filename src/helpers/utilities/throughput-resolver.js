@@ -17,9 +17,12 @@ function calculateProduction(pvsb, energy, length) {
 
 function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
     let bfUnits = 0;
-    let totalGridImported = 0;
     let income = 0.00;
+    let totalGridImported = 0;
     let payableAmount = 0.00;
+    let fixedCharge = 0.00
+
+    let expense = null;
 
     const { startingValue, endingValue } = pgsb;
 
@@ -39,12 +42,15 @@ function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
     }
 
     if (totalGridImported) {
-        payableAmount = calculateExpense(consumer.billingCategory, totalGridImported);
+        expense = calculateExpense(consumer.billingCategory, totalGridImported);
+        payableAmount = expense.payableAmount;
+        fixedCharge = expense.fixedCharge;
     }
 
     return {
         yield: income,
         payableAmount,
+        fixedCharge,
         bfUnits,
         totalGridImported,
         totalConsumption,

@@ -13,7 +13,9 @@ let reportLogSchema = ReportLogSchema({
     },
     month: {
         type: Number,
-        required: true
+        required: true,
+        min: 1,
+        max: 12
     },
     isCompleted: {
         type: Boolean,

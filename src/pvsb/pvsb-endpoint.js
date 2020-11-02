@@ -51,8 +51,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
-
-            if (!consumer && !consumer.selected) {
+            if (!consumer) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested account number '${accountNumber}' is not exists`
@@ -83,6 +82,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error)
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
