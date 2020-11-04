@@ -1,11 +1,10 @@
 import HttpResponseType from '../models/common/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInMonth, dateComparePG, dateComparePV } from '../helpers/utilities/date-resolver';
+import { daysInPreviousMonth, dateComparePG, dateComparePV, getPreviousDate } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
 import { configSMS, sendSMS } from '../helpers/sms/messenger';
-import sendEmail from '../helpers/mail/mailer';
+import { sendEmailPostMark } from '../helpers/mail/mailer';
 import config from '../config/config';
-import { getInvoiceTemplate } from '../helpers/templates/email/invoice';
 
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
@@ -42,20 +41,18 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         }
     };
 
+    // execute on 1st day of the month at 06.00 Hours
     async function generateReports() {
         try {
-            const dateTime = new Date();
-            const currentMonth = dateTime.getMonth() + 1;
-            const currentYear = dateTime.getFullYear();
+            const { dateInstance, month, year } = getPreviousDate();
+            const billingDuration = daysInPreviousMonth();
 
-            const billingDuration = daysInMonth();
-
-            const log = await analysisList.findReportLog(currentMonth, currentYear);
+            const log = await analysisList.findReportLog(month, year);
 
             if (log && log.isCompleted) {
                 return objectHandler({
                     code: HttpResponseType.CONFLICT,
-                    message: `Reports already generated for '${currentYear}-${currentMonth}' current month`
+                    message: `Reports already generated for '${month}-${year}' previous month`
                 });
             }
 
@@ -67,7 +64,6 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         accountNumber,
                         contactNumber,
                         email,
-                        supplier,
                         tariff,
                         billingCategory
                     } = consumer;
@@ -89,42 +85,40 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         energyToday.length);
 
                     const consumptionDetails = calculateConsumption(
-                        dateTime,
+                        dateInstance,
                         consumer,
                         sortedPGSBStats,
                         productionDetails,
                         billingDuration);
+
+                    const forecastedValues = {
+                        forecastedPayable: 0.00 //todo: create a way to predict the total amount for next month
+                    }
 
                     const commonDetails = {
                         accountNumber,
                         contactNumber,
                         email,
                         billingDuration,
-                        supplier,
                         tariff,
                         billingCategory,
-                        previousDue: 0.00, //todo: payment API integration required (mock for the moment)
-                        month: currentMonth,
-                        year: currentYear
+                        month,
+                        year
                     };
-
-                    const forecastedValues = {
-                        forecastedPayable: 0.00 //todo: create a way to predict the total amount for next month
-                    }
 
                     const report = Object.assign({},
                         productionDetails,
                         consumptionDetails,
-                        commonDetails,
-                        forecastedValues
+                        forecastedValues,
+                        commonDetails
                     );
 
                     await analysisList.addReport(report);
                 }
 
                 const reportLog = {
-                    month: currentMonth,
-                    year: currentYear,
+                    month,
+                    year,
                     isCompleted: true
                 };
 
@@ -133,7 +127,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `Reports generated for '${currentYear}-${currentMonth}' completed`
+                        message: `Reports generated for '${month}-${year}' is completed`
                     });
                 }
             }
@@ -150,6 +144,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         }
     }
 
+    // execute on 1st day of the month at 12.00 Hours
     async function dispatchReports() {
         try {
             const smsOptions = {
@@ -157,42 +152,49 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 method: 'post'
             };
 
-            const dateTime = new Date();
-            const year = dateTime.getFullYear();
-            const month = dateTime.getMonth() + 1;
-            const date = dateTime.getDate();
+            const { month, year } = getPreviousDate();
 
             const reports = await analysisList.findAllReportsForMonth(month, year);
 
             if (reports && !reports.length) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Zero reports found for the '${year}-${month}'`
+                    message: `Zero reports found for the '${month}-${year}' period`
                 });
             }
 
             for (const report of reports) {
-                const smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${month}-${date}-${year}. This month you have to pay ${report.payableAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
-
-                const emailBody = getInvoiceTemplate(report);
+                const smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${report.month}-${report.date}-${report.year}. This month you have to pay ${report.netAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
 
                 const sms = configSMS(report.contactNumber, smsMessage);
 
                 //WARNING: limited resource use with care
-                await sendSMS(smsOptions, sms).catch(error => console.log(error));
+                await sendSMS(smsOptions, sms).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
+
+                const templateReport = Object.assign(report, {
+                    bodyTitle: `Electricity EBILL for ${report.month}-${report.year}`,
+                    country: config.country,
+                    currency: config.currency,
+                    supplier: config.supplier
+                });
 
                 //WARNING: limited resource use with care
-                await sendEmail({
-                    from: config.adminEmail,
-                    to: report.email,
-                    subject: `Statement for ${month}-${year} on SETE Account ${report.accountNumber}`,
-                    html: emailBody
-                }).catch(error => console.log(error));
+                await sendEmailPostMark(templateReport, 'monthly-statement').catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
             }
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `All consumer report summaries sent for '${year}-${month}'`
+                message: `All consumer reports sent for '${month}-${year}'`
             });
         } catch (error) {
             return objectHandler({

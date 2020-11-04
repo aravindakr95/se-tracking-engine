@@ -72,7 +72,7 @@ export default function makeAnalysisList() {
 
     async function findAllReportsForMonth(month, year) {
         try {
-            return Report.find({ month, year }).then((data) => {
+            return Report.find({ month, year }).lean().then((data) => {
                 return data;
             }).catch((error) => {
                 return error;

@@ -45,7 +45,12 @@ async function sendSMS(httpOptions, body) {
         }
     }
 
-    return await axios.post(httpOptions.url, body, options);
+    try {
+        return await axios.post(httpOptions.url, body, options);
+    } catch (error) {
+        return error;
+    }
+
 }
 
 module.exports = { configSMS, configOTP, configOTPResponse, sendSMS };

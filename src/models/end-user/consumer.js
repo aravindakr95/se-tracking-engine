@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import config from '../../config/config';
 
 const ConsumerSchema = mongoose.Schema;
 
@@ -39,8 +40,7 @@ let consumerSchema = ConsumerSchema({
     },
     supplier: {
         type: String,
-        required: true,
-        enum: ['CEB', 'LECO']
+        default: config.supplier
     },
     billingCategory: {
         type: String,

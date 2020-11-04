@@ -11,38 +11,70 @@ function calculateIncome(dateTime, consumer, bfUnits) {
 function calculateExpense(category, units) {
     //todo: for the moment D-1 only
     if (category !== 'D-1') {
-        return { fixedCharge: 0, payableAmount: 0 };
+        return {
+            fixedCharge: 0,
+            grossAmount: 0,
+            netAmount: 0
+        };
     }
 
     if (units <= 60) {
         if (units <= 30 && units > 0) {
-            return { fixedCharge: 30, payableAmount: (2.50 * units) };
+            return {
+                fixedCharge: 30,
+                grossAmount: (2.50 * units),
+                netAmount: 30 +  (2.50 * units)
+            };
         }
 
         if (units > 30 && units <= 60) {
-            return { fixedCharge: 60, payableAmount: (4.85 * units) };
+            return {
+                fixedCharge: 60,
+                grossAmount: (4.85 * units),
+                netAmount: 60 +  (4.85 * units)
+            };
         }
     }
 
     if (units > 60) {
         if (units <= 61 && units > 0) {
-            return { fixedCharge: 0, payableAmount: (7.85 * units) }; // no fixed charge
+            return {
+                fixedCharge: 0,
+                grossAmount: (7.85 * units) ,
+                netAmount: (7.85 * units)
+            }; // no fixed charge
         }
 
         if (units > 60 && units <= 90) {
-            return { fixedCharge: 90, payableAmount: (10 * units) };
+            return {
+                fixedCharge: 90,
+                grossAmount: (10 * units),
+                netAmount: 90 +  (10 * units)
+            };
         }
 
         if (units > 90 && units <= 120) {
-            return { fixedCharge: 480, payableAmount: (27.75 * units) };
+            return {
+                fixedCharge: 480,
+                grossAmount: (27.75 * units),
+                netAmount: 480 +  (27.75 * units)
+            };
         }
 
         if (units > 120 && units <= 180) {
-            return { fixedCharge: 480, payableAmount: (32.00 * units) };
+            return {
+                fixedCharge: 480,
+                grossAmount: (32.00 * units),
+                netAmount: 480 +  (32.00 * units)
+            };
         }
 
         if (units > 180) {
-            return { fixedCharge: 540, payableAmount: (45 * units) };
+            return {
+                fixedCharge: 540,
+                grossAmount: (45 * units) ,
+                netAmount: 540 +  (45 * units)
+            };
         }
     }
 }

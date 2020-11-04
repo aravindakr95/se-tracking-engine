@@ -8,14 +8,26 @@ let reportLogSchema = ReportLogSchema({
         default: new Date().getTime()
     },
     year: {
-      type: Number,
-      required: true
+        type: Number,
+        required: true
     },
     month: {
-        type: Number,
+        type: String,
         required: true,
-        min: 1,
-        max: 12
+        enum: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ]
     },
     isCompleted: {
         type: Boolean,

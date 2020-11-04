@@ -1,6 +1,5 @@
-function makeTwoDecimalFixed(value) {
-    const formatted = Number.parseFloat(value).toFixed(2);
-    return Number(formatted);
+function makeTwoDecimalNumber(number) {
+    return Math.floor(number * 100) / 100;
 }
 
-module.exports = { makeTwoDecimalFixed };
+module.exports = { makeTwoDecimalNumber };

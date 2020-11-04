@@ -13,12 +13,11 @@ let reportSchema = ReportSchema({
     },
     dueDate: {
         type: String,
-        default: `${dueDate.getMonth() + '-' + dueDate.getDate() + '-' + dueDate.getFullYear()}`
+        default: `${dueDate.getMonth() + '-' + dueDate.getDate() + '-' + dueDate.getFullYear()}` //todo: add dateStringResolver(date)
     },
     supplier: {
         type: String,
-        required: true,
-        enum: ['CEB', 'LECO']
+        default: config.supplier
     },
     currency: {
       type: String,
@@ -56,9 +55,7 @@ let reportSchema = ReportSchema({
     },
     month: {
         type: String,
-        required: true,
-        min: 1,
-        max: 12
+        required: true
     },
     year: {
         type: String,
@@ -92,11 +89,15 @@ let reportSchema = ReportSchema({
         type: Number,
         required: true
     },
-    payableAmount: {
+    grossAmount: {
         type: Number,
-        required: true
+        default: 0.00
     },
     fixedCharge: {
+        type: Number,
+        default: 0.00
+    },
+    netAmount: {
         type: Number,
         default: 0.00
     },

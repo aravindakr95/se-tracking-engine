@@ -1,20 +1,54 @@
-const startingDateTime = new Date();
-const endingDateTime = new Date();
-
-function daysInMonth() {
+function daysInPreviousMonth() {
     const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
 
-    return  new Date(year, month, 0).getDate();
+    date.setDate(0);
+    return date.getDate();
+}
+
+function getPreviousDate() {
+    const monthsArray = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ];
+    const date = new Date();
+    date.setDate(0);
+
+    return {
+        dateInstance: date,
+        month: monthsArray[date.getMonth()],
+        year: date.getFullYear()
+    };
 }
 
 function dateComparePG(objectOne, objectTwo) {
-    startingDateTime.setDate(1);
-    endingDateTime.setDate(daysInMonth());
+    const startingDate = new Date();
+    const endingDate = new Date();
 
-    const startingMillis = startingDateTime.setHours(0, 0, 0, 0);
-    const endingMillis = endingDateTime.setHours(23, 59, 59, 999);
+    let prevMonth = startingDate.getMonth() - 1;
+
+    if (prevMonth < 0) {
+        prevMonth += 12;
+        startingDate.setFullYear(startingDate.getFullYear() - 1);
+    }
+
+    startingDate.setMonth(prevMonth);
+    startingDate.setDate(1);
+
+    endingDate.setMonth(prevMonth);
+    endingDate.setDate(daysInPreviousMonth())
+
+    const startingMillis = startingDate.setHours(0, 0, 0, 1);
+    const endingMillis = endingDate.setHours(23, 59, 59, 999);
 
     if ((objectOne.timestamp >= startingMillis && objectOne.timestamp <= endingMillis) &&
         (objectTwo.timestamp >= startingMillis && objectTwo.timestamp <= endingMillis)) {
@@ -23,11 +57,24 @@ function dateComparePG(objectOne, objectTwo) {
 }
 
 function dateComparePV(objectOne, objectTwo) {
-    startingDateTime.setDate(1);
-    endingDateTime.setDate(daysInMonth());
+    const startingDate = new Date();
+    const endingDate = new Date();
 
-    const startingMillis = startingDateTime.setHours(0, 0, 0, 0);
-    const endingMillis = endingDateTime.setHours(23, 59, 59, 999);
+    let prevMonth = startingDate.getMonth() - 1;
+
+    if (prevMonth < 0) {
+        prevMonth += 12;
+        startingDate.setFullYear(startingDate.getFullYear() - 1);
+    }
+
+    startingDate.setMonth(prevMonth);
+    startingDate.setDate(1);
+
+    endingDate.setMonth(prevMonth);
+    startingDate.setDate(daysInPreviousMonth());
+
+    const startingMillis = startingDate.setHours(0, 0, 0, 1);
+    const endingMillis = endingDate.setHours(23, 59, 59, 999);
 
     if ((objectOne.snapshotTimestamp >= startingMillis && objectOne.snapshotTimestamp <= endingMillis) &&
         (objectTwo.snapshotTimestamp >= startingMillis && objectTwo.snapshotTimestamp <= endingMillis)) {
@@ -35,4 +82,4 @@ function dateComparePV(objectOne, objectTwo) {
     }
 }
 
-module.exports = { daysInMonth, dateComparePG, dateComparePV };
+module.exports = { daysInPreviousMonth, getPreviousDate, dateComparePG, dateComparePV };

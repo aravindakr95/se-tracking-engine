@@ -4,11 +4,10 @@ import jwtHandler from '../helpers/validators/token-handler';
 import hasher from '../helpers/hasher';
 
 import HttpResponseType from '../models/common/http-response-type';
-import sendEmail from '../helpers/mail/mailer';
+import { sendEmailPostMark } from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms/messenger';
-import { getRegistrationTemplate } from '../helpers/templates/email/registration';
 
 export default function makeAuthEndPointHandler({ authList, consumerList }) {
     return async function handle(httpRequest) {
@@ -151,7 +150,6 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email });
 
             const sms = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempConsumer.msisdn} and descriptive details to your email ${tempConsumer.email}. Thank you for partnering with us.`;
-            const emailBody = getRegistrationTemplate(consumer);
 
             const smsDataset = configSMS(contactNumber, sms);
 
@@ -194,38 +192,31 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             if (removeStatus && removeStatus.deletedCount) {
 
                 //WARNING: limited resource use with care
-                const smsStatus = await sendSMS(smsOptions, smsDataset)
-                    .then(() => {
-                        return true
-                    })
-                    .catch(error => {
-                        return error;
-                    });
-
-                //WARNING: limited resource use with care
-                const emailStatus = await sendEmail({
-                    from: config.adminEmail,
-                    to: tempConsumer.email,
-                    subject: 'SETE Account Registration',
-                    html: emailBody
-                }).then(() => {
-                    return true;
-                }).catch(error => {
-                    console.log(error);
-                    return error
-                });
-
-                if (smsStatus === true && emailStatus === true) {
-                    return objectHandler({
-                        status: HttpResponseType.SUCCESS,
-                        message: `${tempConsumer.email} account activated successful`
-                    });
-                } else {
+                await sendSMS(smsOptions, smsDataset).catch(error => {
                     return objectHandler({
                         code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: 'Registration Email or SMS sending failed'
+                        message: error.message
                     });
-                }
+                });
+
+                const templateConsumer = Object.assign(consumer, {
+                    bodyTitle: `${config.supplier} Electricity EBILL Registration Completed`,
+                    country: config.country,
+                    supplier: config.supplier
+                });
+
+                //WARNING: limited resource use with care
+                await sendEmailPostMark(templateConsumer, 'registration-complete').catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
+
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    message: `${tempConsumer.email} account activated successful`
+                });
             } else {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,

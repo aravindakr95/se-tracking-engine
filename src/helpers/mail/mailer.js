@@ -1,22 +1,20 @@
-import sgMail from '@sendgrid/mail';
+import { ServerClient } from 'postmark';
+
 import config from '../../config/config';
 
-async function sendEmail(email) {
-    const composeEmail = {
-        to: email.to,
-        from: email.from,
-        subject: email.subject,
-        ...(email.text && {text: email.text}),
-        ...(email.html && {html: email.html})
-    };
-
-    sgMail.setApiKey(config.sendGridApiKey);
-
+async function sendEmailPostMark(model, alias) {
     try {
-        return await sgMail.send(composeEmail);
+        let client = await new ServerClient(config.postmarkAuthToken);
+
+        return await client.sendEmailWithTemplate({
+            From: config.adminEmail,
+            To: model.email,
+            TemplateAlias: alias,
+            TemplateModel: model
+        });
     } catch (error) {
         return error;
     }
 }
 
-module.exports = sendEmail;
+module.exports = { sendEmailPostMark };

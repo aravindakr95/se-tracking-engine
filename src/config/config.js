@@ -15,7 +15,10 @@ const config = {
     ideabizSMSOut: process.env.IDEABIZ_SMS_OUT,
     ideabizOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
     ideabizOTPVerify: process.env.IDEABIZ_OTP_VERIFY,
-    currency: process.env.CURRENCY
+    currency: process.env.CURRENCY,
+    supplier: process.env.SUPPLIER,
+    country: process.env.COUNTRY,
+    postmarkAuthToken: process.env.POSTMARK_AUTH_TOKEN
 };
 
 export default config;

@@ -51,7 +51,7 @@ export default function makeAuthList() {
 
     async function findConsumerByEmail(email) {
         try {
-            return Consumer.findOne(email);
+            return Consumer.findOne(email).lean();
         } catch (error) {
             console.log(error.message);
             return error;
