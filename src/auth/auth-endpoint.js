@@ -8,6 +8,7 @@ import { sendEmailPostMark } from '../helpers/mail/mailer';
 import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms/messenger';
+import { getRegistrationSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
 export default function makeAuthEndPointHandler({ authList, consumerList }) {
     return async function handle(httpRequest) {
@@ -147,18 +148,20 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         try {
             let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber });
 
-            const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email });
-
-            const sms = `Account activation completed. You will be receiving monthly electricity statements now by electronically, through a brief statement to your mobile ${tempConsumer.msisdn} and descriptive details to your email ${tempConsumer.email}. Thank you for partnering with us.`;
-
-            const smsDataset = configSMS(contactNumber, sms);
-
             if (!tempConsumer) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: 'Contact number is invalid or not found in temporary consumer collection'
                 });
             }
+
+            const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email });
+
+            const regTemplate = getRegistrationSMSTemplate({
+                contactNumber: tempConsumer.msisdn,
+                email: tempConsumer.email
+            });
+            const smsDataset = configSMS(contactNumber, regTemplate);
 
             const verifyDataset = configOTPResponse({ serverRef: tempConsumer.serverRef, pin });
 
@@ -168,7 +171,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 return error.response.data;
             });
 
-            if (!verifyStatus || (verifyStatus && verifyStatus.statusCode !== 'SUCCESS')) {
+            if (verifyStatus && verifyStatus.statusCode !== 'SUCCESS') {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: verifyStatus.message
@@ -201,7 +204,6 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
                 const templateConsumer = Object.assign(consumer, {
                     bodyTitle: `${config.supplier} Electricity EBILL Registration Completed`,
-                    country: config.country,
                     supplier: config.supplier
                 });
 

@@ -6,27 +6,18 @@ function daysInPreviousMonth() {
 }
 
 function getPreviousDate() {
-    const monthsArray = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-    ];
     const date = new Date();
     date.setDate(0);
 
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
     return {
         dateInstance: date,
-        month: monthsArray[date.getMonth()],
-        year: date.getFullYear()
+        billingPeriod: `${month}-${day}-${year}`,
+        month,
+        year
     };
 }
 
@@ -34,17 +25,9 @@ function dateComparePG(objectOne, objectTwo) {
     const startingDate = new Date();
     const endingDate = new Date();
 
-    let prevMonth = startingDate.getMonth() - 1;
-
-    if (prevMonth < 0) {
-        prevMonth += 12;
-        startingDate.setFullYear(startingDate.getFullYear() - 1);
-    }
-
-    startingDate.setMonth(prevMonth);
+    startingDate.setDate(0);
     startingDate.setDate(1);
 
-    endingDate.setMonth(prevMonth);
     endingDate.setDate(daysInPreviousMonth());
 
     const startingMillis = startingDate.setHours(0, 0, 0, 1);
@@ -60,17 +43,9 @@ function dateComparePV(objectOne, objectTwo) {
     const startingDate = new Date();
     const endingDate = new Date();
 
-    let prevMonth = startingDate.getMonth() - 1;
-
-    if (prevMonth < 0) {
-        prevMonth += 12;
-        startingDate.setFullYear(startingDate.getFullYear() - 1);
-    }
-
-    startingDate.setMonth(prevMonth);
+    startingDate.setDate(0);
     startingDate.setDate(1);
 
-    endingDate.setMonth(prevMonth);
     startingDate.setDate(daysInPreviousMonth());
 
     const startingMillis = startingDate.setHours(0, 0, 0, 1);

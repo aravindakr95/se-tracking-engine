@@ -70,9 +70,9 @@ export default function makeAnalysisList() {
         }
     }
 
-    async function findAllReportsForMonth(month, year) {
+    async function findAllReportsForMonth(period) {
         try {
-            return Report.find({ month, year }).lean().then((data) => {
+            return Report.find(period).lean().then((data) => {
                 return data;
             }).catch((error) => {
                 return error;
@@ -91,9 +91,9 @@ export default function makeAnalysisList() {
         }
     }
 
-    async function findReportLog(month, year) {
+    async function findReportLog(period) {
         try {
-            return ReportLog.findOne({ month, year });
+            return ReportLog.findOne(period);
         } catch (error) {
             console.log(error.message);
             return error;

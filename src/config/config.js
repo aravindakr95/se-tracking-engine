@@ -5,7 +5,6 @@ dotenv.config();
 const config = {
     currency: 'LKR',
     supplier: 'CEB',
-    country: 'Sri Lanka',
     database: {
         url: 'mongodb://127.0.0.1:27017',
         name: 'se-tracking-engine'

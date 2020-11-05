@@ -4,6 +4,8 @@ import config from '../../config/config';
 const ReportSchema = mongoose.Schema;
 
 const date = new Date();
+
+date.setDate(0);
 const dueDate = new Date(date.getTime() + 12096e5); // 12096e5 = 14 days (magic number programming)
 
 let reportSchema = ReportSchema({
@@ -53,12 +55,16 @@ let reportSchema = ReportSchema({
         required: true,
         enum: [28, 29, 30, 31]
     },
-    month: {
+    billingPeriod: {
         type: String,
         required: true
     },
+    month: {
+        type: Number,
+        required: true
+    },
     year: {
-        type: String,
+        type: Number,
         required: true
     },
     avgDailyProduction: {

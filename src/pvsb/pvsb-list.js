@@ -44,7 +44,7 @@ export default function makePVSBList() {
         const customPayload = {};
 
         if (success && results) {
-            customPayload['snapshotTimestamp'] = results['TIME'];
+            customPayload['snapshotTimestamp'] = new Date(results['TIME']).getTime();
             customPayload['deviceId'] = deviceId;
             customPayload['load'] = results['LOAD'];
             customPayload['pv'] = results['PV'];

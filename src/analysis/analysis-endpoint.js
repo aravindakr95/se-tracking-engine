@@ -5,26 +5,27 @@ import { calculateProduction, calculateConsumption } from '../helpers/utilities/
 import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
 import config from '../config/config';
+import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
         case '/reports':
             if (httpRequest.queryParams &&
-                    httpRequest.queryParams.accountNumber &&
-                    httpRequest.queryParams.year &&
-                    httpRequest.queryParams.month) {
+                httpRequest.queryParams.accountNumber &&
+                httpRequest.queryParams.year &&
+                httpRequest.queryParams.month) {
                 return getReportForMonth(httpRequest);
             }
 
             if (httpRequest.queryParams &&
-                    httpRequest.queryParams.accountNumber &&
-                    httpRequest.queryParams.year) {
+                httpRequest.queryParams.accountNumber &&
+                httpRequest.queryParams.year) {
                 return getReportsForYear(httpRequest);
             }
 
             if (httpRequest.queryParams &&
-                    httpRequest.queryParams.accountNumber) {
+                httpRequest.queryParams.accountNumber) {
                 return getAllReportsForAccount(httpRequest);
             }
 
@@ -44,15 +45,15 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
     // execute on 1st day of the month at 06.00 Hours
     async function generateReports() {
         try {
-            const { dateInstance, month, year } = getPreviousDate();
+            const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
 
-            const log = await analysisList.findReportLog(month, year);
+            const log = await analysisList.findReportLog({ billingPeriod });
 
             if (log && log.isCompleted) {
                 return objectHandler({
                     code: HttpResponseType.CONFLICT,
-                    message: `Reports already generated for '${month}-${year}' previous month`
+                    message: `Reports already generated for '${billingPeriod}' previous month`
                 });
             }
 
@@ -102,6 +103,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         billingDuration,
                         tariff,
                         billingCategory,
+                        billingPeriod,
                         month,
                         year
                     };
@@ -117,8 +119,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 }
 
                 const reportLog = {
-                    month,
-                    year,
+                    billingPeriod,
                     isCompleted: true
                 };
 
@@ -127,7 +128,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `Reports generated for '${month}-${year}' is completed`
+                        message: `Reports generated for '${billingPeriod}' is completed`
                     });
                 }
             }
@@ -152,21 +153,21 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 method: 'post'
             };
 
-            const { month, year } = getPreviousDate();
+            const { billingPeriod } = getPreviousDate();
 
-            const reports = await analysisList.findAllReportsForMonth(month, year);
+            const reports = await analysisList.findAllReportsForMonth({ billingPeriod  });
 
             if (reports && !reports.length) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Zero reports found for the '${month}-${year}' period`
+                    message: `Zero reports found for the '${billingPeriod}' period`
                 });
             }
 
             for (const report of reports) {
-                const smsMessage = `Your electricity account number ${report.accountNumber} able to produce ${report.totalProduction} kWh and consumed ${report.totalConsumption} kWh as of ${report.month}-${report.date}-${report.year}. This month you have to pay ${report.netAmount} LKR for the excess energy used. For more descriptive details, please refer the email.`;
+                const smsTemplate = getInvoiceSMSTemplate(report);
 
-                const sms = configSMS(report.contactNumber, smsMessage);
+                const sms = configSMS(report.contactNumber, smsTemplate);
 
                 //WARNING: limited resource use with care
                 await sendSMS(smsOptions, sms).catch(error => {
@@ -177,8 +178,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 });
 
                 const templateReport = Object.assign(report, {
-                    bodyTitle: `Electricity EBILL for ${report.month}-${report.year}`,
-                    country: config.country,
+                    bodyTitle: `Electricity EBILL for ${billingPeriod}`,
                     currency: config.currency,
                     supplier: config.supplier
                 });
@@ -194,8 +194,31 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `All consumer reports sent for '${month}-${year}'`
+                message: `All consumer reports sent for '${billingPeriod}'`
             });
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
+    async function getAllReports() {
+        try {
+            const result = await analysisList.findAllReports();
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: 'Reports collection is empty'
+                });
+            }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
@@ -244,29 +267,6 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested Reports for consumer '${accountNumber}' in '${year}' not found`
-                });
-            }
-        } catch (error) {
-            return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
-            });
-        }
-    }
-
-    async function getAllReports() {
-        try {
-            const result = await analysisList.findAllReports();
-            if (result) {
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: result,
-                    message: ''
-                });
-            } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: 'Reports collection is empty'
                 });
             }
         } catch (error) {
