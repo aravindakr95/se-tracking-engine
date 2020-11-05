@@ -18,21 +18,21 @@ function configSMS(contactNumber, message) {
             },
             senderName: 'SETE'
         }
-    }
+    };
 }
 
 function configOTP(contactNumber) {
     return {
         method: 'ANC',
         msisdn: contactNumber
-    }
+    };
 }
 
 function configOTPResponse(data) {
     return {
         pin: data.pin,
         serverRef: data.serverRef
-    }
+    };
 }
 
 async function sendSMS(httpOptions, body) {
@@ -41,9 +41,9 @@ async function sendSMS(httpOptions, body) {
         method: httpOptions.method,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${config.ideabizAuthToken}`
+            'Authorization': `Bearer ${config.notifier.IBAuthToken}`
         }
-    }
+    };
 
     try {
         return await axios.post(httpOptions.url, body, options);

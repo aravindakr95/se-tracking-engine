@@ -20,8 +20,8 @@ let reportSchema = ReportSchema({
         default: config.supplier
     },
     currency: {
-      type: String,
-      default: config.currency
+        type: String,
+        default: config.currency
     },
     tariff: {
         type: String,

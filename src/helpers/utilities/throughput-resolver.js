@@ -12,7 +12,7 @@ function calculateProduction(pvsb, energy, length) {
     return {
         totalProduction,
         avgDailyProduction
-    }
+    };
 }
 
 function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
@@ -64,7 +64,7 @@ function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
         totalGridImported,
         totalConsumption,
         avgDailyConsumption
-    }
+    };
 }
 
-module.exports = { calculateProduction, calculateConsumption }
+module.exports = { calculateProduction, calculateConsumption };

@@ -17,7 +17,7 @@ export default function authenticateJWT(req, res, next) {
     } else {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
-            jwt.verify(token, config.jwtSecret, (error, consumer) => {
+            jwt.verify(token, config.authentication.jwtSecret, (error, consumer) => {
                 const { email } = jwt.decode(token);
 
                 validateProfile(email).then((valid) => {

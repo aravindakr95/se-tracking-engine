@@ -4,7 +4,7 @@ import config from './config/config';
 const options = {
     apis: ['src/routes/*.js'],
     basePath: '/',
-    host: `${config.serverHost}:${config.serverPort}`,
+    host: `${config.deployment.host}:${config.deployment.port}`,
     swaggerDefinition: {
         info: {
             description: 'Automated API Documentation for Smart Electricity Tracking Engine',

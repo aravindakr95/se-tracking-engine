@@ -4,18 +4,18 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 export default function makeConsumerEndpointHandler({ consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.method) {
-            case 'GET':
-                return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId ?
-                    getConsumer(httpRequest) : getConsumers(httpRequest);
-            case 'PUT':
-                return updateConsumer(httpRequest);
-            case 'DELETE':
-                return deleteConsumer(httpRequest);
-            default:
-                return objectHandler({
-                    code: HttpResponseType.METHOD_NOT_ALLOWED,
-                    message: `${httpRequest.method} method not allowed`
-                });
+        case 'GET':
+            return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId ?
+                getConsumer(httpRequest) : getConsumers(httpRequest);
+        case 'PUT':
+            return updateConsumer(httpRequest);
+        case 'DELETE':
+            return deleteConsumer(httpRequest);
+        default:
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         }
     };
 

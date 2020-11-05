@@ -5,16 +5,16 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
-            case '/payloads':
-                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPVStats(httpRequest) :
-                    addPVStat(httpRequest);
-            case '/errors':
-                return addPVError(httpRequest);
-            default:
-                return objectHandler({
-                    code: HttpResponseType.METHOD_NOT_ALLOWED,
-                    message: `${httpRequest.method} method not allowed`
-                })
+        case '/payloads':
+            return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPVStats(httpRequest) :
+                addPVStat(httpRequest);
+        case '/errors':
+            return addPVError(httpRequest);
+        default:
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         }
     };
 
@@ -82,7 +82,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
@@ -101,7 +101,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             if (payload) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
-                    message: `PVSB '${result.deviceId}' error log received`
+                    message: `PVSB '${deviceId}' error log received`
                 });
             }
         } catch (error) {

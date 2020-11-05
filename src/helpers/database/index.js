@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import config from '../../config/config';
 
 export default async function initializeDB() {
-    const dbUrl = `${config.databaseUrl}/${config.databaseName}?retryWrites=true&w=majority`;
+    const dbUrl = `${config.database.url}/${config.database.name}?retryWrites=true&w=majority`;
 
     mongoose.connect(dbUrl, {
         useNewUrlParser: true,

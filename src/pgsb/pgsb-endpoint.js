@@ -5,16 +5,16 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
-            case '/payloads':
-                return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPGStats(httpRequest) :
-                    addPGStat(httpRequest);
-            case '/errors':
-                return addPGError(httpRequest)
-            default:
-                return objectHandler({
-                    code: HttpResponseType.METHOD_NOT_ALLOWED,
-                    message: `${httpRequest.method} method not allowed`
-                })
+        case '/payloads':
+            return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPGStats(httpRequest) :
+                addPGStat(httpRequest);
+        case '/errors':
+            return addPGError(httpRequest);
+        default:
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         }
     };
 

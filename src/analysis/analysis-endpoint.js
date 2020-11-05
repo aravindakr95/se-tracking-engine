@@ -9,35 +9,35 @@ import config from '../config/config';
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
-            case '/reports':
-                if (httpRequest.queryParams &&
+        case '/reports':
+            if (httpRequest.queryParams &&
                     httpRequest.queryParams.accountNumber &&
                     httpRequest.queryParams.year &&
                     httpRequest.queryParams.month) {
-                    return getReportForMonth(httpRequest);
-                }
+                return getReportForMonth(httpRequest);
+            }
 
-                if (httpRequest.queryParams &&
+            if (httpRequest.queryParams &&
                     httpRequest.queryParams.accountNumber &&
                     httpRequest.queryParams.year) {
-                    return getReportsForYear(httpRequest);
-                }
+                return getReportsForYear(httpRequest);
+            }
 
-                if (httpRequest.queryParams &&
+            if (httpRequest.queryParams &&
                     httpRequest.queryParams.accountNumber) {
-                    return getAllReportsForAccount(httpRequest);
-                }
+                return getAllReportsForAccount(httpRequest);
+            }
 
-                return getAllReports(httpRequest);
-            case '/reports/generate':
-                return generateReports();
-            case '/reports/dispatch':
-                return dispatchReports();
-            default:
-                return objectHandler({
-                    code: HttpResponseType.METHOD_NOT_ALLOWED,
-                    message: `${httpRequest.method} method not allowed`
-                });
+            return getAllReports(httpRequest);
+        case '/reports/generate':
+            return generateReports();
+        case '/reports/dispatch':
+            return dispatchReports();
+        default:
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         }
     };
 
@@ -93,7 +93,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const forecastedValues = {
                         forecastedPayable: 0.00 //todo: create a way to predict the total amount for next month
-                    }
+                    };
 
                     const commonDetails = {
                         accountNumber,
@@ -148,7 +148,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
     async function dispatchReports() {
         try {
             const smsOptions = {
-                url: config.ideabizSMSOut,
+                url: config.notifier.IBSMSOut,
                 method: 'post'
             };
 
@@ -266,7 +266,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Reports collection is empty`
+                    message: 'Reports collection is empty'
                 });
             }
         } catch (error) {
@@ -314,6 +314,6 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         return {
             startingValue: stats[0],
             endingValue: stats[stats.length - 1]
-        }
+        };
     }
 }

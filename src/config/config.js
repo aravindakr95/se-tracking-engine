@@ -3,22 +3,29 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-    databaseUrl: process.env.DB_URL_PROD || process.env.DB_URL_LOCAL,
-    databaseName: process.env.DATABASE_NAME,
-    serverHost: process.env.HOST || process.env.SERVER_HOST,
-    serverPort: process.env.PORT || process.env.SERVER_PORT,
-    jwtSecret: process.env.JWT_SECRET_KEY,
-    saltRounds: process.env.BCRYPT_ROUNDS,
-    sendGridApiKey: process.env.SENDGRID_API_KEY,
-    adminEmail: process.env.ADMIN_EMAIL,
-    ideabizAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
-    ideabizSMSOut: process.env.IDEABIZ_SMS_OUT,
-    ideabizOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
-    ideabizOTPVerify: process.env.IDEABIZ_OTP_VERIFY,
-    currency: process.env.CURRENCY,
-    supplier: process.env.SUPPLIER,
-    country: process.env.COUNTRY,
-    postmarkAuthToken: process.env.POSTMARK_AUTH_TOKEN
+    currency: 'LKR',
+    supplier: 'CEB',
+    country: 'Sri Lanka',
+    database: {
+        url: 'mongodb://127.0.0.1:27017',
+        name: 'se-tracking-engine'
+    },
+    notifier: {
+        admin: 'inquiries@brilliant-apps.club',
+        mailAuthToken: process.env.POSTMARK_AUTH_TOKEN,
+        IBAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
+        IBSMSOut: process.env.IDEABIZ_SMS_OUT,
+        IBOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
+        IBOTPVerify: process.env.IDEABIZ_OTP_VERIFY
+    },
+    authentication: {
+        jwtSecret: process.env.JWT_AUTH_KEY,
+        saltRounds: 10
+    },
+    deployment: {
+        host: process.env.HOST || 'http://192.168.1.8',
+        port: process.env.PORT || 4000
+    }
 };
 
 export default config;

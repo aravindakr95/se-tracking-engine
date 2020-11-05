@@ -9,8 +9,8 @@ let consumerRouter = express.Router();
 consumerRouter.get('/',
     filterRoute,
     (req, res) => {
-    consumerController(req, res);
-});
+        consumerController(req, res);
+    });
 
 /* UPDATE consumer */
 consumerRouter.put('/',

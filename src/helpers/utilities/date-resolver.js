@@ -45,7 +45,7 @@ function dateComparePG(objectOne, objectTwo) {
     startingDate.setDate(1);
 
     endingDate.setMonth(prevMonth);
-    endingDate.setDate(daysInPreviousMonth())
+    endingDate.setDate(daysInPreviousMonth());
 
     const startingMillis = startingDate.setHours(0, 0, 0, 1);
     const endingMillis = endingDate.setHours(23, 59, 59, 999);

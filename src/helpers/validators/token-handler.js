@@ -7,5 +7,5 @@ export default async function getAuthToken(user) {
         email: user.email,
         accountNumber: user.accountNumber,
         status: user.status
-    }, config.jwtSecret);
+    }, config.authentication.jwtSecret);
 }

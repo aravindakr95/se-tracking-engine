@@ -15,7 +15,7 @@ export default function filterRoute(req, res, next) {
     } else {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
-            jwt.verify(token, config.jwtSecret, (error, consumer) => {
+            jwt.verify(token, config.authentication.jwtSecret, (error, consumer) => {
                 if (error) {
                     return errorResponse(res, {
                         code: HttpResponseType.FORBIDDEN,

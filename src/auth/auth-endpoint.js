@@ -12,17 +12,17 @@ import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms
 export default function makeAuthEndPointHandler({ authList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
-            case '/login':
-                return loginConsumer(httpRequest);
-            case '/register':
-                return registerConsumer(httpRequest);
-            case '/verify':
-                return verifyConsumer(httpRequest);
-            default:
-                return objectHandler({
-                    code: HttpResponseType.METHOD_NOT_ALLOWED,
-                    message: `${httpRequest.method} method not allowed`
-                });
+        case '/login':
+            return loginConsumer(httpRequest);
+        case '/register':
+            return registerConsumer(httpRequest);
+        case '/verify':
+            return verifyConsumer(httpRequest);
+        default:
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         }
     };
 
@@ -75,7 +75,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
         const otpDataset = configOTP(body.contactNumber);
         const otpOptions = {
-            url: config.ideabizOTPSubscribe,
+            url: config.notifier.IBOTPSubscribe,
             method: 'post'
         };
 
@@ -92,9 +92,9 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             }
 
             const otpRef = await sendSMS(otpOptions, otpDataset).then(response => {
-                return response.data
+                return response.data;
             }).catch(error => {
-                return error.response.data
+                return error.response.data;
             });
 
             if (!otpRef || (otpRef && otpRef.statusCode !== 'SUCCESS')) {
@@ -136,11 +136,11 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         const { contactNumber, pin } = httpRequest.body;
 
         const smsOptions = {
-            url: config.ideabizSMSOut,
+            url: config.notifier.IBSMSOut,
             method: 'post'
         };
         const otpOptions = {
-            url: config.ideabizOTPVerify,
+            url: config.notifier.IBOTPVerify,
             method: 'post'
         };
 
@@ -163,9 +163,9 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             const verifyDataset = configOTPResponse({ serverRef: tempConsumer.serverRef, pin });
 
             const verifyStatus = await sendSMS(otpOptions, verifyDataset).then(response => {
-                return response.data
+                return response.data;
             }).catch(error => {
-                return error.response.data
+                return error.response.data;
             });
 
             if (!verifyStatus || (verifyStatus && verifyStatus.statusCode !== 'SUCCESS')) {

@@ -40,13 +40,13 @@ app.all('*', (req, res) => {
     });
 });
 
-app.listen(config.serverPort, () => {
+app.listen(config.deployment.port, () => {
     console.log(chalk.magenta('-----------------------------------------------------------------------------'));
     console.log(chalk.yellow('Server Environment Details'));
     console.log(chalk.magenta('-----------------------------------------------------------------------------'));
 
-    console.log(chalk.green(`Listening URL: ${config.serverHost}:${config.serverPort}`));
-    console.log(chalk.green(`API Docs URL: ${config.serverHost}:${config.serverPort}/api-docs`));
+    console.log(chalk.green(`Listening URL: ${config.deployment.host}:${config.deployment.port}`));
+    console.log(chalk.green(`API Docs URL: ${config.deployment.host}:${config.deployment.port}/api-docs`));
     console.log(chalk.magenta('-----------------------------------------------------------------------------'));
     console.log(chalk.green.bold('Smart Electricity Tracking Engine (SETE) is up and running...'));
 });
