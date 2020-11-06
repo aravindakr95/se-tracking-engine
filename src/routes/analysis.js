@@ -6,6 +6,13 @@ import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
 let analysisRouter = express.Router();
 
+analysisRouter.get('/reports/:_id',
+    filterRoute,
+    (req, res) => {
+        analysisController(req, res);
+    });
+
+
 analysisRouter.get('/reports',
     filterRoute,
     (req, res) => {

@@ -12,6 +12,10 @@ import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
+        case '/reports/generate':
+            return generateReports();
+        case '/reports/dispatch':
+            return dispatchReports();
         case '/reports':
             if (httpRequest.queryParams &&
                 httpRequest.queryParams.accountNumber &&
@@ -32,10 +36,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             }
 
             return getAllReports(httpRequest);
-        case '/reports/generate':
-            return generateReports();
-        case '/reports/dispatch':
-            return dispatchReports();
+        case `/reports/${httpRequest.pathParams._id}`:
+            return getReportByInvoiceID(httpRequest);
         default:
             return objectHandler({
                 code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -375,6 +377,37 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
                     message: `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`
+                });
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        }
+    }
+
+    async function getReportByInvoiceID(httpRequest) {
+        const { _id } = httpRequest.pathParams;
+
+        try {
+            const result = await analysisList.findReportByInvoiceID({ _id }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: `Requested Reports '${id}' not found`
                 });
             }
         } catch (error) {

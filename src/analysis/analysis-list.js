@@ -9,6 +9,7 @@ export default function makeAnalysisList() {
         findReportsForYear,
         findReportForMonth,
         findAllReportsForMonth,
+        findReportByInvoiceID,
         addReportLog,
         findReportLog
     });
@@ -35,6 +36,10 @@ export default function makeAnalysisList() {
 
     async function findAllReportsForMonth(period) {
         return await Report.find(period).lean();
+    }
+
+    async function findReportByInvoiceID(id) {
+        return await Report.find(id);
     }
 
     async function addReportLog(log) {
