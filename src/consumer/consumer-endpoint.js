@@ -1,4 +1,5 @@
 import HttpResponseType from '../models/common/http-response-type';
+
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
@@ -22,17 +23,30 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
     async function getConsumers(httpRequest) {
         const status = (httpRequest.queryParams) && (httpRequest.queryParams.status) ?
             httpRequest.queryParams.status : null;
+
         let result = null;
 
         if (status) {
             try {
-                result = await consumerList.findConsumersByStatus({ status });
-
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: result,
-                    message: ''
+                result = await consumerList.findConsumersByStatus({ status }).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
                 });
+
+                if (result && result.length) {
+                    return objectHandler({
+                        status: HttpResponseType.SUCCESS,
+                        data: result,
+                        message: ''
+                    });
+                } else {
+                    return objectHandler({
+                        code: HttpResponseType.NOT_FOUND,
+                        message: 'Consumers collection is empty'
+                    });
+                }
             } catch (error) {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
@@ -42,13 +56,25 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         }
 
         try {
-            result = await consumerList.getAllConsumers();
-
-            return objectHandler({
-                status: HttpResponseType.SUCCESS,
-                data: result,
-                message: ''
+            result = await consumerList.getAllConsumers().catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
             });
+
+            if (result && result.length) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: ''
+                });
+            } else {
+                return objectHandler({
+                    code: HttpResponseType.NOT_FOUND,
+                    message: 'Consumers collection is empty'
+                });
+            }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
@@ -64,7 +90,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
             const { accountNumber } = httpRequest.queryParams;
 
             try {
-                result = await consumerList.findConsumerByAccNumber(accountNumber);
+                result = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
                 if (result) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
@@ -89,7 +120,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
             const { deviceId } = httpRequest.queryParams;
 
             try {
-                result = await consumerList.findConsumerByDeviceId(deviceId);
+                result = await consumerList.findConsumerByDeviceId(deviceId).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
                 if (result) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
@@ -140,7 +176,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
     async function deleteConsumer(httpRequest) {
         const { accountNumber } = httpRequest.queryParams;
 
-        let result = await consumerList.deleteConsumerByAccNumber({ accountNumber });
+        let result = await consumerList.deleteConsumerByAccNumber({ accountNumber }).catch(error => {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error.message
+            });
+        });
 
         if (result && result.deletedCount) {
             return objectHandler({

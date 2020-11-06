@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import config from '../../config/config';
 
+import { getDateString } from '../../helpers/utilities/date-resolver';
+
 const ReportSchema = mongoose.Schema;
 
 const date = new Date();
@@ -15,7 +17,7 @@ let reportSchema = ReportSchema({
     },
     dueDate: {
         type: String,
-        default: `${dueDate.getMonth() + '-' + dueDate.getDate() + '-' + dueDate.getFullYear()}` //todo: add dateStringResolver(date)
+        default: getDateString(dueDate)
     },
     supplier: {
         type: String,

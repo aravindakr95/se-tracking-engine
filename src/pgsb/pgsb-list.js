@@ -9,32 +9,14 @@ export default function makePGSBList() {
     });
 
     async function addPGStats(stats) {
-        try {
-            return new PGStat(stats).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new PGStat(stats).save();
     }
 
     async function findAllPGStatsByDeviceId(deviceId) {
-        try {
-            return PGStat.find(deviceId).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await PGStat.find(deviceId).lean();
     }
 
     async function addPGError(error) {
-        try {
-            return new PGError(error).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new PGError(error).save();
     }
 }

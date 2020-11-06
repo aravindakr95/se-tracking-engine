@@ -10,33 +10,15 @@ export default function makePVSBList() {
     });
 
     async function addPVStats(stats) {
-        try {
-            return new PVStat(stats).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new PVStat(stats).save();
     }
 
     async function addPVError(error) {
-        try {
-            return new PVError(error).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new PVError(error).save();
     }
 
     async function findAllPVStatsByDeviceId(deviceId) {
-        try {
-            return PVStat.find(deviceId).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await PVStat.find(deviceId).lean();
     }
 
     function mapPayload(deviceId, body) {

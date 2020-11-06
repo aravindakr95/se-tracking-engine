@@ -14,89 +14,34 @@ export default function makeAnalysisList() {
     });
 
     async function addReport(record) {
-        try {
-            return new Report(record).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new Report(record).save();
     }
 
     async function findAllReports() {
-        try {
-            return Report.find().then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Report.find();
     }
 
     async function findReportsByAccNumber(accNumber) {
-        try {
-            return Report.find(accNumber).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Report.find(accNumber).lean();
     }
 
     async function findReportsForYear(accountNumber, year) {
-        try {
-            return Report.find({ accountNumber, year }).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Report.find({ accountNumber, year }).lean();
     }
 
     async function findReportForMonth(accountNumber, year, month) {
-        try {
-            return Report.findOne({ accountNumber, year, month }).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Report.findOne({ accountNumber, year, month }).lean();
     }
 
     async function findAllReportsForMonth(period) {
-        try {
-            return Report.find(period).lean().then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Report.find(period).lean();
     }
 
     async function addReportLog(log) {
-        try {
-            return new ReportLog(log).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new ReportLog(log).save();
     }
 
     async function findReportLog(period) {
-        try {
-            return ReportLog.findOne(period);
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return ReportLog.findOne(period);
     }
 }

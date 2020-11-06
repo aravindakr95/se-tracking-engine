@@ -11,50 +11,22 @@ export default function makeAuthList() {
     });
 
     async function addConsumer(consumer) {
-        try {
-            return new Consumer(consumer).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new Consumer(consumer).save();
     }
 
     async function addConsumerOnPending(tempConsumer) {
-        try {
-            return new TempConsumer(tempConsumer).save();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await new TempConsumer(tempConsumer).save();
     }
 
     async function findConsumerOnPending(msisdn) {
-        try {
-            return TempConsumer.findOne(msisdn);
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return TempConsumer.findOne(msisdn);
     }
 
     async function removeConsumerOnPending(msisdn) {
-        try {
-            return TempConsumer.deleteOne(msisdn).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await TempConsumer.deleteOne(msisdn);
     }
 
     async function findConsumerByEmail(email) {
-        try {
-            return Consumer.findOne(email).lean();
-        } catch (error) {
-            console.log(error.message);
-            return error;
-        }
+        return await Consumer.findOne(email).lean();
     }
 }

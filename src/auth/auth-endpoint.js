@@ -1,11 +1,11 @@
-import hashValidator from '../helpers/validators/hash-validator';
-
-import jwtHandler from '../helpers/validators/token-handler';
-import hasher from '../helpers/hasher';
+import config from '../config/config';
 
 import HttpResponseType from '../models/common/http-response-type';
+
+import hashValidator from '../helpers/validators/hash-validator';
+import jwtHandler from '../helpers/validators/token-handler';
+import hasher from '../helpers/hasher';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
-import config from '../config/config';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { configSMS, configOTP, configOTPResponse, sendSMS } from '../helpers/sms/messenger';
 import { getRegistrationSMSTemplate } from '../helpers/templates/sms/sms-broker';
@@ -32,7 +32,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         const { email, password } = httpRequest.body;
 
         try {
-            let consumer = await authList.findConsumerByEmail({ email });
+            let consumer = await authList.findConsumerByEmail({ email }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (consumer && consumer.status === 'PENDING') {
                 return objectHandler({
@@ -50,13 +55,20 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
             if (isValidPw) {
                 const { email } = consumer;
-                let accessToken = await jwtHandler(consumer);
-
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: { accessToken },
-                    message: `Consumer '${email}' authentication successful`
+                let accessToken = await jwtHandler(consumer).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
                 });
+
+                if (accessToken) {
+                    return objectHandler({
+                        status: HttpResponseType.SUCCESS,
+                        data: { accessToken },
+                        message: `Consumer '${email}' authentication successful`
+                    });
+                }
             } else {
                 return objectHandler({
                     code: HttpResponseType.CLIENT_ERROR,
@@ -83,7 +95,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         try {
             Object.assign(body, { password: hasher({ password: body.password }) });
 
-            let consumer = await authList.addConsumer(body);
+            let consumer = await authList.addConsumer(body).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (!consumer) {
                 return objectHandler({
@@ -98,7 +115,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 return error.response.data;
             });
 
-            if (!otpRef || (otpRef && otpRef.statusCode !== 'SUCCESS')) {
+            if (otpRef && otpRef.statusCode !== 'SUCCESS') {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: otpRef.message
@@ -111,6 +128,11 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 msisdn,
                 email: body.email,
                 serverRef
+            }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
             });
 
             if (!tempConsumer) {
@@ -146,7 +168,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
         };
 
         try {
-            let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber });
+            let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (!tempConsumer) {
                 return objectHandler({
@@ -155,7 +182,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 });
             }
 
-            const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email });
+            const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             const regTemplate = getRegistrationSMSTemplate({
                 contactNumber: tempConsumer.msisdn,
@@ -181,7 +213,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             const activeStatus = await consumerList.updateConsumerStatusByContactNumber(
                 { contactNumber: tempConsumer.msisdn },
                 { status: 'ACTIVE' }
-            );
+            ).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (activeStatus && activeStatus.nModified < 1) {
                 return objectHandler({
@@ -190,7 +227,13 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 });
             }
 
-            const removeStatus = await authList.removeConsumerOnPending({ msisdn: contactNumber });
+            const removeStatus = await authList.removeConsumerOnPending({ msisdn: contactNumber })
+                .catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
 
             if (removeStatus && removeStatus.deletedCount) {
 

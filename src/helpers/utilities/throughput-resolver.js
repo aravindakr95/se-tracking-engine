@@ -1,13 +1,13 @@
 import { makeTwoDecimalNumber } from './number-resolver';
 import { calculateIncome, calculateExpense } from './price-resolver';
 
-function calculateProduction(pvsb, energy, length) {
+function calculateProduction(pvsb, energyToday) {
+    const energyLength = energyToday.length;
     const { startingValue, endingValue } = pvsb;
-    const energyTotal = energy.reduce((valueOne, valueTwo) => valueOne + valueTwo, 0);
+    const energyTotal = energyToday.reduce((valueOne, valueTwo) => valueOne + valueTwo, 0);
 
-    const totalProduction = makeTwoDecimalNumber(endingValue.totalEnergy -
-        startingValue.totalEnergy);
-    const avgDailyProduction = makeTwoDecimalNumber(energyTotal / length);
+    const totalProduction = makeTwoDecimalNumber(endingValue.totalEnergy - startingValue.totalEnergy);
+    const avgDailyProduction = makeTwoDecimalNumber(energyTotal / energyLength);
 
     return {
         totalProduction,

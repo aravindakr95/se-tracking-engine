@@ -24,7 +24,12 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
         try {
             Object.assign(body, { deviceId, slaveId });
-            const payload = await pgsbList.addPGStats(body);
+            const payload = await pgsbList.addPGStats(body).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (payload) {
                 return objectHandler({
@@ -44,7 +49,12 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
+            const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (!consumer) {
                 return objectHandler({
@@ -53,7 +63,12 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 });
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB').catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (!deviceId) {
                 return objectHandler({
@@ -62,9 +77,14 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 });
             }
 
-            const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId });
+            const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
-            if (result) {
+            if (result && result.length) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
@@ -90,12 +110,16 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
         try {
             Object.assign(body, { deviceId });
-            const payload = await pgsbList.addPGError(body);
+            const payload = await pgsbList.addPGError(body).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (payload) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
-                    data: null,
                     message: `PGSB ${deviceId} error log received`
                 });
             }

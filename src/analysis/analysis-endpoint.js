@@ -1,10 +1,12 @@
+import config from '../config/config';
+
 import HttpResponseType from '../models/common/http-response-type';
+
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInPreviousMonth, dateComparePG, dateComparePV, getPreviousDate } from '../helpers/utilities/date-resolver';
+import { daysInPreviousMonth, getPreviousDate } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
 import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
-import config from '../config/config';
 import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
 export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
@@ -57,7 +59,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 });
             }
 
-            const response = await consumerList.getAllConsumers();
+            const response = await consumerList.getAllConsumers().catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (response && response.length) {
                 for (const consumer of response) {
@@ -69,26 +76,62 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         billingCategory
                     } = consumer;
 
-                    const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB');
-                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId });
+                    const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
+                        .catch(error => {
+                            return objectHandler({
+                                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                                message: error.message
+                            });
+                        });
 
-                    const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
-                    const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId });
+                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId })
+                        .catch(error => {
+                            return objectHandler({
+                                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                                message: error.message
+                            });
+                        });
 
-                    const sortedPVSBStats = getCurrentMonthStats('PVSB', pvsbStats);
-                    const sortedPGSBStats = getCurrentMonthStats('PGSB', pgsbStats);
+                    const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
+                        .catch(error => {
+                            return objectHandler({
+                                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                                message: error.message
+                            });
+                        });
 
-                    const energyToday = pvsbStats.map(stat => stat.energyToday);
+                    const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId })
+                        .catch(error => {
+                            return objectHandler({
+                                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                                message: error.message
+                            });
+                        });
+
+                    if (!(pvsbStats && pvsbStats.length) || !(pgsbStats && pgsbStats.length)) {
+                        continue;
+                    }
+
+                    const filteredPVSB = filterCurrentMonthStats('PVSB', pvsbStats);
+                    const filteredPGSB = filterCurrentMonthStats('PGSB', pgsbStats);
+
+                    if (!(filteredPVSB && filteredPVSB.length) || !(filteredPGSB && filteredPGSB.length)) {
+                        continue;
+                    }
+
+                    const sortedPVSB = sortCurrentMonthStats('PVSB', filteredPVSB);
+                    const sortedPGSB = sortCurrentMonthStats('PGSB', filteredPGSB);
+
+                    const energyToday = filteredPVSB.map(stat => stat.energyToday);
 
                     const productionDetails = calculateProduction(
-                        sortedPVSBStats,
-                        energyToday,
-                        energyToday.length);
+                        sortedPVSB,
+                        energyToday);
 
                     const consumptionDetails = calculateConsumption(
                         dateInstance,
                         consumer,
-                        sortedPGSBStats,
+                        sortedPGSB,
                         productionDetails,
                         billingDuration);
 
@@ -115,7 +158,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         commonDetails
                     );
 
-                    await analysisList.addReport(report);
+                    await analysisList.addReport(report).catch(error => {
+                        return objectHandler({
+                            code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                            message: error.message
+                        });
+                    });
                 }
 
                 const reportLog = {
@@ -123,7 +171,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     isCompleted: true
                 };
 
-                const status = await analysisList.addReportLog(reportLog);
+                const status = await analysisList.addReportLog(reportLog).catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
 
                 if (status && status.isCompleted) {
                     return objectHandler({
@@ -155,7 +208,13 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
             const { billingPeriod } = getPreviousDate();
 
-            const reports = await analysisList.findAllReportsForMonth({ billingPeriod  });
+            const reports = await analysisList.findAllReportsForMonth({ billingPeriod })
+                .catch(error => {
+                    return objectHandler({
+                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                        message: error.message
+                    });
+                });
 
             if (reports && !reports.length) {
                 return objectHandler({
@@ -206,8 +265,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
     async function getAllReports() {
         try {
-            const result = await analysisList.findAllReports();
-            if (result) {
+            const result = await analysisList.findAllReports().catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
+            if (result && result.length) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
@@ -231,8 +296,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const result = await analysisList.findReportsByAccNumber({ accountNumber });
-            if (result) {
+            const result = await analysisList.findReportsByAccNumber({ accountNumber }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
+            if (result && result.length) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
@@ -256,8 +327,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         const { accountNumber, year } = httpRequest.queryParams;
 
         try {
-            const result = await analysisList.findReportsForYear(accountNumber, year);
-            if (result) {
+            const result = await analysisList.findReportsForYear(accountNumber, year).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
+            if (result && result.length) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
@@ -281,7 +358,13 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         const { accountNumber, year, month } = httpRequest.queryParams;
 
         try {
-            const result = await analysisList.findReportForMonth(accountNumber, year, month);
+            const result = await analysisList.findReportForMonth(accountNumber, year, month).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
             if (result) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
@@ -302,13 +385,43 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         }
     }
 
-    function getCurrentMonthStats(type, stats) {
+    function filterCurrentMonthStats(type, stats) {
+        const startingDate = new Date();
+        const endingDate = new Date();
+
+        let filteredStats = [];
+
+        startingDate.setDate(0);
+        startingDate.setDate(1);
+
+        endingDate.setDate(0);
+        endingDate.setDate(daysInPreviousMonth());
+
+        const startingMillis = startingDate.setHours(0, 0, 0, 1);
+        const endingMillis = endingDate.setHours(23, 59, 59, 999);
+
         if (type === 'PGSB') {
-            stats.sort(dateComparePG);
+            filteredStats = stats.filter(stat =>
+                stat.timestamp >= startingMillis && stat.timestamp <= endingMillis);
+
+            filteredStats.sort((dateOne, dateTwo) => dateOne - dateTwo);
         }
 
         if (type === 'PVSB') {
-            stats.sort(dateComparePV);
+            filteredStats = stats.filter(stat =>
+                stat.snapshotTimestamp >= startingMillis && stat.snapshotTimestamp <= endingMillis);
+        }
+
+        return filteredStats;
+    }
+
+    function sortCurrentMonthStats(type, stats) {
+        if (type === 'PGSB') {
+            stats.sort((objOne, objTwo) => objOne.timestamp - objTwo.timestamp);
+        }
+
+        if (type === 'PVSB') {
+            stats.sort((objOne, objTwo) => objOne.snapshotTimestamp - objTwo.snapshotTimestamp);
         }
 
         return {

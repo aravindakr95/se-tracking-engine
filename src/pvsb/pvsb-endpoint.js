@@ -26,18 +26,26 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             const customPayload = pvsbList.mapPayload(deviceId, body);
 
             if (!customPayload) {
-                console.log('Custom payload is empty');
-                return;
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: 'Custom payload is empty'
+                });
             }
 
-            const result = await pvsbList.addPVStats(customPayload);
-
-            return objectHandler({
-                status: HttpResponseType.SUCCESS,
-                data: null,
-                message: `PVSB '${result.deviceId}' payload statistics received`
+            const result = await pvsbList.addPVStats(customPayload).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
             });
 
+            if (result) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: null,
+                    message: `PVSB '${result.deviceId}' payload statistics received`
+                });
+            }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
@@ -50,7 +58,13 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
+            const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
             if (!consumer) {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
@@ -58,7 +72,12 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB');
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB').catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (!deviceId) {
                 return objectHandler({
@@ -67,9 +86,14 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
 
-            const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId });
+            const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId }).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
-            if (result) {
+            if (result && result.length) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: result,
@@ -82,7 +106,6 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
@@ -96,7 +119,12 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
         try {
             Object.assign(body, { deviceId });
-            const payload = await pvsbList.addPVError(body);
+            const payload = await pvsbList.addPVError(body).catch(error => {
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
 
             if (payload) {
                 return objectHandler({

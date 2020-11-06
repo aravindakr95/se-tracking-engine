@@ -13,54 +13,22 @@ export default function makeConsumerList() {
     });
 
     async function getAllConsumers() {
-        try {
-            return Consumer.find().then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Consumer.find();
     }
 
     async function findConsumersByStatus(status) {
-        try {
-            return Consumer.find(status).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Consumer.find(status);
     }
 
     async function findConsumerByAccNumber(accNumber) {
-        try {
-            return Consumer.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean(true).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Consumer.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean();
     }
 
     async function findConsumerByDeviceId(deviceId) {
-        try {
-            return Consumer.findOne({
-                'devices.deviceId': deviceId,
-                'status': 'ACTIVE'
-            }).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return Consumer.findOne({
+            'devices.deviceId': deviceId,
+            'status': 'ACTIVE'
+        });
     }
 
     async function findDeviceIdByAccNumber(accNumber, type) {
@@ -80,39 +48,18 @@ export default function makeConsumerList() {
     }
 
     async function updateConsumerByAccNumber(accNumber, data) {
-        try {
-            return Consumer.findOneAndUpdate(
-                accNumber, data, { new: true }).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return Consumer.findOneAndUpdate(
+            accNumber,
+            data,
+            { new: true }
+        );
     }
 
     async function updateConsumerStatusByContactNumber(contactNumber, data) {
-        try {
-            return Consumer.updateOne(contactNumber, data).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Consumer.updateOne(contactNumber, data);
     }
 
     async function deleteConsumerByAccNumber(accNumber) {
-        try {
-            return Consumer.deleteOne(accNumber).then((data) => {
-                return data;
-            }).catch((error) => {
-                return error;
-            });
-        } catch (error) {
-            return error;
-        }
+        return await Consumer.deleteOne(accNumber);
     }
 }
