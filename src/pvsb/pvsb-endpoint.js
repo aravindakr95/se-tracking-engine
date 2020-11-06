@@ -33,6 +33,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             }
 
             const result = await pvsbList.addPVStats(customPayload).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -47,6 +48,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
                 message: error.message
@@ -106,6 +108,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
@@ -133,6 +136,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
                 message: error.message

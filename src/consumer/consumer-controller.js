@@ -18,6 +18,7 @@ export default function consumerController(req, res) {
         }
         )
         .catch((error) => {
+            console.log(error);
             errorResponse(res, {
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import config from '../../config/config';
 
 export default async function initializeDB() {
-    const dbUrl = `${config.database.url}/${config.database.name}?retryWrites=true&w=majority`;
+    const dbUrl = `mongodb://${config.database.url}/${config.database.name}?retryWrites=true&w=majority`;
 
     mongoose.connect(dbUrl, {
         useNewUrlParser: true,
@@ -13,6 +13,7 @@ export default async function initializeDB() {
     }).then(() => {
         console.log(`Connected to ${dbUrl}`);
     }).catch((error) => {
+        console.log(error);
         console.log(`Database starting error: ${error.message}`);
 
         process.exit(1);

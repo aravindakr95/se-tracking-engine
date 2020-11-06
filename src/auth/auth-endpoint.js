@@ -33,6 +33,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
         try {
             let consumer = await authList.findConsumerByEmail({ email }).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -54,19 +55,18 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             }
 
             if (isValidPw) {
-                const { email } = consumer;
-                let accessToken = await jwtHandler(consumer).catch(error => {
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
-                });
+                const { email, deviceToken } = consumer;
 
-                if (accessToken) {
+                if (deviceToken) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        data: { accessToken },
+                        data: { accessToken: deviceToken },
                         message: `Consumer '${email}' authentication successful`
+                    });
+                } else {
+                    return objectHandler({
+                        code: HttpResponseType.CLIENT_ERROR,
+                        message: 'Device token not found in the database'
                     });
                 }
             } else {
@@ -76,6 +76,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
                 message: error.message
@@ -96,6 +97,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             Object.assign(body, { password: hasher({ password: body.password }) });
 
             let consumer = await authList.addConsumer(body).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -129,6 +131,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 email: body.email,
                 serverRef
             }).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -147,6 +150,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 message: `${consumer.email} account created and on hold`
             });
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
                 message: error.code === 11000 ? `Email '${body.email}' or unique property already exists` :
@@ -169,6 +173,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
         try {
             let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber }).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -210,10 +215,19 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 });
             }
 
+            const deviceToken = await jwtHandler(consumer).catch(error => {
+                console.log(error);
+                return objectHandler({
+                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                    message: error.message
+                });
+            });
+
             const activeStatus = await consumerList.updateConsumerStatusByContactNumber(
                 { contactNumber: tempConsumer.msisdn },
-                { status: 'ACTIVE' }
+                { status: 'ACTIVE', deviceToken }
             ).catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message

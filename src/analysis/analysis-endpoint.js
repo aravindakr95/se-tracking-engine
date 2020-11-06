@@ -62,6 +62,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             }
 
             const response = await consumerList.getAllConsumers().catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -80,6 +81,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
                         .catch(error => {
+                            console.log(error);
                             return objectHandler({
                                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                                 message: error.message
@@ -88,6 +90,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId })
                         .catch(error => {
+                            console.log(error);
                             return objectHandler({
                                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                                 message: error.message
@@ -96,6 +99,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
                         .catch(error => {
+                            console.log(error);
                             return objectHandler({
                                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                                 message: error.message
@@ -104,6 +108,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId })
                         .catch(error => {
+                            console.log(error);
                             return objectHandler({
                                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                                 message: error.message
@@ -407,7 +412,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 return objectHandler({
                     code: HttpResponseType.NOT_FOUND,
-                    message: `Requested Reports '${id}' not found`
+                    message: `Requested Reports '${_id}' not found`
                 });
             }
         } catch (error) {

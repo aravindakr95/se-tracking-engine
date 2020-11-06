@@ -2,10 +2,9 @@ import jwt from 'jsonwebtoken';
 
 import config from '../../config/config';
 
-export default async function getAuthToken(user) {
+export default async function getAuthToken(consumer) {
     return jwt.sign({
-        email: user.email,
-        accountNumber: user.accountNumber,
-        status: user.status
+        email: consumer.email,
+        accountNumber: consumer.accountNumber
     }, config.authentication.jwtSecret);
 }

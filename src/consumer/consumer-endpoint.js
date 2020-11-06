@@ -29,6 +29,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         if (status) {
             try {
                 result = await consumerList.findConsumersByStatus({ status }).catch(error => {
+                    console.log(error);
                     return objectHandler({
                         code: HttpResponseType.INTERNAL_SERVER_ERROR,
                         message: error.message
@@ -57,6 +58,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
         try {
             result = await consumerList.getAllConsumers().catch(error => {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -76,6 +78,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
@@ -91,6 +94,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
+                    console.log(error);
                     return objectHandler({
                         code: HttpResponseType.INTERNAL_SERVER_ERROR,
                         message: error.message
@@ -109,6 +113,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     });
                 }
             } catch (error) {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -121,6 +126,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByDeviceId(deviceId).catch(error => {
+                    console.log(error);
                     return objectHandler({
                         code: HttpResponseType.INTERNAL_SERVER_ERROR,
                         message: error.message
@@ -139,6 +145,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     });
                 }
             } catch (error) {
+                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
                     message: error.message
@@ -166,6 +173,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 });
             }
         } catch (error) {
+            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message

@@ -17,23 +17,44 @@ export default function authenticateJWT(req, res, next) {
     } else {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
-            jwt.verify(token, config.authentication.jwtSecret, (error, consumer) => {
-                const { email } = jwt.decode(token);
 
-                validateProfile(email).then((valid) => {
-                    if (valid) {
-                        req.consumer = consumer;
-                        next();
+            if (token) {
+                jwt.verify(token, config.authentication.jwtSecret, (error, consumer) => {
+                    const decodedToken = jwt.decode(token);
+
+                    if (error) {
+                        console.log(error);
+                        return errorResponse(res, {
+                            code: HttpResponseType.FORBIDDEN,
+                            message: error.message
+                        });
+                    }
+
+                    if (decodedToken && decodedToken.email) {
+                        validateProfile(decodedToken.email).then((valid) => {
+                            if (valid) {
+                                req.consumer = consumer;
+                                next();
+                            } else {
+                                return errorResponse(res, {
+                                    code: HttpResponseType.AUTH_REQUIRED,
+                                    message: 'Present Authorization header does not allowed'
+                                });
+                            }
+                        });
+                    } else {
+                        return errorResponse(res, {
+                            code: HttpResponseType.AUTH_REQUIRED,
+                            message: 'Required fields are not available to authenticate'
+                        });
                     }
                 });
-
-                if (error) {
-                    return errorResponse(res, {
-                        code: HttpResponseType.FORBIDDEN,
-                        message: error.message
-                    });
-                }
-            });
+            } else {
+                return errorResponse(res, {
+                    code: HttpResponseType.AUTH_REQUIRED,
+                    message: 'Bearer token is not presented or invalid format'
+                });
+            }
         } else {
             return errorResponse(res, {
                 code: HttpResponseType.AUTH_REQUIRED,

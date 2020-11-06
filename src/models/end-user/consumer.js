@@ -12,7 +12,7 @@ let consumerSchema = ConsumerSchema({
         type: String,
         default: ''
     },
-    establishedYear: { //connection established year (for yield)
+    establishedYear: { //connection established year (for yield check)
         type: Number,
         required: true
     },

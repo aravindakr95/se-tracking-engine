@@ -6,7 +6,7 @@ const config = {
     currency: 'LKR',
     supplier: 'CEB',
     database: {
-        url: 'mongodb://127.0.0.1:27017',
+        url: '127.0.0.1:27017',
         name: 'se-tracking-engine'
     },
     notifier: {
@@ -22,7 +22,7 @@ const config = {
         saltRounds: 10
     },
     deployment: {
-        host: process.env.HOST || 'http://192.168.1.8',
+        host: process.env.HOST || '192.168.1.8',
         port: process.env.PORT || 4000
     }
 };
