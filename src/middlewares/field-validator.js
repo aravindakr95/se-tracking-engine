@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { errorResponse } from '../helpers/response/response-dispatcher';
 import HttpResponseType from '../models/common/http-response-type';
 
@@ -223,7 +223,6 @@ function consumersValidator(method) {
                 .exists().withMessage('Devices.Type is required')
                 .isString().withMessage('Devices.Type should be String'),
             body('devices.*.deviceId')
-                .exists().withMessage('Devices.DeviceId is required')
                 .isMACAddress().withMessage('Devices.DeviceId should be MAC address')
         ];
     default:
@@ -237,6 +236,12 @@ function reportsValidator(route) {
         return [];
     case '/reports/dispatch':
         return [];
+    case '/reports/:_id':
+        return [
+            param('_id')
+                .exists().withMessage('Invoice ID is required')
+                .isMongoId().withMessage('Invoice ID should be Mongo ID')
+        ];
     default:
         return [];
     }

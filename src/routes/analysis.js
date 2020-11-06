@@ -8,6 +8,8 @@ let analysisRouter = express.Router();
 
 analysisRouter.get('/reports/:_id',
     filterRoute,
+    validate('analysis', '/reports/:_id', 'GET'),
+    fieldStateChecker,
     (req, res) => {
         analysisController(req, res);
     });
@@ -21,7 +23,7 @@ analysisRouter.get('/reports',
 
 analysisRouter.post('/reports/generate',
     filterRoute,
-    validate('reports', '/reports/generate', 'POST'),
+    validate('analysis', '/reports/generate', 'POST'),
     fieldStateChecker,
     (req, res) => {
         analysisController(req, res);
@@ -29,7 +31,7 @@ analysisRouter.post('/reports/generate',
 
 analysisRouter.post('/reports/dispatch',
     filterRoute,
-    validate('reports', '/reports/dispatch', 'POST'),
+    validate('analysis', '/reports/dispatch', 'POST'),
     fieldStateChecker,
     (req, res) => {
         analysisController(req, res);
