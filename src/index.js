@@ -2,12 +2,16 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import chalk from 'chalk';
+import morgan from 'morgan';
+
 
 import config from './config/config';
 
-import initializeDB from './helpers/database';
+import HttpResponseType from './models/common/http-response-type';
 
+import initializeDB from './helpers/database';
 import { errorResponse } from './helpers/response/response-dispatcher';
+import logger from './config/log-level';
 
 import authRouter from './routes/auth';
 import consumerRouter from './routes/consumer';
@@ -15,13 +19,13 @@ import pgsbRouter from './routes/pgsb';
 import pvsbRouter from './routes/pvsb';
 import analysisRouter from './routes/analysis';
 
-import HttpResponseType from './models/common/http-response-type';
 import authenticateJWT from './middlewares/auth';
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(morgan('combined', { stream: logger.stream }));
 
 initializeDB();
 

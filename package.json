@@ -31,8 +31,9 @@
   "bugs": {
     "url": "https://github.com/aravindakr95/se-tracking-engine/issues"
   },
-  "homepage": "https://github.com/aravindakr95/se-tracking-engine",
+  "homepage": "https://github.com/aravindakr95/se-tracking-engine#readme",
   "dependencies": {
+    "app-root-path": "^3.0.0",
     "axios": "^0.21.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
@@ -41,8 +42,10 @@
     "ejs": "^3.0.2",
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
+    "express-winston": "^4.0.5",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.12",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "postmark": "^2.6.0",
     "rimraf": "^3.0.2",

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
+    environment: 'dev', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
     database: {
