@@ -54,7 +54,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
                         data: { accessToken: deviceToken },
-                        message: ''
+                        message: `Consumer '${email}' authentication successful`
                     });
                 } else {
                     throw 'Device token not found in the database';
