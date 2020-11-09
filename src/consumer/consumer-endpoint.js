@@ -29,11 +29,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         if (status) {
             try {
                 result = await consumerList.findConsumersByStatus({ status }).catch(error => {
-                    console.log(error);
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
 
                 if (result && result.length) {
@@ -43,26 +39,19 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    return objectHandler({
-                        code: HttpResponseType.NOT_FOUND,
-                        message: 'Consumers collection is empty'
-                    });
+                    throw 'Consumers collection is empty';
                 }
             } catch (error) {
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
+                    message: error
                 });
             }
         }
 
         try {
             result = await consumerList.getAllConsumers().catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (result && result.length) {
@@ -72,16 +61,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: ''
                 });
             } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: 'Consumers collection is empty'
-                });
+                throw 'Consumers collection is empty';
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -94,11 +79,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                    console.log(error);
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
                 if (result) {
                     return objectHandler({
@@ -107,16 +88,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    return objectHandler({
-                        code: HttpResponseType.NOT_FOUND,
-                        message: `Requested Consumer account '${accountNumber}' not found`
-                    });
+                    throw `Requested Consumer account '${accountNumber}' not found`;
                 }
             } catch (error) {
-                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
+                    message: error
                 });
             }
         }
@@ -126,11 +103,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByDeviceId(deviceId).catch(error => {
-                    console.log(error);
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
                 if (result) {
                     return objectHandler({
@@ -139,16 +112,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    return objectHandler({
-                        code: HttpResponseType.NOT_FOUND,
-                        message: `Requested Device Id '${deviceId}' not found`
-                    });
+                    throw `Requested Device Id '${deviceId}' not found`;
                 }
             } catch (error) {
-                console.log(error);
                 return objectHandler({
                     code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
+                    message: error
                 });
             }
         }
@@ -159,7 +128,9 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const result = await consumerList.updateConsumerByAccNumber({ accountNumber }, body);
+            const result = await consumerList.updateConsumerByAccNumber({ accountNumber }, body).catch(error => {
+                throw error.message;
+            });
             if (result) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
@@ -167,16 +138,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: `Consumer account '${accountNumber}' updated successful`
                 });
             } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Consumer account '${accountNumber}' is not found`
-                });
+                throw `Consumer account '${accountNumber}' is not found`;
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -185,10 +152,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         let result = await consumerList.deleteConsumerByAccNumber({ accountNumber }).catch(error => {
-            return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
-            });
+            throw error.message;
         });
 
         if (result && result.deletedCount) {
@@ -198,10 +162,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 message: `Account number '${accountNumber}' record is deleted successful`
             });
         } else {
-            return objectHandler({
-                code: HttpResponseType.NOT_FOUND,
-                message: `Requested Account number '${accountNumber}' not found`
-            });
+            throw `Requested Account number '${accountNumber}' not found`;
         }
     }
 }
