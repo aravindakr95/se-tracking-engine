@@ -30,7 +30,7 @@ let reportSchema = ReportSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['NetMetering', 'NetAccounting']
+        enum: ['Net Metering', 'Net Accounting']
     },
     accountNumber: {
         type: Number,

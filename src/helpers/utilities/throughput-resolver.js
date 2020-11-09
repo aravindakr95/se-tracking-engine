@@ -34,17 +34,17 @@ function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
     const avgDailyConsumption = makeTwoDecimalNumber(totalConsumption / duration);
 
     if (excessEnergy > 0) {
-        bfUnits = consumer.tariff === 'NetMetering' ? excessEnergy : -1;
+        bfUnits = consumer.tariff === 'Net Metering' ? excessEnergy : -1;
 
-        income = consumer.tariff === 'NetAccounting' ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
+        income = consumer.tariff === 'Net Accounting' ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
         income = makeTwoDecimalNumber(income);
     } else {
         totalGridImported = Math.abs(excessEnergy);
         totalGridImported = makeTwoDecimalNumber(totalGridImported);
     }
 
-    bfUnits = consumer.tariff === 'NetMetering' ? bfUnits : -1;
-    income = consumer.tariff === 'NetAccounting' ? income : -1;
+    bfUnits = consumer.tariff === 'Net Metering' ? bfUnits : -1;
+    income = consumer.tariff === 'Net Accounting' ? income : -1;
 
     if (totalGridImported) {
         expense = calculateExpense(consumer.billingCategory, totalGridImported);

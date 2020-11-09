@@ -249,13 +249,23 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     supplier: config.supplier
                 });
 
-                //WARNING: limited resource use with care
-                await sendEmailPostMark(templateReport, 'monthly-statement').catch(error => {
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
+                if (report && report.tariff === 'Net Metering') {
+                    //WARNING: limited resource use with care
+                    await sendEmailPostMark(templateReport, 'monthly-statement-nm').catch(error => {
+                        return objectHandler({
+                            code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                            message: error.message
+                        });
                     });
-                });
+                } else {
+                    //WARNING: limited resource use with care
+                    await sendEmailPostMark(templateReport, 'monthly-statement-na').catch(error => {
+                        return objectHandler({
+                            code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                            message: error.message
+                        });
+                    });
+                }
             }
 
             return objectHandler({

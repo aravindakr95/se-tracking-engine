@@ -2,9 +2,9 @@ function calculateIncome(dateTime, consumer, bfUnits) {
     const establishedDuration = dateTime.getFullYear() - consumer.establishedYear;
 
     if (establishedDuration <= 7 && establishedDuration > 0) {
-        return consumer.tariff === 'NetMetering' ? 0 : bfUnits * 22.00;
+        return consumer.tariff === 'Net Metering' ? 0 : bfUnits * 22.00;
     } else {
-        return consumer.tariff === 'NetMetering' ? 0 : bfUnits * 15.50;
+        return consumer.tariff === 'Net Metering' ? 0 : bfUnits * 15.50;
     }
 }
 

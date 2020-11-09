@@ -50,7 +50,7 @@ let consumerSchema = ConsumerSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['NetMetering', 'NetAccounting']
+        enum: ['Net Metering', 'Net Accounting']
     },
     accountNumber: {
         type: Number,

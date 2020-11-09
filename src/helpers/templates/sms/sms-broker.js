@@ -4,10 +4,10 @@ function getRegistrationSMSTemplate(regDetails) {
 
 function getInvoiceSMSTemplate(invoice) {
     switch (invoice.tariff) {
-    case 'NetMetering':
+    case 'Net Metering':
         return `Your electricity system ${invoice.accountNumber} produced ${invoice.totalProduction} units and consumed ${invoice.totalConsumption} units as of ${invoice.billingPeriod}. This month you have ${invoice.bfUnits} BF units as the excess units and total payable amount is ${invoice.netAmount} ${invoice.currency}`;
 
-    case 'NetAccounting':
+    case 'Net Accounting':
         return `Your electricity system ${invoice.accountNumber} produced ${invoice.totalProduction} units and consumed ${invoice.totalConsumption} units as of ${invoice.billingPeriod}. This month you have ${invoice.yield} income and total payable amount is ${invoice.netAmount} ${invoice.currency}`;
 
     default:
