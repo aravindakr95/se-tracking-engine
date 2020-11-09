@@ -8,7 +8,7 @@ function getInvoiceSMSTemplate(invoice) {
         return `Your electricity system ${invoice.accountNumber} produced ${invoice.totalProduction} units and consumed ${invoice.totalConsumption} units as of ${invoice.billingPeriod}. This month you have ${invoice.bfUnits} BF units as the excess units and total payable amount is ${invoice.netAmount} ${invoice.currency}`;
 
     case 'Net Accounting':
-        return `Your electricity system ${invoice.accountNumber} produced ${invoice.totalProduction} units and consumed ${invoice.totalConsumption} units as of ${invoice.billingPeriod}. This month you have ${invoice.yield} income and total payable amount is ${invoice.netAmount} ${invoice.currency}`;
+        return `Your electricity system ${invoice.accountNumber} produced ${invoice.totalProduction} units and consumed ${invoice.totalConsumption} units as of ${invoice.billingPeriod}. This month you have revenue of ${invoice.yield} ${invoice.currency} and total payable amount is ${invoice.netAmount} ${invoice.currency}`;
 
     default:
         return '';
