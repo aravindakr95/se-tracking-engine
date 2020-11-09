@@ -33,18 +33,11 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
         try {
             let consumer = await authList.findConsumerByEmail({ email }).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (consumer && consumer.status === 'PENDING') {
-                return objectHandler({
-                    code: HttpResponseType.FORBIDDEN,
-                    message: `Account number '${consumer.accountNumber}' is pending for verification`
-                });
+                throw `Account number '${consumer.accountNumber}' is pending for verification`;
             }
 
             if (consumer) {
@@ -55,31 +48,24 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             }
 
             if (isValidPw) {
-                const { email, deviceToken } = consumer;
+                const { deviceToken } = consumer;
 
                 if (deviceToken) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
                         data: { accessToken: deviceToken },
-                        message: `Consumer '${email}' authentication successful`
+                        message: ''
                     });
                 } else {
-                    return objectHandler({
-                        code: HttpResponseType.CLIENT_ERROR,
-                        message: 'Device token not found in the database'
-                    });
+                    throw 'Device token not found in the database';
                 }
             } else {
-                return objectHandler({
-                    code: HttpResponseType.CLIENT_ERROR,
-                    message: 'Invalid email or password'
-                });
+                throw 'Invalid email or password';
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -97,11 +83,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             Object.assign(body, { password: hasher({ password: body.password }) });
 
             let consumer = await authList.addConsumer(body).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (!consumer) {
@@ -114,7 +96,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             const otpRef = await sendSMS(otpOptions, otpDataset).then(response => {
                 return response.data;
             }).catch(error => {
-                return error.response.data;
+                throw error.response.data;
             });
 
             if (otpRef && otpRef.statusCode !== 'SUCCESS') {
@@ -131,11 +113,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 email: body.email,
                 serverRef
             }).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (!tempConsumer) {
@@ -150,11 +128,9 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 message: `${consumer.email} account created and on hold`
             });
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.code === 11000 ? `Email '${body.email}' or unique property already exists` :
-                    error.message
+                message: error
             });
         }
     }
@@ -173,11 +149,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
         try {
             let tempConsumer = await authList.findConsumerOnPending({ msisdn: contactNumber }).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (!tempConsumer) {
@@ -188,10 +160,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             }
 
             const consumer = await authList.findConsumerByEmail({ email: tempConsumer.email }).catch(error => {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             const regTemplate = getRegistrationSMSTemplate({
@@ -205,58 +174,38 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             const verifyStatus = await sendSMS(otpOptions, verifyDataset).then(response => {
                 return response.data;
             }).catch(error => {
-                return error.response.data;
+                throw error.response.data;
             });
 
             if (verifyStatus && verifyStatus.statusCode !== 'SUCCESS') {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: verifyStatus.message
-                });
+                throw verifyStatus.message;
             }
 
             const deviceToken = await jwtHandler(consumer).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             const activeStatus = await consumerList.updateConsumerStatusByContactNumber(
                 { contactNumber: tempConsumer.msisdn },
                 { status: 'ACTIVE', deviceToken }
             ).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (activeStatus && activeStatus.nModified < 1) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `Contact number '${contactNumber}' activation failed`
-                });
+                throw `Contact number '${contactNumber}' activation failed`;
             }
 
             const removeStatus = await authList.removeConsumerOnPending({ msisdn: contactNumber })
                 .catch(error => {
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
 
             if (removeStatus && removeStatus.deletedCount) {
 
                 //WARNING: limited resource use with care
                 await sendSMS(smsOptions, smsDataset).catch(error => {
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
 
                 const templateConsumer = Object.assign(consumer, {
@@ -266,10 +215,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
                 //WARNING: limited resource use with care
                 await sendEmailPostMark(templateConsumer, 'registration-complete').catch(error => {
-                    return objectHandler({
-                        code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                        message: error.message
-                    });
+                    throw error.message;
                 });
 
                 return objectHandler({
@@ -277,15 +223,12 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                     message: `${tempConsumer.email} account activated successful`
                 });
             } else {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: 'Temporary consumer delete failed'
-                });
+                throw 'Temporary consumer delete failed';
             }
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
