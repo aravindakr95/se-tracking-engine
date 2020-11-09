@@ -26,18 +26,11 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             const customPayload = pvsbList.mapPayload(deviceId, body);
 
             if (!customPayload) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: 'Custom payload is empty'
-                });
+                throw 'Custom payload is empty';
             }
 
             const result = await pvsbList.addPVStats(customPayload).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (result) {
@@ -48,10 +41,9 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -61,38 +53,24 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (!consumer) {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested account number '${accountNumber}' is not exists`
-                });
+                throw `Requested account number '${accountNumber}' is not exists`;
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB').catch(error => {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
+                .catch(error => {
+                    throw error.message;
                 });
-            });
 
             if (!deviceId) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`
-                });
+                throw `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`;
             }
 
             const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId }).catch(error => {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (result && result.length) {
@@ -102,16 +80,12 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                     message: ''
                 });
             } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested consumer account '${accountNumber}' PV statistics not found`
-                });
+                throw `Requested consumer account '${accountNumber}' PV statistics not found`;
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -123,10 +97,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId });
             const payload = await pvsbList.addPVError(body).catch(error => {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (payload) {
@@ -136,10 +107,9 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
+                message: error
             });
         }
     }

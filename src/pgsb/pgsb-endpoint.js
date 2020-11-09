@@ -25,11 +25,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId, slaveId });
             const payload = await pgsbList.addPGStats(body).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (payload) {
@@ -39,10 +35,9 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -52,41 +47,24 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (!consumer) {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested account number '${accountNumber}' is not exists`
-                });
+                throw `Requested account number '${accountNumber}' is not exists`;
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB').catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
+            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
+                .catch(error => {
+                    throw error.message;
                 });
-            });
 
             if (!deviceId) {
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`
-                });
+                throw `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`;
             }
 
             const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId }).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (result && result.length) {
@@ -96,16 +74,12 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                     message: ''
                 });
             } else {
-                return objectHandler({
-                    code: HttpResponseType.NOT_FOUND,
-                    message: `Requested consumer account '${accountNumber}' PG statistics not found`
-                });
+                throw `Requested consumer account '${accountNumber}' PG statistics not found`;
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
@@ -117,11 +91,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId });
             const payload = await pgsbList.addPGError(body).catch(error => {
-                console.log(error);
-                return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error.message
-                });
+                throw error.message;
             });
 
             if (payload) {
@@ -131,10 +101,9 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 });
             }
         } catch (error) {
-            console.log(error);
             return objectHandler({
                 code: HttpResponseType.CLIENT_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
