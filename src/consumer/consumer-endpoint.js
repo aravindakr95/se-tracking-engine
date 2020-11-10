@@ -1,6 +1,7 @@
 import HttpResponseType from '../models/common/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
+import hasher from '../helpers/hasher';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
     return async function handle(httpRequest) {
@@ -128,6 +129,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         const { accountNumber } = httpRequest.queryParams;
 
         try {
+            Object.assign(body, { password: hasher({ password: body.password }) });
             const result = await consumerList.updateConsumerByAccNumber({ accountNumber }, body).catch(error => {
                 throw error.message;
             });
@@ -138,7 +140,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: `Consumer account '${accountNumber}' updated successful`
                 });
             } else {
-                throw `Consumer account '${accountNumber}' is not found`;
+                throw `Requested consumer account '${accountNumber}' is not found`;
             }
         } catch (error) {
             return objectHandler({
@@ -151,18 +153,25 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
     async function deleteConsumer(httpRequest) {
         const { accountNumber } = httpRequest.queryParams;
 
-        let result = await consumerList.deleteConsumerByAccNumber({ accountNumber }).catch(error => {
-            throw error.message;
-        });
-
-        if (result && result.deletedCount) {
-            return objectHandler({
-                status: HttpResponseType.SUCCESS,
-                data: result,
-                message: `Account number '${accountNumber}' record is deleted successful`
+        try {
+            let result = await consumerList.deleteConsumerByAccNumber({ accountNumber }).catch(error => {
+                throw error.message;
             });
-        } else {
-            throw `Requested Account number '${accountNumber}' not found`;
+
+            if (result && result.deletedCount) {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: result,
+                    message: `Account number '${accountNumber}' record is deleted successful`
+                });
+            } else {
+                throw `Requested Consumer account number '${accountNumber}' is not found`;
+            }
+        } catch (error) {
+            return objectHandler({
+                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                message: error
+            });
         }
     }
 }
