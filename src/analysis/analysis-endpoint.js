@@ -251,7 +251,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         } catch (error) {
             return objectHandler({
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error.message
+                message: error
             });
         }
     }
