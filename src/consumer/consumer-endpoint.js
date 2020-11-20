@@ -1,5 +1,6 @@
 import HttpResponseType from '../models/common/http-response-type';
 
+import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import hasher from '../helpers/hasher';
 
@@ -30,7 +31,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         if (status) {
             try {
                 result = await consumerList.findConsumersByStatus({ status }).catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
                 if (result && result.length) {
@@ -40,19 +41,22 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    throw 'Consumers collection is empty';
+                    throw CustomException(
+                        'Consumers collection is empty',
+                        404
+                    );
                 }
             } catch (error) {
                 return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error
+                    code: error.code,
+                    message: error.message
                 });
             }
         }
 
         try {
             result = await consumerList.getAllConsumers().catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -62,12 +66,12 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: ''
                 });
             } else {
-                throw 'Consumers collection is empty';
+                throw CustomException('Consumers collection is empty', 404);
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -80,7 +84,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
                 if (result) {
                     return objectHandler({
@@ -89,12 +93,15 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    throw `Requested Consumer account '${accountNumber}' not found`;
+                    throw CustomException(
+                        `Requested Consumer account '${accountNumber}' not found`,
+                        404
+                    );
                 }
             } catch (error) {
                 return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error
+                    code: error.code,
+                    message: error.message
                 });
             }
         }
@@ -104,7 +111,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
             try {
                 result = await consumerList.findConsumerByDeviceId(deviceId).catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
                 if (result) {
                     return objectHandler({
@@ -113,12 +120,15 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                         message: ''
                     });
                 } else {
-                    throw `Requested Device Id '${deviceId}' not found`;
+                    throw CustomException(
+                        `Requested Device Id '${deviceId}' not found`,
+                        404
+                    );
                 }
             } catch (error) {
                 return objectHandler({
-                    code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                    message: error
+                    code: error.code,
+                    message: error.message
                 });
             }
         }
@@ -131,7 +141,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
         try {
             Object.assign(body, { password: hasher({ password: body.password }) });
             const result = await consumerList.updateConsumerByAccNumber({ accountNumber }, body).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
             if (result) {
                 return objectHandler({
@@ -140,12 +150,15 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: `Consumer account '${accountNumber}' updated successful`
                 });
             } else {
-                throw `Requested consumer account '${accountNumber}' is not found`;
+                throw CustomException(
+                    `Requested consumer account '${accountNumber}' is not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -155,7 +168,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
 
         try {
             let result = await consumerList.deleteConsumerByAccNumber({ accountNumber }).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.deletedCount) {
@@ -165,12 +178,15 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: `Account number '${accountNumber}' record is deleted successful`
                 });
             } else {
-                throw `Requested Consumer account number '${accountNumber}' is not found`;
+                throw CustomException(
+                    `Requested Consumer account number '${accountNumber}' is not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }

@@ -1,5 +1,6 @@
 import HttpResponseType from '../models/common/http-response-type';
 
+import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
@@ -25,7 +26,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId, slaveId });
             const payload = await pgsbList.addPGStats(body).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (payload) {
@@ -36,8 +37,8 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.CLIENT_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -47,24 +48,30 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (!consumer) {
-                throw `Requested account number '${accountNumber}' is not exists`;
+                throw CustomException(
+                    `Requested account number '${accountNumber}' is not exists`,
+                    404
+                );
             }
 
             const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
                 .catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
             if (!deviceId) {
-                throw `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`;
+                throw CustomException(
+                    `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`,
+                    404
+                );
             }
 
             const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId }).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -74,12 +81,15 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                     message: ''
                 });
             } else {
-                throw `Requested consumer account '${accountNumber}' PG statistics not found`;
+                throw CustomException(
+                    `Requested consumer account '${accountNumber}' PG statistics not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -91,7 +101,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId });
             const payload = await pgsbList.addPGError(body).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (payload) {

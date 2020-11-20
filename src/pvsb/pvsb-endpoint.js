@@ -1,5 +1,6 @@
 import HttpResponseType from '../models/common/http-response-type';
 
+import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
@@ -26,11 +27,14 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             const customPayload = pvsbList.mapPayload(deviceId, body);
 
             if (!customPayload) {
-                throw 'Custom payload is empty';
+                throw CustomException(
+                    'Custom payload is empty',
+                    404
+                );
             }
 
             const result = await pvsbList.addPVStats(customPayload).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result) {
@@ -42,8 +46,8 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.CLIENT_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -53,24 +57,29 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (!consumer) {
-                throw `Requested account number '${accountNumber}' is not exists`;
+                throw CustomException(
+                    `Requested account number '${accountNumber}' is not exists`,
+                    404
+                );
             }
 
             const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
                 .catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
             if (!deviceId) {
-                throw `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`;
+                throw CustomException(
+                    `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`,
+                    404);
             }
 
             const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId }).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -80,12 +89,15 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                     message: ''
                 });
             } else {
-                throw `Requested consumer account '${accountNumber}' PV statistics not found`;
+                throw CustomException(
+                    `Requested consumer account '${accountNumber}' PV statistics not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -97,7 +109,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
         try {
             Object.assign(body, { deviceId });
             const payload = await pvsbList.addPVError(body).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (payload) {
@@ -108,8 +120,8 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.CLIENT_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }

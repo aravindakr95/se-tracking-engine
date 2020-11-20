@@ -2,6 +2,7 @@ import config from '../config/config';
 
 import HttpResponseType from '../models/common/http-response-type';
 
+import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { daysInPreviousMonth, getPreviousDate } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
@@ -55,11 +56,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             const log = await analysisList.findReportLog({ billingPeriod });
 
             if (log && log.isCompleted) {
-                throw `Reports already generated for '${billingPeriod}' previous month`;
+                throw CustomException(
+                    `Reports already generated for '${billingPeriod}' previous month`,
+                    409
+                );
             }
 
             const response = await consumerList.getAllConsumers().catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (response && response.length) {
@@ -74,22 +78,22 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                     const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
                         .catch(error => {
-                            throw error.message;
+                            throw CustomException(error.message);
                         });
 
                     const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId })
                         .catch(error => {
-                            throw error.message;
+                            throw CustomException(error.message);
                         });
 
                     const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
                         .catch(error => {
-                            throw error.message;
+                            throw CustomException(error.message);
                         });
 
                     const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId })
                         .catch(error => {
-                            throw error.message;
+                            throw CustomException(error.message);
                         });
 
                     if (!(pvsbStats && pvsbStats.length) || !(pgsbStats && pgsbStats.length)) {
@@ -143,7 +147,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     );
 
                     await analysisList.addReport(report).catch(error => {
-                        throw error.message;
+                        throw CustomException(error.message);
                     });
                 }
 
@@ -153,7 +157,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 };
 
                 const status = await analysisList.addReportLog(reportLog).catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
                 if (status && status.isCompleted) {
@@ -164,11 +168,11 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 }
             }
 
-            throw 'Consumers collection is empty';
+            throw CustomException('Consumers collection is empty', 404);
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -185,11 +189,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
             const reports = await analysisList.findAllReportsForMonth({ billingPeriod })
                 .catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
             if (reports && !reports.length) {
-                throw `Zero reports found for the '${billingPeriod}' period`;
+                throw CustomException(
+                    `Zero reports found for the '${billingPeriod}' period`,
+                    404
+                );
             }
 
             for (const report of reports) {
@@ -199,7 +206,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
                 //WARNING: limited resource use with care
                 await sendSMS(smsOptions, sms).catch(error => {
-                    throw error.message;
+                    throw CustomException(error.message);
                 });
 
                 const templateReport = Object.assign(report, {
@@ -211,12 +218,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (report && report.tariff === 'Net Metering') {
                     //WARNING: limited resource use with care
                     await sendEmailPostMark(templateReport, 'monthly-statement-nm').catch(error => {
-                        throw error.message;
+                        throw CustomException(error.message);
                     });
                 } else {
                     //WARNING: limited resource use with care
                     await sendEmailPostMark(templateReport, 'monthly-statement-na').catch(error => {
-                        throw error.message;
+                        throw CustomException(error.message);
                     });
                 }
             }
@@ -227,8 +234,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             });
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -236,7 +243,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
     async function getAllReports() {
         try {
             const result = await analysisList.findAllReports().catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -246,12 +253,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw 'Reports collection is empty';
+                throw CustomException('Reports collection is empty', 404);
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -261,7 +268,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
         try {
             const result = await analysisList.findReportsByAccNumber({ accountNumber }).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -271,12 +278,15 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw `Requested Reports for consumer '${accountNumber}' not found`;
+                throw CustomException(
+                    `Requested Reports for consumer '${accountNumber}' not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -286,7 +296,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
         try {
             const result = await analysisList.findReportsForYear(accountNumber, year).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result && result.length) {
@@ -296,11 +306,14 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw `Requested Reports for consumer '${accountNumber}' in '${year}' not found`;
+                throw CustomException(
+                    `Requested Reports for consumer '${accountNumber}' in '${year}' not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
+                code: error.code,
                 message: error.message
             });
         }
@@ -311,7 +324,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
         try {
             const result = await analysisList.findReportForMonth(accountNumber, year, month).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result) {
@@ -321,12 +334,15 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`;
+                throw CustomException(
+                    `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
@@ -336,7 +352,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
 
         try {
             const result = await analysisList.findReportByInvoiceID({ _id }).catch(error => {
-                throw error.message;
+                throw CustomException(error.message);
             });
 
             if (result) {
@@ -346,12 +362,15 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw `Requested Reports '${_id}' not found`;
+                throw CustomException(
+                    `Requested Reports '${_id}' not found`,
+                    404
+                );
             }
         } catch (error) {
             return objectHandler({
-                code: HttpResponseType.INTERNAL_SERVER_ERROR,
-                message: error
+                code: error.code,
+                message: error.message
             });
         }
     }
