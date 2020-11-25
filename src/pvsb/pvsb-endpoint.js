@@ -7,8 +7,19 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
         case '/payloads':
-            return httpRequest.queryParams && httpRequest.queryParams.accountNumber ? getConsumerPVStats(httpRequest) :
-                addPVStat(httpRequest);
+            if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
+                return getConsumerPVStats(httpRequest);
+            }
+
+            if (httpRequest.queryParams &&
+                (httpRequest.queryParams.deviceId && httpRequest.queryParams.fetchMode)) {
+                return addPVStat(httpRequest);
+            }
+
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
         case '/errors':
             return addPVError(httpRequest);
         default:
@@ -21,10 +32,10 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
     async function addPVStat(httpRequest) {
         const body = httpRequest.body;
-        const { deviceId } = httpRequest.queryParams;
+        const { deviceId, fetchMode } = httpRequest.queryParams;
 
         try {
-            const customPayload = pvsbList.mapPayload(deviceId, body);
+            const customPayload = pvsbList.mapPayload(deviceId, fetchMode, body);
 
             if (!customPayload) {
                 throw CustomException(

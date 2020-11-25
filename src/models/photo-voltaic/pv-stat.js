@@ -9,7 +9,7 @@ let pvStatSchema = PVStatSchema({
     },
     snapshotTimestamp: {
         type: Number,
-        required: true
+        default: null
     },
     deviceId: {
         type: String,

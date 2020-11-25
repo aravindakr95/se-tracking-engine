@@ -1,9 +1,16 @@
+/* -----------------------------------------------------
+ * Smart Electricity Tracking Engine (SETE)
+ * -----------------------------------------------------
+ *
+ * 2020© NIB303COM Individual Project, National Institute of Business Management (affiliated with Coventry University, England)
+ * @author: Aravinda Rathnayake
+ */
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import chalk from 'chalk';
 import morgan from 'morgan';
-
 
 import config from './config/config';
 

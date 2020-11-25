@@ -21,19 +21,19 @@ export default function makePVSBList() {
         return await PVStat.find(deviceId).lean();
     }
 
-    function mapPayload(deviceId, body) {
+    function mapPayload(deviceId, fetchMode, body) {
         const { results, success } = body;
         const customPayload = {};
 
-        if (success && results) {
-            customPayload['snapshotTimestamp'] = new Date(results['TIME']).getTime();
+        if (results && success) {
+            customPayload['snapshotTimestamp'] = fetchMode === 'API' ? new Date(results['TIME']).getTime() : null;
             customPayload['deviceId'] = deviceId;
             customPayload['load'] = results['LOAD'];
             customPayload['pv'] = results['PV'];
             customPayload['energyToday'] = results['ENERGY_TODAY'];
             customPayload['totalEnergy'] = results['ENERGY_TOTAL'];
             customPayload['importEnergy'] = results['GRID'];
-            customPayload['batteryCapacity'] = results['battery_capacity'];
+            customPayload['batteryCapacity'] = results['BATTERY_CAPACITY'];
             customPayload['chargeCapacity'] = results['CAPACITY_CHARGE'];
             customPayload['inverterTemp'] = results['TMP'];
             customPayload['batType'] = results['bat_type'];
