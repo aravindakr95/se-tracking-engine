@@ -40,7 +40,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             if (consumer && consumer.status === 'PENDING') {
                 throw CustomException(
                     `Account number '${consumer.accountNumber}' is pending for verification`,
-                    403
+                    HttpResponseType.FORBIDDEN
                 );
             }
 
@@ -63,13 +63,13 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 } else {
                     throw CustomException(
                         'Device token not found in the database',
-                        404
+                        HttpResponseType.NOT_FOUND
                     );
                 }
             } else {
                 throw CustomException(
                     'Invalid email or password',
-                    401
+                    HttpResponseType.AUTH_REQUIRED
                 );
             }
         } catch (error) {
@@ -160,7 +160,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
             if (!tempConsumer) {
                 throw CustomException(
                     'Contact number is invalid or not found in temporary consumer collection',
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 

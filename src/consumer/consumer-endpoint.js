@@ -43,7 +43,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 } else {
                     throw CustomException(
                         'Consumers collection is empty',
-                        404
+                        HttpResponseType.NOT_FOUND
                     );
                 }
             } catch (error) {
@@ -66,7 +66,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     message: ''
                 });
             } else {
-                throw CustomException('Consumers collection is empty', 404);
+                throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
             }
         } catch (error) {
             return objectHandler({
@@ -95,7 +95,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 } else {
                     throw CustomException(
                         `Requested Consumer account '${accountNumber}' not found`,
-                        404
+                        HttpResponseType.NOT_FOUND
                     );
                 }
             } catch (error) {
@@ -122,7 +122,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                 } else {
                     throw CustomException(
                         `Requested Device Id '${deviceId}' not found`,
-                        404
+                        HttpResponseType.NOT_FOUND
                     );
                 }
             } catch (error) {
@@ -152,7 +152,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
             } else {
                 throw CustomException(
                     `Requested consumer account '${accountNumber}' is not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {
@@ -180,7 +180,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
             } else {
                 throw CustomException(
                     `Requested Consumer account number '${accountNumber}' is not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {

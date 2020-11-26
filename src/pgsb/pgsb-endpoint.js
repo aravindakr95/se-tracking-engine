@@ -54,7 +54,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             if (!consumer) {
                 throw CustomException(
                     `Requested account number '${accountNumber}' is not exists`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 
@@ -66,7 +66,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             if (!deviceId) {
                 throw CustomException(
                     `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 
@@ -83,7 +83,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             } else {
                 throw CustomException(
                     `Requested consumer account '${accountNumber}' PG statistics not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {

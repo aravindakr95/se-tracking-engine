@@ -40,7 +40,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             if (!customPayload) {
                 throw CustomException(
                     'Custom payload is empty',
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 
@@ -74,7 +74,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             if (!consumer) {
                 throw CustomException(
                     `Requested account number '${accountNumber}' is not exists`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 
@@ -86,7 +86,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             if (!deviceId) {
                 throw CustomException(
                     `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`,
-                    404);
+                    HttpResponseType.NOT_FOUND);
             }
 
             const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId }).catch(error => {
@@ -102,7 +102,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             } else {
                 throw CustomException(
                     `Requested consumer account '${accountNumber}' PV statistics not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {
