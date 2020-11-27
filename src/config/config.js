@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-    environment: 'prod', // dev, prod
+    environment: 'dev', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
     database: {
@@ -26,7 +26,7 @@ const config = {
     },
     deployment: {
         host: process.env.HOST || '192.168.1.8',
-        port: process.env.PORT || 3000
+        port: process.env.PORT || 5000
     }
 };
 
