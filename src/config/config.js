@@ -7,8 +7,10 @@ const config = {
     currency: 'LKR',
     supplier: 'CEB',
     database: {
-        url: 'mongodb+srv://admin:Pvugy10qZ3jLZrfm@se-tracking-engine.jw1zk.mongodb.net',
-        name: 'se-tracking-engine'
+        url: 'se-tracking-engine.jw1zk.mongodb.net',
+        name: 'se-tracking-engine',
+        user: 'admin',
+        credentials: 'Pvugy10qZ3jLZrfm'
     },
     notifier: {
         admin: 'inquiries@brilliant-apps.club',
