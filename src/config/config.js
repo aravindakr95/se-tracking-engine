@@ -3,11 +3,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-    environment: 'dev', // dev, prod
+    environment: 'prod', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
     database: {
-        url: '127.0.0.1:27017',
+        url: 'mongodb+srv://admin:Pvugy10qZ3jLZrfm@se-tracking-engine.jw1zk.mongodb.net',
         name: 'se-tracking-engine'
     },
     notifier: {
