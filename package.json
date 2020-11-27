@@ -44,6 +44,7 @@
     "express-validator": "^6.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.12",
+    "morgan": "^1.10.0",
     "postmark": "^2.6.0",
     "rimraf": "^3.0.2",
     "winston": "^3.2.1",
