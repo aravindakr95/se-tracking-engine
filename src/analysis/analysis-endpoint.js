@@ -168,7 +168,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: new Date().getTime()
+                        message: new Date().getTime().toString()
                     });
                 }
             }
