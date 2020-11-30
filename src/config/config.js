@@ -11,7 +11,7 @@ const config = {
         url: 'se-tracking-engine.jw1zk.mongodb.net',
         name: 'se-tracking-engine',
         user: 'admin',
-        credentials: 'Pvugy10qZ3jLZrfm'
+        credentials: process.env.DB_CREDENTIALS
     },
     notifier: {
         admin: 'inquiries@brilliant-apps.club',
@@ -26,8 +26,8 @@ const config = {
         saltRounds: 10
     },
     deployment: {
-        host: process.env.API_ENDPOINT || '192.168.1.8',
-        port: process.env.PORT || 5000
+        host: '127.0.0.1',
+        port: process.env.PORT || 3000
     }
 };
 
