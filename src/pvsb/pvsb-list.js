@@ -1,6 +1,8 @@
 import PVStat from '../models/photo-voltaic/pv-stat';
 import PVError from '../models/photo-voltaic/pv-error';
 
+import config from '../config/config';
+
 export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
@@ -24,9 +26,10 @@ export default function makePVSBList() {
     function mapPayload(deviceId, fetchMode, body) {
         const { results, success } = body;
         const customPayload = {};
+        const ssTimestamp = fetchMode === 'API' ? new Date(results['TIME'] + config.timezone).getTime() : null;
 
         if (results && success) {
-            customPayload['snapshotTimestamp'] = fetchMode === 'API' ? new Date(results['TIME']).getTime() : null;
+            customPayload['snapshotTimestamp'] = ssTimestamp;
             customPayload['deviceId'] = deviceId;
             customPayload['load'] = results['LOAD'];
             customPayload['pv'] = results['PV'];

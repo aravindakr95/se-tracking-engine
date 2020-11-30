@@ -3,9 +3,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-    environment: 'dev', // dev, prod
+    environment: 'prod', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
+    timezone: '+05:30',
     database: {
         url: 'se-tracking-engine.jw1zk.mongodb.net',
         name: 'se-tracking-engine',
