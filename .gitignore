@@ -105,3 +105,6 @@ dist/
 # Intellij Cache
 .idea/
 .idea/workspace.xml
+
+# AWS
+.elasticbeanstalk/

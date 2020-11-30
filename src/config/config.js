@@ -26,7 +26,7 @@ const config = {
         saltRounds: 10
     },
     deployment: {
-        host: process.env.HOST || '192.168.1.8',
+        host: process.env.API_ENDPOINT || '192.168.1.8',
         port: process.env.PORT || 5000
     }
 };
