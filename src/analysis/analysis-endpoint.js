@@ -53,6 +53,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
 
+            console.log(billingPeriod);
+
             const log = await analysisList.findReportLog({ billingPeriod });
 
             if (log && log.isCompleted) {
@@ -163,7 +165,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `Reports generated for '${billingPeriod}' is completed`
+                        message: new Date().getTime()
                     });
                 }
             }
