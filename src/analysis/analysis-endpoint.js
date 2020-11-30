@@ -54,6 +54,9 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             const billingDuration = daysInPreviousMonth();
 
             console.log(billingPeriod);
+            console.log(month);
+            console.log(year);
+            console.log(billingDuration);
 
             const log = await analysisList.findReportLog({ billingPeriod });
 
