@@ -5,7 +5,7 @@ const TempConsumerSchema = mongoose.Schema;
 let tempConsumerSchema = TempConsumerSchema({
     timestamp: {
         type: Number,
-        default: new Date().getTime()
+        default: Date.now
     },
     msisdn: {
         type: String,

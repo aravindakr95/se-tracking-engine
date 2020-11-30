@@ -1,4 +1,5 @@
 import Consumer from '../models/end-user/consumer';
+import AccountStatus from '../models/common/account-status';
 
 export default function makeConsumerList() {
     return Object.freeze({
@@ -21,13 +22,16 @@ export default function makeConsumerList() {
     }
 
     async function findConsumerByAccNumber(accNumber) {
-        return await Consumer.findOne({ accountNumber: accNumber, status: 'ACTIVE' }).lean();
+        return await Consumer.findOne({
+            accountNumber: accNumber,
+            status: AccountStatus.ACTIVE
+        }).lean();
     }
 
     async function findConsumerByDeviceId(deviceId) {
         return Consumer.findOne({
             'devices.deviceId': deviceId,
-            'status': 'ACTIVE'
+            'status': AccountStatus.ACTIVE
         });
     }
 

@@ -6,7 +6,7 @@ const ConsumerSchema = mongoose.Schema;
 let consumerSchema = ConsumerSchema({
     timestamp: {
         type: Number,
-        default: new Date().getTime()
+        default: Date.now
     },
     deviceToken: {
         type: String,
@@ -61,8 +61,8 @@ let consumerSchema = ConsumerSchema({
     status: {
         type: String,
         required: true,
-        default: 'PENDING',
-        enum: ['PENDING', 'ACTIVE']
+        default: 'INACTIVE',
+        enum: ['INACTIVE', 'ACTIVE']
     },
     devices: [
         {

@@ -1,6 +1,7 @@
 import config from '../config/config';
 
 import HttpResponseType from '../models/common/http-response-type';
+import AccountStatus from '../models/common/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import hashValidator from '../helpers/validators/hash-validator';
@@ -37,7 +38,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 throw CustomException(error.message);
             });
 
-            if (consumer && consumer.status === 'PENDING') {
+            if (consumer && consumer.status === AccountStatus.INACTIVE) {
                 throw CustomException(
                     `Account number '${consumer.accountNumber}' is pending for verification`,
                     HttpResponseType.FORBIDDEN
@@ -192,7 +193,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
 
             const activeStatus = await consumerList.updateConsumerStatusByContactNumber(
                 { contactNumber: tempConsumer.msisdn },
-                { status: 'ACTIVE', deviceToken }
+                { status: AccountStatus.ACTIVE, deviceToken }
             ).catch(error => {
                 throw CustomException(error.message);
             });

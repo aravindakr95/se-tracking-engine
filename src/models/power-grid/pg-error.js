@@ -5,7 +5,7 @@ const PgErrorSchema = mongoose.Schema;
 let pgErrorSchema = PgErrorSchema({
     timestamp: {
         type: Number,
-        default: new Date().getTime()
+        default: Date.now
     },
     deviceId: {
         type: String,

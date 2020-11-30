@@ -8,7 +8,7 @@ import config from './config';
 const options = {
     file: {
         level: 'info',
-        filename: `${appRoot}/logs/${config.environment}-%DATE%.log`,
+        filename: `${appRoot}/logs/${config.environment}/%DATE%.log`,
         datePattern: 'MM-DD-YYYY-HH',
         zippedArchive: true,
         handleExceptions: true,
