@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "npm run -s build",
     "start": "npm run build && node dist/index.js",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist && rimraf logs",
     "lint": "eslint --fix --config .eslintrc.json \"src/**/*.js\"",
     "build": "npm run clean && babel src -s -D -d dist",
     "watch": "nodemon -e js --watch src --exec \"npm run start\""
