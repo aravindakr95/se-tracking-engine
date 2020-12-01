@@ -47,23 +47,18 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         }
     };
 
-    // execute on 1st day of the month at 06.00 Hours
+    // execute on 1st day of the month at 09.00 Hours
     async function generateReports() {
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
-
-            console.log(billingPeriod);
-            console.log(month);
-            console.log(year);
-            console.log(billingDuration);
 
             const log = await analysisList.findReportLog({ billingPeriod });
 
             if (log && log.isCompleted) {
                 throw CustomException(
                     `Reports already generated for '${billingPeriod}' previous month`,
-                    409
+                    HttpResponseType.CONFLICT
                 );
             }
 
@@ -108,7 +103,8 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     const filteredPVSB = filterCurrentMonthStats('PVSB', pvsbStats);
                     const filteredPGSB = filterCurrentMonthStats('PGSB', pgsbStats);
 
-                    if (!(filteredPVSB && filteredPVSB.length) || !(filteredPGSB && filteredPGSB.length)) {
+                    if (!(filteredPVSB && filteredPVSB.length) ||
+                        !(filteredPGSB && filteredPGSB.length)) {
                         continue;
                     }
 
@@ -168,12 +164,12 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: new Date().getTime().toString()
+                        message: `Reports generated for '${billingPeriod}' is completed`
                     });
                 }
             }
 
-            throw CustomException('Consumers collection is empty', 404);
+            throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
         } catch (error) {
             return objectHandler({
                 code: error.code,
@@ -200,7 +196,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             if (reports && !reports.length) {
                 throw CustomException(
                     `Zero reports found for the '${billingPeriod}' period`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
 
@@ -258,7 +254,10 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                     message: ''
                 });
             } else {
-                throw CustomException('Reports collection is empty', 404);
+                throw CustomException(
+                    'Reports collection is empty',
+                    HttpResponseType.NOT_FOUND
+                );
             }
         } catch (error) {
             return objectHandler({
@@ -285,7 +284,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 throw CustomException(
                     `Requested Reports for consumer '${accountNumber}' not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {
@@ -313,7 +312,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 throw CustomException(
                     `Requested Reports for consumer '${accountNumber}' in '${year}' not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {
@@ -341,7 +340,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 throw CustomException(
                     `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {
@@ -369,7 +368,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
             } else {
                 throw CustomException(
                     `Requested Reports '${_id}' not found`,
-                    404
+                    HttpResponseType.NOT_FOUND
                 );
             }
         } catch (error) {

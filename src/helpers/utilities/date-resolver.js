@@ -1,12 +1,12 @@
 function daysInPreviousMonth() {
-    const date = Date.now;
+    const date = new Date();
 
     date.setDate(0);
     return date.getDate();
 }
 
 function getPreviousDate() {
-    const date = Date.now;
+    const date = new Date();
     date.setDate(0);
 
     const year = date.getFullYear();
