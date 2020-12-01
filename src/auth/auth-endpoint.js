@@ -173,6 +173,7 @@ export default function makeAuthEndPointHandler({ authList, consumerList }) {
                 contactNumber: tempConsumer.msisdn,
                 email: tempConsumer.email
             });
+
             const smsDataset = configSMS(contactNumber, regTemplate);
 
             const verifyDataset = configOTPResponse({ serverRef: tempConsumer.serverRef, pin });

@@ -1,6 +1,7 @@
 import config from '../config/config';
 
 import HttpResponseType from '../models/common/http-response-type';
+import AccountStatus from '../models/common/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -62,12 +63,13 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                 );
             }
 
-            const response = await consumerList.getAllConsumers().catch(error => {
-                throw CustomException(error.message);
-            });
+            const consumers = await consumerList.findConsumersByStatus({ status: AccountStatus.ACTIVE })
+                .catch(error => {
+                    throw CustomException(error.message);
+                });
 
-            if (response && response.length) {
-                for (const consumer of response) {
+            if (consumers && consumers.length) {
+                for (const consumer of consumers) {
                     let {
                         accountNumber,
                         contactNumber,
