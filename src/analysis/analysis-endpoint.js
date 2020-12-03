@@ -5,13 +5,19 @@ import AccountStatus from '../models/common/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInPreviousMonth, getPreviousDate } from '../helpers/utilities/date-resolver';
+import { daysInPreviousMonth, getNextMonthString, getPreviousDate } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
 import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
 import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
-export default function makeAnalysisEndPointHandler({ analysisList, consumerList, pvsbList, pgsbList }) {
+export default function makeAnalysisEndPointHandler({
+    analysisList,
+    consumerList,
+    pvsbList,
+    pgsbList,
+    forecastList
+}) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
         case '/reports/generate':
@@ -48,7 +54,7 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
         }
     };
 
-    // execute on 1st day of the month at 09.00 Hours
+    // execute on 1st day of the month at 06.00 Hours
     async function generateReports() {
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
@@ -126,8 +132,18 @@ export default function makeAnalysisEndPointHandler({ analysisList, consumerList
                         productionDetails,
                         billingDuration);
 
+                    const forecastPeriod = getNextMonthString(new Date());
+
+                    const forecastValues = await forecastList.findForecastReportByAccountNumber(
+                        accountNumber, forecastPeriod
+                    ).catch(error => {
+                        throw CustomException(error.message);
+                    });
+
+                    const forecastedPayable = forecastValues.Forecast.Predictions.mean.map(field => field.Value);
+
                     const forecastedValues = {
-                        forecastedPayable: 0.00 //todo: create a way to predict the total amount for next month
+                        forecastedPayable: forecastedPayable[0]
                     };
 
                     const commonDetails = {

@@ -30,6 +30,8 @@ const validate = (main, route, method) => {
         return consumersValidator(method);
     case 'analysis':
         return reportsValidator(route);
+    case 'forecast':
+        return forecastValidator(route);
     default:
         return [];
     }
@@ -242,6 +244,15 @@ function reportsValidator(route) {
                 .exists().withMessage('Invoice ID is required')
                 .isMongoId().withMessage('Invoice ID should be Mongo ID')
         ];
+    default:
+        return [];
+    }
+}
+
+function forecastValidator(route) {
+    switch (route) {
+    case '/reports/generate':
+        return [];
     default:
         return [];
     }

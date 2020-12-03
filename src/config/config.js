@@ -28,6 +28,12 @@ const config = {
     deployment: {
         host: '127.0.0.1',
         port: process.env.PORT || 3000
+    },
+    sdk: {
+        accessKey: process.env.AWS_ACCESS_KEY,
+        secretKey: process.env.AWS_SECRET_KEY,
+        sessionToken: process.env.AWS_SESSION_TOKEN,
+        forecastArn: process.env.AWS_FORECAST_ARN
     }
 };
 
