@@ -23,7 +23,7 @@ export default function makeAnalysisEndPointHandler({
         }
     };
 
-    // execute on 1st day of the month at 03.00 Hours
+    // execute on 1st day of the month at 06.00 Hours (IST)
     async function generateForecast() {
         try {
             const date = new Date();

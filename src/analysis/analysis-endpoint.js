@@ -54,7 +54,7 @@ export default function makeAnalysisEndPointHandler({
         }
     };
 
-    // execute on 1st day of the month at 06.00 Hours
+    // execute on 1st day of the month at 09.00 Hours (IST)
     async function generateReports() {
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
@@ -196,7 +196,7 @@ export default function makeAnalysisEndPointHandler({
         }
     }
 
-    // execute on 1st day of the month at 12.00 Hours
+    // execute on 1st day of the month at 15.00 Hours (IST)
     async function dispatchReports() {
         try {
             const smsOptions = {
