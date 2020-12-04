@@ -20,6 +20,8 @@ import initializeDB from './helpers/database';
 import { errorResponse } from './helpers/response/response-dispatcher';
 import logger from './config/log-level';
 
+import authenticateJWT from './middlewares/auth';
+
 import authRouter from './routes/auth';
 import consumerRouter from './routes/consumer';
 import pgsbRouter from './routes/pgsb';
@@ -42,12 +44,14 @@ app.use('/v1/sete/pvsb', pvsbRouter);
 app.use('/v1/sete/analysis', analysisRouter);
 app.use('/v1/sete/forecast', forecastRouter);
 
-app.all('*', (req, res) => {
-    return errorResponse(res, {
-        code: HttpResponseType.NOT_FOUND,
-        message: 'Request URL not found'
+app.all('*',
+    authenticateJWT,
+    (req, res) => {
+        return errorResponse(res, {
+            code: HttpResponseType.NOT_FOUND,
+            message: 'Request URL not found'
+        });
     });
-});
 
 app.listen(config.deployment.port, () => {
     console.log(chalk.magenta('-----------------------------------------------------------------------------'));
