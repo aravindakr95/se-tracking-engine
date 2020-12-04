@@ -51,7 +51,8 @@ export default function makeAnalysisEndPointHandler({
                     let { accountNumber } = consumer;
 
                     // Demonstration purposes only
-                    const forecast = await generateForecastValues({ startDate, endDate }, accountNumber)
+                    const forecast = await generateForecastValues(
+                        { startDate, endDate }, accountNumber)
                         .catch(error => error);
 
                     const reports = await analysisList.findReportsByAccNumber({ accountNumber })

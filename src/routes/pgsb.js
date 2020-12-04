@@ -4,9 +4,12 @@ import pgsbController from '../pgsb/pgsb-controller';
 
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
+import authenticateJWT from '../middlewares/auth';
+
 let pgsbRouter = express.Router();
 
 pgsbRouter.post('/payloads',
+    authenticateJWT,
     validate('pgsb', '/payloads', 'POST'),
     fieldStateChecker,
     (req, res) => {
@@ -14,11 +17,13 @@ pgsbRouter.post('/payloads',
     });
 
 pgsbRouter.get('/payloads',
+    authenticateJWT,
     (req, res) => {
         pgsbController(req, res);
     });
 
 pgsbRouter.post('/errors',
+    authenticateJWT,
     validate('pgsb', '/errors', 'POST'),
     fieldStateChecker,
     (req, res) => {

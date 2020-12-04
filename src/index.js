@@ -27,8 +27,6 @@ import pvsbRouter from './routes/pvsb';
 import analysisRouter from './routes/analysis';
 import forecastRouter from './routes/forecast';
 
-import authenticateJWT from './middlewares/auth';
-
 const app = express();
 
 app.use(cors());
@@ -38,11 +36,11 @@ app.use(morgan('combined', { stream: logger.stream }));
 initializeDB();
 
 app.use('/v1/sete/auth', authRouter);
-app.use('/v1/sete/consumers', authenticateJWT, consumerRouter);
-app.use('/v1/sete/pgsb', authenticateJWT, pgsbRouter);
-app.use('/v1/sete/pvsb', authenticateJWT, pvsbRouter);
-app.use('/v1/sete/analysis', authenticateJWT, analysisRouter);
-app.use('/v1/sete/forecast', authenticateJWT, forecastRouter);
+app.use('/v1/sete/consumers', consumerRouter);
+app.use('/v1/sete/pgsb', pgsbRouter);
+app.use('/v1/sete/pvsb', pvsbRouter);
+app.use('/v1/sete/analysis', analysisRouter);
+app.use('/v1/sete/forecast', forecastRouter);
 
 app.all('*', (req, res) => {
     return errorResponse(res, {
