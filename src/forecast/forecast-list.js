@@ -11,7 +11,7 @@ export default function makeForecastList() {
         findForecastLog
     });
 
-    async function addForecastReport(prediction, reports, endDate, forecastPeriod, accountNumber) {
+    async function addForecastReport(reports, endDate, forecastPeriod, accountNumber, prediction = null) {
         let result = null;
 
         if (prediction) {

@@ -140,10 +140,11 @@ export default function makeAnalysisEndPointHandler({
                         throw CustomException(error.message);
                     });
 
-                    const forecastedPayable = forecastValues.Forecast.Predictions.mean.map(field => field.Value);
+                    const forecastedPayable = forecastValues ? forecastValues.Forecast.Predictions.mean
+                        .map(field => field.Value) : 0;
 
                     const forecastedValues = {
-                        forecastedPayable: forecastedPayable[0]
+                        forecastedPayable: forecastedPayable ? forecastedPayable[0] : 0
                     };
 
                     const commonDetails = {
@@ -189,6 +190,7 @@ export default function makeAnalysisEndPointHandler({
 
             throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
         } catch (error) {
+            console.log(error.message);
             return objectHandler({
                 code: error.code,
                 message: error.message

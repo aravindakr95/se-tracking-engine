@@ -2,6 +2,8 @@ import { Options, Aws } from 'aws-cli-js';
 
 import config from '../../config/config';
 
+import { makeTwoDecimalNumber } from '../utilities/number-resolver';
+
 async function getAWSConfig() {
     const options = new Options(
         config.sdk.accessKey,
@@ -42,7 +44,7 @@ function getAvgValues(reports, endDate) {
                 mean: [
                     {
                         Timestamp: endDate.toISOString(),
-                        Value: totalValues / reports.length
+                        Value: makeTwoDecimalNumber(totalValues / reports.length)
                     }
                 ]
             }

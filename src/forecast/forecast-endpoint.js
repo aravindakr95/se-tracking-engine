@@ -62,7 +62,6 @@ export default function makeAnalysisEndPointHandler({
 
                     if (reports && reports.length) {
                         await forecastList.addForecastReport(
-                            null,
                             reports,
                             endDate,
                             { forecastPeriod },

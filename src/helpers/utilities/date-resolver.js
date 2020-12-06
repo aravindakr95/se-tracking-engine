@@ -22,7 +22,7 @@ function getPreviousDate() {
 }
 
 function getFirstDay(dateInstance) {
-    return new Date(dateInstance.getFullYear(), dateInstance.getMonth(), 1);
+    return new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 1);
 }
 
 function getLastDay(dateInstance) {
