@@ -10,7 +10,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         switch (httpRequest.path) {
         case '/payloads':
             if (httpRequest.queryParams &&
-            (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
+                (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
                 return getConsumerPGStats(httpRequest);
             }
 
@@ -37,21 +37,32 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         const body = httpRequest.body;
         const { deviceId, slaveId } = httpRequest.queryParams;
 
+        let isStored = false;
+
         try {
             Object.assign(body, { deviceId, slaveId });
 
-            const payload = await pgsbList.addPGStats(body).catch(error => {
-                throw CustomException(error.message);
-            });
-
-            if (payload) {
-                await distributeStats(body, OperationStatus.GridSuccess).catch(error => {
+            if (slaveId === '101' || slaveId === '201') {
+                await pgsbList.addPGStats(body).catch(error => {
                     throw CustomException(error.message);
                 });
 
+                isStored = true;
+            }
+
+            await distributeStats(body, OperationStatus.GridSuccess).catch(error => {
+                throw CustomException(error.message);
+            });
+
+            if (isStored) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     message: `PGSB ${deviceId} payload statistics received`
+                });
+            } else {
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    message: `PGSB ${deviceId} payload statistics skipped`
                 });
             }
         } catch (error) {
