@@ -1,9 +1,11 @@
 import HttpResponseType from '../models/http/http-response-type';
+import OperationStatus from '../models/common/operation-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import HttpMethod from '../models/http/http-method';
 import { fetchInverter } from '../helpers/renac/fetch-pv-data';
+import { distributeStats } from '../helpers/distributor/distribute-stats';
 
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
@@ -67,6 +69,10 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             });
 
             if (result) {
+                await distributeStats(pvStats, OperationStatus.PVSuccess).catch(error => {
+                    throw CustomException(error.message);
+                });
+
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     data: null,

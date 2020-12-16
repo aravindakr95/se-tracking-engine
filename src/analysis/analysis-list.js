@@ -19,27 +19,27 @@ export default function makeAnalysisList() {
     }
 
     async function findAllReports() {
-        return await Report.find();
+        return Report.find();
     }
 
     async function findReportsByAccNumber(accNumber) {
-        return await Report.find(accNumber).lean();
+        return Report.find(accNumber).lean();
     }
 
     async function findReportsForYear(accountNumber, year) {
-        return await Report.find({ accountNumber, year }).lean();
+        return Report.find({ accountNumber, year }).lean();
     }
 
     async function findReportForMonth(accountNumber, year, month) {
-        return await Report.findOne({ accountNumber, year, month }).lean();
+        return Report.findOne({ accountNumber, year, month }).lean();
     }
 
     async function findAllReportsForMonth(period) {
-        return await Report.find(period).lean();
+        return Report.find(period).lean();
     }
 
     async function findReportByInvoiceID(id) {
-        return await Report.find(id);
+        return Report.find(id);
     }
 
     async function addReportLog(log) {

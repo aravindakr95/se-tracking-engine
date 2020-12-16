@@ -1,7 +1,9 @@
 import HttpResponseType from '../models/http/http-response-type';
+import OperationStatus from '../models/common/operation-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
+import { distributeStats } from '../helpers/distributor/distribute-stats';
 
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     return async function handle(httpRequest) {
@@ -25,11 +27,16 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
         try {
             Object.assign(body, { deviceId, slaveId });
+
             const payload = await pgsbList.addPGStats(body).catch(error => {
                 throw CustomException(error.message);
             });
 
             if (payload) {
+                await distributeStats(body, OperationStatus.GridSuccess).catch(error => {
+                    throw CustomException(error.message);
+                });
+
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     message: `PGSB ${deviceId} payload statistics received`
@@ -105,6 +112,10 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             });
 
             if (payload) {
+                await distributeStats(body, OperationStatus.GridError).catch(error => {
+                    throw CustomException(error.message);
+                });
+
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
                     message: `PGSB ${deviceId} error log received`

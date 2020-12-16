@@ -2,6 +2,7 @@ import config from '../config/config';
 
 import HttpResponseType from '../models/http/http-response-type';
 import AccountStatus from '../models/common/account-status';
+import DeviceType from '../models/common/device-type';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -119,10 +120,10 @@ export default function makeAnalysisEndPointHandler({
                             firstFloorPGStats.push(stat);
                     });
 
-                    const filteredPVSB = filterCurrentMonthStats('PVSB', pvsbStats);
+                    const filteredPVSB = filterCurrentMonthStats(DeviceType.PVSB, pvsbStats);
 
-                    const filteredGroundStats = filterCurrentMonthStats('PGSB', groundFloorPGStats);
-                    const filteredFirstStats = filterCurrentMonthStats('PGSB', firstFloorPGStats);
+                    const filteredGroundStats = filterCurrentMonthStats(DeviceType.PGSB, groundFloorPGStats);
+                    const filteredFirstStats = filterCurrentMonthStats(DeviceType.PGSB, firstFloorPGStats);
 
                     if (!(filteredPVSB && filteredPVSB.length) ||
                         !(filteredGroundStats && filteredFirstStats.length) ||
@@ -130,10 +131,10 @@ export default function makeAnalysisEndPointHandler({
                         continue;
                     }
 
-                    const sortedPVSB = sortCurrentMonthStats('PVSB', filteredPVSB);
+                    const sortedPVSB = sortCurrentMonthStats(DeviceType.PVSB, filteredPVSB);
 
-                    const sortedGroundPGSB = sortCurrentMonthStats('PGSB', filteredGroundStats);
-                    const sortedFirstPGSB = sortCurrentMonthStats('PGSB', filteredFirstStats);
+                    const sortedGroundPGSB = sortCurrentMonthStats(DeviceType.PGSB, filteredGroundStats);
+                    const sortedFirstPGSB = sortCurrentMonthStats(DeviceType.PGSB, filteredFirstStats);
 
                     const energyToday = filteredPVSB.map(stat => stat.energyToday);
 
@@ -413,14 +414,14 @@ export default function makeAnalysisEndPointHandler({
         const startingMillis = startingDate.setHours(0, 0, 0, 1);
         const endingMillis = endingDate.setHours(23, 59, 59, 999);
 
-        if (type === 'PGSB') {
+        if (type === DeviceType.PGSB) {
             filteredStats = stats.filter(stat =>
                 stat.timestamp >= startingMillis && stat.timestamp <= endingMillis);
 
             filteredStats.sort((dateOne, dateTwo) => dateOne - dateTwo);
         }
 
-        if (type === 'PVSB') {
+        if (type === DeviceType.PVSB) {
             filteredStats = stats.filter(stat =>
                 stat.snapshotTimestamp >= startingMillis && stat.snapshotTimestamp <= endingMillis);
         }
@@ -429,11 +430,11 @@ export default function makeAnalysisEndPointHandler({
     }
 
     function sortCurrentMonthStats(type, stats) {
-        if (type === 'PGSB') {
+        if (type === DeviceType.PGSB) {
             stats.sort((objOne, objTwo) => objOne.timestamp - objTwo.timestamp);
         }
 
-        if (type === 'PVSB') {
+        if (type === DeviceType.PVSB) {
             stats.sort((objOne, objTwo) => objOne.snapshotTimestamp - objTwo.snapshotTimestamp);
         }
 

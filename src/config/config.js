@@ -7,7 +7,12 @@ const config = {
     currency: 'LKR',
     supplier: 'CEB',
     timezone: '+05:30',
-    adminToken: '3c31292i0t20mdp6s8hgg4y2tvc0iy',
+    adminToken: process.env.ADMIN_TOKEN,
+    distributor: {
+        gridSuccessUrl: 'http://apps2.malindaprasad.com/home/em/send.php',
+        gridErrorUrl: 'http://apps2.malindaprasad.com/home/error',
+        pvSuccessUrl: 'http://apps2.malindaprasad.com/home/pv/send.php'
+    },
     inverter: {
         url: 'http://apiapp.le-pv.com:8080/api/equipDetail',
         serialNumber: process.env.RENAC_SN,

@@ -14,7 +14,7 @@ export default function makePVSBList() {
     }
 
     async function findAllPVStatsByAccountNumber(accountNumber) {
-        return await PVStat.find(accountNumber).lean();
+        return PVStat.find(accountNumber).lean();
     }
 
     function mapPayload(pvStats, accountNumber) {
