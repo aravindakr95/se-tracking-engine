@@ -9,7 +9,6 @@ export default function makeConsumerList() {
         findConsumerByDeviceId,
         findDeviceIdsByAccNumber,
         updateConsumerByAccNumber,
-        updateConsumerStatusByContactNumber,
         deleteConsumerByAccNumber
     });
 
@@ -55,10 +54,6 @@ export default function makeConsumerList() {
             data,
             { new: true }
         );
-    }
-
-    async function updateConsumerStatusByContactNumber(contactNumber, data) {
-        return Consumer.updateOne(contactNumber, data);
     }
 
     async function deleteConsumerByAccNumber(accNumber) {

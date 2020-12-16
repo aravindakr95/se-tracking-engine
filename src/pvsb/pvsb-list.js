@@ -6,6 +6,7 @@ export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
         findAllPVStatsByAccountNumber,
+        findLatestPVStatByAccountNumber,
         mapPayload
     });
 
@@ -15,6 +16,13 @@ export default function makePVSBList() {
 
     async function findAllPVStatsByAccountNumber(accountNumber) {
         return PVStat.find(accountNumber).lean();
+    }
+
+    async function findLatestPVStatByAccountNumber(accountNumber) {
+        return PVStat
+            .find(accountNumber)
+            .sort({ timestamp: -1 })
+            .limit(1);
     }
 
     function mapPayload(pvStats, accountNumber) {

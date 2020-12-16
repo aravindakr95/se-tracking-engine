@@ -1,9 +1,9 @@
 import HttpResponseType from '../models/http/http-response-type';
 import OperationStatus from '../models/common/operation-status';
+import HttpMethod from '../models/http/http-method';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import HttpMethod from '../models/http/http-method';
 import { fetchInverter } from '../helpers/renac/fetch-pv-data';
 import { distributeStats } from '../helpers/distributor/distribute-stats';
 
@@ -11,9 +11,11 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.method) {
         case HttpMethod.GET:
-            if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
+            if (httpRequest.queryParams &&
+                (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
                 return getConsumerPVStats(httpRequest);
             }
+
             return objectHandler({
                 code: HttpResponseType.METHOD_NOT_ALLOWED,
                 message: `${httpRequest.method} method not allowed`
@@ -22,6 +24,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
                 return addPVStat(httpRequest);
             }
+
             return objectHandler({
                 code: HttpResponseType.METHOD_NOT_ALLOWED,
                 message: `${httpRequest.method} method not allowed`
@@ -88,7 +91,8 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     }
 
     async function getConsumerPVStats(httpRequest) {
-        const { accountNumber } = httpRequest.queryParams;
+        const { accountNumber, type } = httpRequest.queryParams;
+        let result = null;
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
@@ -102,9 +106,21 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 );
             }
 
-            const result = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber }).catch(error => {
-                throw CustomException(error.message);
-            });
+            if (type === 'ALL') {
+                result = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber }).catch(error => {
+                    throw CustomException(error.message);
+                });
+            } else if (type === 'LATEST') {
+                result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber }).catch(error => {
+                    throw CustomException(error.message);
+                });
+            } else {
+                throw CustomException(
+                    'Provided parameters are missing or invalid',
+                    HttpResponseType.NOT_FOUND
+                );
+            }
+
 
             if (result && result.length) {
                 return objectHandler({

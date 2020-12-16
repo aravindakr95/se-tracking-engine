@@ -5,6 +5,7 @@ export default function makePGSBList() {
     return Object.freeze({
         addPGStats,
         findAllPGStatsByDeviceIds,
+        findLatestPGStatByDeviceIds,
         addPGError
     });
 
@@ -14,6 +15,13 @@ export default function makePGSBList() {
 
     async function findAllPGStatsByDeviceIds(deviceIds) {
         return PGStat.find({ deviceId: { $in: deviceIds } });
+    }
+
+    async function findLatestPGStatByDeviceIds(deviceIds) {
+        return PGStat
+            .find({ deviceId: { $in: deviceIds } })
+            .sort({ timestamp: -1 })
+            .limit(2);
     }
 
     async function addPGError(error) {
