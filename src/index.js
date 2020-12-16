@@ -14,13 +14,13 @@ import morgan from 'morgan';
 
 import config from './config/config';
 
-import HttpResponseType from './models/common/http-response-type';
+import HttpResponseType from './models/http/http-response-type';
 
 import initializeDB from './helpers/database';
 import { errorResponse } from './helpers/response/response-dispatcher';
 import logger from './config/log-level';
 
-import authenticateJWT from './middlewares/auth';
+import authenticateJWT from './middlewares/auth-jwt';
 
 import authRouter from './routes/auth';
 import consumerRouter from './routes/consumer';

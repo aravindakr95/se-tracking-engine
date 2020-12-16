@@ -15,7 +15,7 @@ function calculateProduction(pvsb, energyToday) {
     };
 }
 
-function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
+function calculateConsumption(dateTime, consumer, groundPgsb, firstPgsb, production, duration) {
     let bfUnits = 0;
     let income = 0;
 
@@ -26,9 +26,14 @@ function calculateConsumption(dateTime, consumer, pgsb, production, duration) {
 
     let expense = null;
 
-    const { startingValue, endingValue } = pgsb;
+    if (!groundPgsb || !firstPgsb) {
+        return null;
+    }
 
-    const totalConsumption = makeTwoDecimalNumber(endingValue.totalPower - startingValue.totalPower);
+    const groundTotalPower = groundPgsb.endingValue.totalPower - groundPgsb.startingValue.totalPower;
+    const firstTotalPower = firstPgsb.endingValue.totalPower - firstPgsb.startingValue.totalPower;
+
+    const totalConsumption = makeTwoDecimalNumber(groundTotalPower + firstTotalPower);
     const excessEnergy = makeTwoDecimalNumber(production.totalProduction - totalConsumption);
 
     const avgDailyConsumption = makeTwoDecimalNumber(totalConsumption / duration);

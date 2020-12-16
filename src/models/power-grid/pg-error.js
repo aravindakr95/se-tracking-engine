@@ -21,13 +21,11 @@ let pgErrorSchema = PgErrorSchema({
     },
     wifiFailCount: {
         type: Number,
-        required: true,
-        default: 0
+        required: true
     },
     httpFailCount: {
         type: Number,
-        required: true,
-        default: 0
+        required: true
     }
 });
 

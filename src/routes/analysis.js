@@ -3,7 +3,7 @@ import express from 'express';
 import analysisController from '../analysis/analysis-controller';
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
-import authenticateJWT from '../middlewares/auth';
+import authenticateJWT from '../middlewares/auth-jwt';
 
 let analysisRouter = express.Router();
 

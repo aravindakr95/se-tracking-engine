@@ -1,4 +1,4 @@
-import HttpResponseType from '../models/common/http-response-type';
+import HttpResponseType from '../models/http/http-response-type';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -58,19 +58,19 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 );
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
+            const deviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
                 .catch(error => {
                     throw CustomException(error.message);
                 });
 
-            if (!deviceId) {
+            if (!deviceIds && !deviceIds.length) {
                 throw CustomException(
-                    `PGSB Device Id '${deviceId}' is not exists for account '${accountNumber}'`,
+                    `PGSB Device Id '${deviceIds}' is not exists for account '${accountNumber}'`,
                     HttpResponseType.NOT_FOUND
                 );
             }
 
-            const result = await pgsbList.findAllPGStatsByDeviceId({ deviceId }).catch(error => {
+            const result = await pgsbList.findAllPGStatsByDeviceIds(deviceIds).catch(error => {
                 throw CustomException(error.message);
             });
 

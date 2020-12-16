@@ -13,22 +13,13 @@ let forecastLogSchema = ForecastReportSchema({
         type: String,
         required: true
     },
-    Forecast: {
-        Predictions: {
-            mean: [
-                {
-                    _id: false,
-                    Timestamp: {
-                        type: String,
-                        required: true
-                    },
-                    Value: {
-                        type: String,
-                        required: true
-                    }
-                }
-            ]
-        }
+    timestamp: {
+        type: String,
+        required: true
+    },
+    value: {
+        type: Number,
+        required: true
     }
 });
 

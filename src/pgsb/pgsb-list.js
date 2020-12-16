@@ -4,7 +4,7 @@ import PGError from '../models/power-grid/pg-error';
 export default function makePGSBList() {
     return Object.freeze({
         addPGStats,
-        findAllPGStatsByDeviceId,
+        findAllPGStatsByDeviceIds,
         addPGError
     });
 
@@ -12,8 +12,8 @@ export default function makePGSBList() {
         return await new PGStat(stats).save();
     }
 
-    async function findAllPGStatsByDeviceId(deviceId) {
-        return await PGStat.find(deviceId).lean();
+    async function findAllPGStatsByDeviceIds(deviceIds) {
+        return PGStat.find({ deviceId: { $in: deviceIds } });
     }
 
     async function addPGError(error) {

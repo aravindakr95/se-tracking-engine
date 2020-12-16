@@ -1,4 +1,4 @@
-import HttpResponseType from '../models/common/http-response-type';
+import HttpResponseType from '../models/http/http-response-type';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -121,7 +121,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     });
                 } else {
                     throw CustomException(
-                        `Requested Device Id '${deviceId}' not found`,
+                        `Requested Device Id '${deviceId}' not associated with any account`,
                         HttpResponseType.NOT_FOUND
                     );
                 }

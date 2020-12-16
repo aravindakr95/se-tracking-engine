@@ -61,23 +61,27 @@ let consumerSchema = ConsumerSchema({
     status: {
         type: String,
         required: true,
-        default: 'INACTIVE',
+        default: 'ACTIVE',
         enum: ['INACTIVE', 'ACTIVE']
     },
     devices: [
         {
             _id: false,
-            type: {
+            floor: {
                 type: String,
                 required: true,
-                enum: ['PGSB', 'PVSB']
+                enum: ['Ground Floor', 'First Floor', 'Second Floor']
+            },
+            description: {
+                type: String,
+                default: ''
             },
             deviceId: {
                 type: String,
                 required: true
             },
             slaveId: {
-                type: String,
+                type: Number,
                 default: null
             }
         }

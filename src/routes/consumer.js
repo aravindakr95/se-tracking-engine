@@ -3,7 +3,7 @@ import express from 'express';
 import consumerController from '../consumer/consumer-controller';
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
-import authenticateJWT from '../middlewares/auth';
+import authenticateJWT from '../middlewares/auth-jwt';
 
 let consumerRouter = express.Router();
 

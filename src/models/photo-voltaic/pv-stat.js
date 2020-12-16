@@ -11,9 +11,11 @@ let pvStatSchema = PVStatSchema({
         type: Number,
         default: null
     },
-    deviceId: {
-        type: String,
-        required: true
+    accountNumber: {
+        type: Number,
+        required: true,
+        minlength: 10,
+        maxlength: 10
     },
     load: {
         type: Number,

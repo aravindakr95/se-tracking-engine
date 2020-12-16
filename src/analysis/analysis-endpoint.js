@@ -1,15 +1,13 @@
 import config from '../config/config';
 
-import HttpResponseType from '../models/common/http-response-type';
+import HttpResponseType from '../models/http/http-response-type';
 import AccountStatus from '../models/common/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInPreviousMonth, getNextMonthString, getPreviousDate } from '../helpers/utilities/date-resolver';
+import { daysInPreviousMonth, getCurrentMonthString, getPreviousDate } from '../helpers/utilities/date-resolver';
 import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
-import { configSMS, sendSMS } from '../helpers/sms/messenger';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
-import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
 export default function makeAnalysisEndPointHandler({
     analysisList,
@@ -56,6 +54,11 @@ export default function makeAnalysisEndPointHandler({
 
     // execute on 1st day of the month at 09.00 Hours (IST)
     async function generateReports() {
+        const dateNow = new Date();
+
+        let groundFloorPGStats = [];
+        let firstFloorPGStats = [];
+
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
@@ -64,7 +67,7 @@ export default function makeAnalysisEndPointHandler({
 
             if (log && log.isCompleted) {
                 throw CustomException(
-                    `Reports already generated for '${billingPeriod}' previous month`,
+                    `Reports already generated for '${billingPeriod}' month`,
                     HttpResponseType.CONFLICT
                 );
             }
@@ -75,6 +78,8 @@ export default function makeAnalysisEndPointHandler({
                 });
 
             if (consumers && consumers.length) {
+                let uniqueDeviceIds = [];
+
                 for (const consumer of consumers) {
                     let {
                         accountNumber,
@@ -84,22 +89,23 @@ export default function makeAnalysisEndPointHandler({
                         billingCategory
                     } = consumer;
 
-                    const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
+                    const pgsbDeviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId })
+                    pgsbDeviceIds.forEach((deviceId) => {
+                        if (!uniqueDeviceIds.includes(deviceId)) {
+                            uniqueDeviceIds.push(deviceId);
+                        }
+                    });
+
+                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceIds(uniqueDeviceIds)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
-                        .catch(error => {
-                            throw CustomException(error.message);
-                        });
-
-                    const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId })
+                    const pvsbStats = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber })
                         .catch(error => {
                             throw CustomException(error.message);
                         });
@@ -108,16 +114,26 @@ export default function makeAnalysisEndPointHandler({
                         continue;
                     }
 
+                    pgsbStats.filter(stat => {
+                        stat.slaveId === 101 ? groundFloorPGStats.push(stat) :
+                            firstFloorPGStats.push(stat);
+                    });
+
                     const filteredPVSB = filterCurrentMonthStats('PVSB', pvsbStats);
-                    const filteredPGSB = filterCurrentMonthStats('PGSB', pgsbStats);
+
+                    const filteredGroundStats = filterCurrentMonthStats('PGSB', groundFloorPGStats);
+                    const filteredFirstStats = filterCurrentMonthStats('PGSB', firstFloorPGStats);
 
                     if (!(filteredPVSB && filteredPVSB.length) ||
-                        !(filteredPGSB && filteredPGSB.length)) {
+                        !(filteredGroundStats && filteredFirstStats.length) ||
+                        !(filteredFirstStats && filteredFirstStats.length)) {
                         continue;
                     }
 
                     const sortedPVSB = sortCurrentMonthStats('PVSB', filteredPVSB);
-                    const sortedPGSB = sortCurrentMonthStats('PGSB', filteredPGSB);
+
+                    const sortedGroundPGSB = sortCurrentMonthStats('PGSB', filteredGroundStats);
+                    const sortedFirstPGSB = sortCurrentMonthStats('PGSB', filteredFirstStats);
 
                     const energyToday = filteredPVSB.map(stat => stat.energyToday);
 
@@ -128,11 +144,12 @@ export default function makeAnalysisEndPointHandler({
                     const consumptionDetails = calculateConsumption(
                         dateInstance,
                         consumer,
-                        sortedPGSB,
+                        sortedGroundPGSB,
+                        sortedFirstPGSB,
                         productionDetails,
                         billingDuration);
 
-                    const forecastPeriod = getNextMonthString(new Date());
+                    const forecastPeriod = getCurrentMonthString(dateNow);
 
                     const forecastValues = await forecastList.findForecastReportByAccountNumber(
                         accountNumber, forecastPeriod
@@ -140,11 +157,8 @@ export default function makeAnalysisEndPointHandler({
                         throw CustomException(error.message);
                     });
 
-                    const forecastedPayable = forecastValues ? forecastValues.Forecast.Predictions.mean
-                        .map(field => field.Value) : 0;
-
                     const forecastedValues = {
-                        forecastedPayable: forecastedPayable ? forecastedPayable[0] : 0
+                        forecastedPayable: forecastValues.value
                     };
 
                     const commonDetails = {
@@ -190,7 +204,6 @@ export default function makeAnalysisEndPointHandler({
 
             throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
         } catch (error) {
-            console.log(error.message);
             return objectHandler({
                 code: error.code,
                 message: error.message
@@ -201,11 +214,6 @@ export default function makeAnalysisEndPointHandler({
     // execute on 1st day of the month at 15.00 Hours (IST)
     async function dispatchReports() {
         try {
-            const smsOptions = {
-                url: config.notifier.IBSMSOut,
-                method: 'post'
-            };
-
             const { billingPeriod } = getPreviousDate();
 
             const reports = await analysisList.findAllReportsForMonth({ billingPeriod })
@@ -221,15 +229,6 @@ export default function makeAnalysisEndPointHandler({
             }
 
             for (const report of reports) {
-                const smsTemplate = getInvoiceSMSTemplate(report);
-
-                const sms = configSMS(report.contactNumber, smsTemplate);
-
-                //WARNING: limited resource use with care
-                await sendSMS(smsOptions, sms).catch(error => {
-                    throw CustomException(error.message);
-                });
-
                 const templateReport = Object.assign(report, {
                     bodyTitle: `Electricity EBILL for ${billingPeriod}`,
                     currency: config.currency,

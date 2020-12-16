@@ -3,23 +3,25 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-    environment: 'prod', // dev, prod
+    environment: 'dev', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
     timezone: '+05:30',
+    adminToken: '3c31292i0t20mdp6s8hgg4y2tvc0iy',
+    inverter: {
+        url: 'http://apiapp.le-pv.com:8080/api/equipDetail',
+        serialNumber: process.env.RENAC_SN,
+        email: process.env.RENAC_EMAIL
+    },
     database: {
-        url: 'se-tracking-engine.jw1zk.mongodb.net',
+        url: 'mongodb://127.0.0.1:27017', // mongodb://127.0.0.1:27017
         name: 'se-tracking-engine',
         user: 'admin',
         credentials: process.env.DB_CREDENTIALS
     },
     notifier: {
         admin: 'inquiries@brilliant-apps.club',
-        mailAuthToken: process.env.POSTMARK_AUTH_TOKEN,
-        IBAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
-        IBSMSOut: process.env.IDEABIZ_SMS_OUT,
-        IBOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
-        IBOTPVerify: process.env.IDEABIZ_OTP_VERIFY
+        mailAuthToken: process.env.POSTMARK_AUTH_TOKEN
     },
     authentication: {
         jwtSecret: process.env.JWT_AUTH_KEY,
@@ -28,12 +30,6 @@ const config = {
     deployment: {
         host: '127.0.0.1',
         port: process.env.PORT || 3000
-    },
-    sdk: {
-        accessKey: process.env.AWS_ACCESS_KEY,
-        secretKey: process.env.AWS_SECRET_KEY,
-        sessionToken: process.env.AWS_SESSION_TOKEN,
-        forecastArn: process.env.AWS_FORECAST_ARN
     }
 };
 

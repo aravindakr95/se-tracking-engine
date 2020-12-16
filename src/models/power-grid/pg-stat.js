@@ -12,7 +12,7 @@ let powerGridStatSchema = PgStatSchema({
         required: true
     },
     slaveId: {
-        type: String,
+        type: Number,
         required: true
     },
     currentRound: {

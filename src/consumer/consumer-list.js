@@ -7,7 +7,7 @@ export default function makeConsumerList() {
         findConsumersByStatus,
         findConsumerByAccNumber,
         findConsumerByDeviceId,
-        findDeviceIdByAccNumber,
+        findDeviceIdsByAccNumber,
         updateConsumerByAccNumber,
         updateConsumerStatusByContactNumber,
         deleteConsumerByAccNumber
@@ -35,14 +35,12 @@ export default function makeConsumerList() {
         });
     }
 
-    async function findDeviceIdByAccNumber(accNumber, type) {
+    async function findDeviceIdsByAccNumber(accNumber) {
         try {
             const consumer = await findConsumerByAccNumber(accNumber);
 
             if (consumer && consumer.devices) {
-                const { deviceId } = consumer.devices.find(device => device.type === type);
-
-                return deviceId;
+                return consumer.devices.map(device => device.deviceId);
             } else {
                 return null;
             }

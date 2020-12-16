@@ -1,5 +1,5 @@
 import handleForecastRequest from './index';
-import HttpResponseType from '../models/common/http-response-type';
+import HttpResponseType from '../models/http/http-response-type';
 
 import normalizedRequest from '../helpers/utilities/normalize-request';
 
@@ -17,7 +17,6 @@ export default function forecastController(req, res) {
             }
         })
         .catch((error) => {
-            console.log(error);
             errorResponse(res, {
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message

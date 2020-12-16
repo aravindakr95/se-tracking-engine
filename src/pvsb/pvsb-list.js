@@ -1,13 +1,11 @@
 import PVStat from '../models/photo-voltaic/pv-stat';
-import PVError from '../models/photo-voltaic/pv-error';
 
 import config from '../config/config';
 
 export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
-        addPVError,
-        findAllPVStatsByDeviceId,
+        findAllPVStatsByAccountNumber,
         mapPayload
     });
 
@@ -15,22 +13,18 @@ export default function makePVSBList() {
         return await new PVStat(stats).save();
     }
 
-    async function addPVError(error) {
-        return await new PVError(error).save();
+    async function findAllPVStatsByAccountNumber(accountNumber) {
+        return await PVStat.find(accountNumber).lean();
     }
 
-    async function findAllPVStatsByDeviceId(deviceId) {
-        return await PVStat.find(deviceId).lean();
-    }
-
-    function mapPayload(deviceId, fetchMode, body) {
-        const { results, success } = body;
+    function mapPayload(pvStats, accountNumber) {
+        const { results, success } = pvStats;
         const customPayload = {};
-        const ssTimestamp = fetchMode === 'API' ? new Date(results['TIME'] + config.timezone).getTime() : null;
+        const ssTimestamp = new Date(results['TIME'] + config.timezone).getTime();
 
         if (results && success) {
             customPayload['snapshotTimestamp'] = ssTimestamp;
-            customPayload['deviceId'] = deviceId;
+            customPayload['accountNumber'] = accountNumber;
             customPayload['load'] = results['LOAD'];
             customPayload['pv'] = results['PV'];
             customPayload['energyToday'] = results['ENERGY_TODAY'];
