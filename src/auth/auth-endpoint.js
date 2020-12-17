@@ -103,7 +103,7 @@ export default function makeAuthEndPointHandler({ authList }) {
 
             if (!consumer) {
                 throw CustomException(
-                    `Consumer '${body.email}' pending account create failed`
+                    `Consumer '${body.email}' account create failed`
                 );
             }
 

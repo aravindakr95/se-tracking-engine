@@ -54,11 +54,13 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 throw CustomException(error.message);
             });
 
-            if (!pvStats && !pvStats.data) {
+            const { data } = pvStats;
+
+            if (!pvStats && !data) {
                 throw CustomException('PV statistics retrieval failed from the manufacturer server');
             }
 
-            const customPayload = pvsbList.mapPayload(pvStats.data, accountNumber);
+            const customPayload = pvsbList.mapPayload(data, accountNumber);
 
             if (!customPayload) {
                 throw CustomException(
@@ -72,7 +74,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             });
 
             if (result) {
-                await distributeStats(pvStats, OperationStatus.PVSuccess).catch(error => {
+                await distributeStats(data, OperationStatus.PVSuccess).catch(error => {
                     throw CustomException(error.message);
                 });
 
