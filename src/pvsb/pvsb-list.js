@@ -7,6 +7,7 @@ export default function makePVSBList() {
         addPVStats,
         findAllPVStatsByAccountNumber,
         findLatestPVStatByAccountNumber,
+        flushPVData,
         mapPayload
     });
 
@@ -23,6 +24,10 @@ export default function makePVSBList() {
             .find(accountNumber)
             .sort({ timestamp: -1 })
             .limit(1);
+    }
+
+    async function flushPVData(dateMS) {
+        return PVStat.deleteMany({ snapshotTimestamp: { $lte: dateMS } });
     }
 
     function mapPayload(pvStats, accountNumber) {

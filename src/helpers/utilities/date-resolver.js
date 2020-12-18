@@ -8,6 +8,7 @@ function daysInPreviousMonth() {
 function getPreviousDate() {
     const date = new Date();
     date.setDate(0);
+    date.setHours(23, 59, 59, 999);
 
     const year = date.getFullYear();
     const month = date.getMonth() + 1;

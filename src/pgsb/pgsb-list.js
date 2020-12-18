@@ -6,7 +6,9 @@ export default function makePGSBList() {
         addPGStats,
         findAllPGStatsByDeviceIds,
         findLatestPGStatByDeviceIds,
-        addPGError
+        flushPGData,
+        addPGError,
+        flushPGErrorData
     });
 
     async function addPGStats(stats) {
@@ -26,5 +28,13 @@ export default function makePGSBList() {
 
     async function addPGError(error) {
         return await new PGError(error).save();
+    }
+
+    async function flushPGData(dateMS) {
+        return PGStat.deleteMany({ timestamp: { $lte: dateMS } });
+    }
+
+    async function flushPGErrorData(dateMS) {
+        return PGError.deleteMany({ timestamp: { $lte: dateMS } });
     }
 }
