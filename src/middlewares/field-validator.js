@@ -57,6 +57,14 @@ function authValidator(route) {
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),
+            body('subscribers', 'Subscribers is required').exists()
+                .isArray().withMessage('Subscribers should be Array'),
+            body('subscribers.*.holder')
+                .exists().withMessage('Subscribers.Holder is required')
+                .isString().withMessage('Subscribers.Holder should be String'),
+            body('subscribers.*.email')
+                .exists().withMessage('Subscribers.Email is required')
+                .isString().withMessage('Subscribers.Email should be String'),
             body('password')
                 .exists().withMessage('Password is required')
                 .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
@@ -170,6 +178,14 @@ function consumersValidator(method) {
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),
+            body('subscribers', 'Subscribers is required').exists()
+                .isArray().withMessage('Subscribers should be Array'),
+            body('subscribers.*.holder')
+                .exists().withMessage('Subscribers.Holder is required')
+                .isString().withMessage('Subscribers.Holder should be String'),
+            body('subscribers.*.email')
+                .exists().withMessage('Subscribers.Email is required')
+                .isString().withMessage('Subscribers.Email should be String'),
             body('password')
                 .exists().withMessage('Password is required')
                 .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
