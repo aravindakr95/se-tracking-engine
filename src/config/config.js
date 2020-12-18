@@ -6,7 +6,6 @@ const config = {
     environment: 'prod', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
-    timezone: '+05:30',
     adminToken: process.env.ADMIN_TOKEN,
     distributor: {
         gridSuccessUrl: 'http://apps2.malindaprasad.com/home/em/send.php',

@@ -1,7 +1,5 @@
 import PVStat from '../models/photo-voltaic/pv-stat';
 
-import config from '../config/config';
-
 export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
@@ -33,7 +31,7 @@ export default function makePVSBList() {
     function mapPayload(pvStats, accountNumber) {
         const { results, success } = pvStats;
         const customPayload = {};
-        const ssTimestamp = new Date(results['TIME'] + config.timezone).getTime();
+        const ssTimestamp = new Date(results['TIME']).getTime();
 
         if (results && success) {
             customPayload['snapshotTimestamp'] = ssTimestamp;
