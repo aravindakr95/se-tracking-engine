@@ -6,7 +6,7 @@ function getAvgValues(reports, endDate) {
 
     if (reports || !reports.length) {
         return {
-            timestamp: endDate.getTime(),
+            endDate: endDate.getTime(),
             value: makeTwoDecimalNumber(0)
         };
     }
@@ -16,7 +16,7 @@ function getAvgValues(reports, endDate) {
     });
 
     return {
-        timestamp: endDate.getTime(),
+        endDate: endDate.getTime(),
         value: makeTwoDecimalNumber(totalValues / reports.length)
     };
 }

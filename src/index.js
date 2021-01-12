@@ -28,6 +28,7 @@ import pgsbRouter from './routes/pgsb';
 import pvsbRouter from './routes/pvsb';
 import analysisRouter from './routes/analysis';
 import forecastRouter from './routes/forecast';
+import metaRouter from './routes/meta';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/v1/sete/pgsb', pgsbRouter);
 app.use('/v1/sete/pvsb', pvsbRouter);
 app.use('/v1/sete/analysis', analysisRouter);
 app.use('/v1/sete/forecast', forecastRouter);
+app.use('/v1/sete/meta', metaRouter);
 
 app.all('*',
     authenticateJWT,

@@ -2,11 +2,13 @@ import axios from 'axios';
 
 import config from '../../config/config';
 
+import OperationStatus from '../../models/common/operation-status';
+
 async function distributeStats(stats, type) {
     let options = null;
 
     switch (type) {
-    case 'GridSuccess':
+    case OperationStatus.GridSuccess:
         options = {
             url: config.distributor.gridSuccessUrl,
             method: 'get',
@@ -30,7 +32,7 @@ async function distributeStats(stats, type) {
         };
 
         return await axios.get(options.url, options);
-    case 'GridError':
+    case OperationStatus.GridError:
         options = {
             url: config.distributor.gridErrorUrl,
             method: 'get',
@@ -47,7 +49,7 @@ async function distributeStats(stats, type) {
         };
 
         return await axios.get(options.url, options);
-    case 'PVSuccess':
+    case OperationStatus.PVSuccess:
         options = {
             url: config.distributor.pvSuccessUrl,
             method: 'post',

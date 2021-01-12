@@ -69,6 +69,14 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 );
             }
 
+            if (customPayload &&
+                (!customPayload.totalEnergy && !customPayload.inverterTemp)) {
+                throw CustomException(
+                    `Inverter data for '${accountNumber}' payload statistics ignored because body is not valid`,
+                    HttpResponseType.CLIENT_ERROR
+                );
+            }
+
             const result = await pvsbList.addPVStats(customPayload).catch(error => {
                 throw CustomException(error.message);
             });

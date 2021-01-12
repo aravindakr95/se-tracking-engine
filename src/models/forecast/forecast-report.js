@@ -3,6 +3,10 @@ import mongoose from 'mongoose';
 const ForecastReportSchema = mongoose.Schema;
 
 let forecastLogSchema = ForecastReportSchema({
+    timestamp: {
+        type: Number,
+        default: Date.now()
+    },
     accountNumber: {
         type: Number,
         required: true,
@@ -13,8 +17,8 @@ let forecastLogSchema = ForecastReportSchema({
         type: String,
         required: true
     },
-    timestamp: {
-        type: String,
+    endDate: {
+        type: Number,
         required: true
     },
     value: {

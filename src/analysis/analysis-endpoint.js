@@ -159,7 +159,7 @@ export default function makeAnalysisEndPointHandler({
                     });
 
                     const forecastedValues = {
-                        forecastedPayable: forecastValues.value
+                        forecastedPayable: forecastValues.value || 0
                     };
 
                     const commonDetails = {
@@ -201,6 +201,7 @@ export default function makeAnalysisEndPointHandler({
                     await pgsbList.flushPGData(lastDayMS).catch(error => {
                         throw CustomException(error.message);
                     });
+
                     await pgsbList.flushPGErrorData(lastDayMS).catch(error => {
                         throw CustomException(error.message);
                     });

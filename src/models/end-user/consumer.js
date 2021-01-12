@@ -6,7 +6,7 @@ const ConsumerSchema = mongoose.Schema;
 let consumerSchema = ConsumerSchema({
     timestamp: {
         type: Number,
-        default: Date.now
+        default: Date.now()
     },
     deviceToken: {
         type: String,

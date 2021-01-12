@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
+    version: process.env.npm_package_version,
     environment: 'prod', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
