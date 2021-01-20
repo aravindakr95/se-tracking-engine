@@ -8,6 +8,83 @@ function calculateIncome(dateTime, consumer, bfUnits) {
     }
 }
 
+function calculateFixedCharge(units) {
+    if (units > 60) {
+        if (units > 180)
+            return 540.00;
+        if (units >= 121)
+            return 480.00;
+        if (units >= 91)
+            return 480.00;
+        if (units >= 61)
+            return 90.00;
+        if (units >= 0)
+            return 0;
+    }
+
+    if (units <= 60) {
+        if (units >= 31)
+            return 60.00;
+        if (units >= 0)
+            return 30.00;
+    }
+}
+
+function calculateUnitCharges(units) {
+    if (units > 60) {
+        if (units > 180)
+            return priceBlockSeven(units);
+        if (units >= 121)
+            return priceBlockSix(units);
+        if (units >= 91)
+            return priceBlockFive(units);
+        if (units >= 61)
+            return priceBlockFour(units);
+        if (units >= 0)
+            return priceBlockThree(units);
+    }
+
+    if (units <= 60) {
+        if (units >= 31)
+            return priceBlockTwo(units);
+        if (units >= 0)
+            return priceBlockOne(units);
+    }
+}
+
+function priceBlockOne(units) {
+    return 2.50 * units;
+}
+
+function priceBlockTwo(units) {
+    const blockOne = priceBlockOne(30);
+    return (4.85 * (units - 30)) + blockOne;
+}
+
+function priceBlockThree(units) {
+    return 7.85 * units;
+}
+
+function priceBlockFour(units) {
+    const blockThree = priceBlockThree(60);
+    return (10 * (units - 60) + blockThree);
+}
+
+function priceBlockFive(units) {
+    const blockFour = priceBlockFour(90);
+    return (27.75 * (units - 90) + blockFour);
+}
+
+function priceBlockSix(units) {
+    const blockFive = priceBlockFive(120);
+    return (32.00 * (units - 120) + blockFive);
+}
+
+function priceBlockSeven(units) {
+    const blockSix = priceBlockSix(180);
+    return (32.00 * (units - 180) + blockSix);
+}
+
 function calculateExpense(category, units) {
     //todo: for the moment D-1 only
     if (category !== 'D-1') {
@@ -18,65 +95,18 @@ function calculateExpense(category, units) {
         };
     }
 
-    if (units <= 60) {
-        if (units <= 30 && units > 0) {
-            return {
-                fixedCharge: 30,
-                grossAmount: (2.50 * units),
-                netAmount: 30 +  (2.50 * units)
-            };
-        }
+    const grossAmount = calculateUnitCharges(units);
+    const fixedCharge = calculateFixedCharge(units);
+    const netAmount = grossAmount + fixedCharge;
 
-        if (units > 30 && units <= 60) {
-            return {
-                fixedCharge: 60,
-                grossAmount: (4.85 * units),
-                netAmount: 60 +  (4.85 * units)
-            };
-        }
-    }
-
-    if (units > 60) {
-        if (units <= 61 && units > 0) {
-            return {
-                fixedCharge: 0,
-                grossAmount: (7.85 * units) ,
-                netAmount: (7.85 * units)
-            }; // no fixed charge
-        }
-
-        if (units > 60 && units <= 90) {
-            return {
-                fixedCharge: 90,
-                grossAmount: (10 * units),
-                netAmount: 90 +  (10 * units)
-            };
-        }
-
-        if (units > 90 && units <= 120) {
-            return {
-                fixedCharge: 480,
-                grossAmount: (27.75 * units),
-                netAmount: 480 +  (27.75 * units)
-            };
-        }
-
-        if (units > 120 && units <= 180) {
-            return {
-                fixedCharge: 480,
-                grossAmount: (32.00 * units),
-                netAmount: 480 +  (32.00 * units)
-            };
-        }
-
-        if (units > 180) {
-            return {
-                fixedCharge: 540,
-                grossAmount: (45 * units) ,
-                netAmount: 540 +  (45 * units)
-            };
-        }
-    }
+    return {
+        fixedCharge,
+        grossAmount,
+        netAmount
+    };
 }
 
-module.exports = { calculateIncome, calculateExpense };
+module.exports = {
+    calculateIncome,
+    calculateExpense
+};

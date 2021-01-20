@@ -1,13 +1,54 @@
 import { makeTwoDecimalNumber } from './number-resolver';
 import { calculateIncome, calculateExpense } from './price-resolver';
+import { CustomException } from './custom-exception';
 
-function calculateProduction(pvsb, energyToday) {
-    const energyLength = energyToday.length;
-    const { startingValue, endingValue } = pvsb;
-    const energyTotal = energyToday.reduce((valueOne, valueTwo) => valueOne + valueTwo, 0);
+function calculateDailyProduction(pvStats) {
+    if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
+        throw CustomException('CalculateDailyProduction(): PV stats, PV stats latest or old fields are empty');
+    }
 
-    const totalProduction = makeTwoDecimalNumber(endingValue.totalEnergy - startingValue.totalEnergy);
-    const avgDailyProduction = makeTwoDecimalNumber(energyTotal / energyLength);
+    const result = pvStats.latest.totalEnergy - pvStats.oldest.totalEnergy;
+
+    return makeTwoDecimalNumber(result);
+}
+
+function calculateDailyConsumption(pgStats) {
+    if (!pgStats || (!pgStats[0].latest.length || !pgStats[0].oldest.length)) {
+        throw CustomException('CalculateDailyConsumption(): PG stats, PG stats latest or old fields are empty');
+    }
+
+    const groundFloorLatest = pgStats[0].latest
+        .find(stat => stat._id === 101);
+
+    const firstFloorLatest = pgStats[0].latest
+        .find(stat => stat._id === 201);
+
+    const groundFloorOldest = pgStats[0].oldest
+        .find(stat => stat._id === 101);
+
+    const firstFloorOldest = pgStats[0].oldest
+        .find(stat => stat._id === 201);
+
+    if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result) ||
+        (!groundFloorOldest.result || !firstFloorOldest.result)) {
+        throw CustomException('CalculateDailyConsumption(): One or more data fields are empty');
+    }
+
+    const result = (groundFloorLatest.result.totalPower - groundFloorOldest.result.totalPower) +
+        (firstFloorLatest.result.totalPower - firstFloorOldest.result.totalPower);
+
+    return makeTwoDecimalNumber(result);
+}
+
+function calculateMonthlyProduction(pvStats, duration) {
+
+    if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
+        throw CustomException('CalculateMonthlyProduction(): PV stats, PV stats latest or old fields are empty');
+    }
+    const { latest, oldest } = pvStats;
+
+    const totalProduction = makeTwoDecimalNumber(latest.totalEnergy - oldest.totalEnergy);
+    const avgDailyProduction = makeTwoDecimalNumber(totalProduction / duration);
 
     return {
         totalProduction,
@@ -15,7 +56,7 @@ function calculateProduction(pvsb, energyToday) {
     };
 }
 
-function calculateConsumption(dateTime, consumer, groundPgsb, firstPgsb, production, duration) {
+function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, duration) {
     let bfUnits = 0;
     let income = 0;
 
@@ -26,14 +67,32 @@ function calculateConsumption(dateTime, consumer, groundPgsb, firstPgsb, product
 
     let expense = null;
 
-    if (!groundPgsb || !firstPgsb) {
-        return null;
+    if (!pgStats || (!pgStats[0].latest.length || !pgStats[0].oldest.length)) {
+        throw CustomException('CalculateMonthlyConsumption(): PG stats, PG stats latest or old fields are empty');
     }
 
-    const groundTotalPower = groundPgsb.endingValue.totalPower - groundPgsb.startingValue.totalPower;
-    const firstTotalPower = firstPgsb.endingValue.totalPower - firstPgsb.startingValue.totalPower;
+    const groundFloorLatest = pgStats[0].latest
+        .find(stat => stat._id === 101);
 
-    const totalConsumption = makeTwoDecimalNumber(groundTotalPower + firstTotalPower);
+    const firstFloorLatest = pgStats[0].latest
+        .find(stat => stat._id === 201);
+
+    const groundFloorOldest = pgStats[0].oldest
+        .find(stat => stat._id === 101);
+
+    const firstFloorOldest = pgStats[0].oldest
+        .find(stat => stat._id === 201);
+
+    if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result) ||
+        (!groundFloorOldest.result || !firstFloorOldest.result)) {
+        throw CustomException('CalculateMonthlyConsumption(): One or more data fields are empty');
+    }
+
+    const totalConsumption = makeTwoDecimalNumber(
+        (groundFloorLatest.result.totalPower - groundFloorOldest.result.totalPower) +
+        (firstFloorLatest.result.totalPower - firstFloorOldest.result.totalPower)
+    );
+
     const excessEnergy = makeTwoDecimalNumber(production.totalProduction - totalConsumption);
 
     const avgDailyConsumption = makeTwoDecimalNumber(totalConsumption / duration);
@@ -72,4 +131,9 @@ function calculateConsumption(dateTime, consumer, groundPgsb, firstPgsb, product
     };
 }
 
-module.exports = { calculateProduction, calculateConsumption };
+module.exports = {
+    calculateDailyProduction,
+    calculateDailyConsumption,
+    calculateMonthlyProduction,
+    calculateMonthlyConsumption
+};

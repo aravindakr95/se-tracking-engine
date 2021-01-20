@@ -123,10 +123,10 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 );
             }
 
-            if (result && result.length) {
+            if (result || (result[0].latest && result[0].latest.length)) {
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
-                    data: result,
+                    data: result[0].latest,
                     message: ''
                 });
             } else {

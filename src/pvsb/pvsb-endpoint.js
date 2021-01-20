@@ -122,6 +122,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 result = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber }).catch(error => {
                     throw CustomException(error.message);
                 });
+
             } else if (type === 'LATEST') {
                 result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber }).catch(error => {
                     throw CustomException(error.message);
@@ -132,7 +133,6 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                     HttpResponseType.NOT_FOUND
                 );
             }
-
 
             if (result && result.length) {
                 return objectHandler({

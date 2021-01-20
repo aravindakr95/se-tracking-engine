@@ -4,6 +4,7 @@ export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
         findAllPVStatsByAccountNumber,
+        findLatestOldestPVStatByTime,
         findLatestPVStatByAccountNumber,
         flushPVData,
         mapPayload
@@ -15,6 +16,27 @@ export default function makePVSBList() {
 
     async function findAllPVStatsByAccountNumber(accountNumber) {
         return PVStat.find(accountNumber).lean();
+    }
+
+    async function findLatestOldestPVStatByTime(accountNumber, endTime, startTime) {
+        const latestPVStat = await PVStat.findOne({
+            accountNumber: accountNumber,
+            snapshotTimestamp: { $lte: endTime, $gte: startTime }
+        })
+            .sort({ timestamp: -1 }) // latest doc
+            .limit(1);
+
+        const oldestPVStat = await PVStat.findOne({
+            accountNumber: accountNumber,
+            snapshotTimestamp: { $lte: endTime, $gte: startTime }
+        })
+            .sort({ timestamp: 1 }) // oldest doc
+            .limit(1);
+
+        return {
+            latest: latestPVStat,
+            oldest: oldestPVStat
+        };
     }
 
     async function findLatestPVStatByAccountNumber(accountNumber) {

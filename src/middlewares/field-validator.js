@@ -1,6 +1,9 @@
 import { body, param, validationResult } from 'express-validator';
-import { errorResponse } from '../helpers/response/response-dispatcher';
+
 import HttpResponseType from '../models/http/http-response-type';
+import HttpMethod from '../models/http/http-method';
+
+import { errorResponse } from '../helpers/response/response-dispatcher';
 
 function fieldStateChecker(req, res, next) {
     const errors = validationResult(req);
@@ -28,6 +31,8 @@ const validate = (main, route, method) => {
         return pvsbValidator(route);
     case 'consumers':
         return consumersValidator(method);
+    case 'summary':
+        return summaryValidator(method);
     case 'analysis':
         return reportsValidator(route);
     case 'forecast':
@@ -219,6 +224,15 @@ function consumersValidator(method) {
                 .exists().withMessage('Devices.SlaveId is required')
                 .isNumeric().withMessage('Devices.SlaveId should be Number')
         ];
+    default:
+        return [];
+    }
+}
+
+function summaryValidator(method) {
+    switch (method) {
+    case HttpMethod.POST:
+        return [];
     default:
         return [];
     }

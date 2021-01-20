@@ -26,8 +26,9 @@ import authRouter from './routes/auth';
 import consumerRouter from './routes/consumer';
 import pgsbRouter from './routes/pgsb';
 import pvsbRouter from './routes/pvsb';
-import analysisRouter from './routes/analysis';
+import summaryRouter from './routes/summary';
 import forecastRouter from './routes/forecast';
+import analysisRouter from './routes/analysis';
 import metaRouter from './routes/meta';
 
 const app = express();
@@ -42,8 +43,9 @@ app.use('/v1/sete/auth', authRouter);
 app.use('/v1/sete/consumers', consumerRouter);
 app.use('/v1/sete/pgsb', pgsbRouter);
 app.use('/v1/sete/pvsb', pvsbRouter);
-app.use('/v1/sete/analysis', analysisRouter);
+app.use('/v1/sete/summary', summaryRouter);
 app.use('/v1/sete/forecast', forecastRouter);
+app.use('/v1/sete/analysis', analysisRouter);
 app.use('/v1/sete/meta', metaRouter);
 
 app.all('*',

@@ -2,12 +2,16 @@ import config from '../config/config';
 
 import HttpResponseType from '../models/http/http-response-type';
 import AccountStatus from '../models/common/account-status';
-import DeviceType from '../models/common/device-type';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInPreviousMonth, getCurrentMonthString, getPreviousDate } from '../helpers/utilities/date-resolver';
-import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
+import {
+    daysInPreviousMonth,
+    getCurrentMonthString,
+    getPreviousDate,
+    getPreviousMonthStartEndDate
+} from '../helpers/utilities/date-resolver';
+import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/utilities/throughput-resolver';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
 
 export default function makeAnalysisEndPointHandler({
@@ -57,18 +61,16 @@ export default function makeAnalysisEndPointHandler({
     async function generateReports() {
         const dateNow = new Date();
 
-        let groundFloorPGStats = [];
-        let firstFloorPGStats = [];
-
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
+            const { startTime, endTime } = getPreviousMonthStartEndDate();
 
             const log = await analysisList.findReportLog({ billingPeriod });
 
             if (log && log.isCompleted) {
                 throw CustomException(
-                    `Reports already generated for '${billingPeriod}' month`,
+                    `Monthly reports already generated for '${billingPeriod}'`,
                     HttpResponseType.CONFLICT
                 );
             }
@@ -79,9 +81,9 @@ export default function makeAnalysisEndPointHandler({
                 });
 
             if (consumers && consumers.length) {
-                let uniqueDeviceIds = [];
-
                 for (const consumer of consumers) {
+                    let uniqueDeviceIds = [];
+
                     let {
                         accountNumber,
                         contactNumber,
@@ -101,52 +103,28 @@ export default function makeAnalysisEndPointHandler({
                         }
                     });
 
-                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceIds(uniqueDeviceIds)
+                    const pgsbStats = await pgsbList.findLatestOldestPGStatsByDeviceIds(uniqueDeviceIds, startTime, endTime)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pvsbStats = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber })
+                    const pvsbStats = await pvsbList.findLatestOldestPVStatByTime(accountNumber, startTime, endTime)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    if (!(pvsbStats && pvsbStats.length) || !(pgsbStats && pgsbStats.length)) {
+                    if (!(pvsbStats) || !(pgsbStats && pgsbStats.length)) {
                         continue;
                     }
 
-                    pgsbStats.filter(stat => {
-                        stat.slaveId === 101 ? groundFloorPGStats.push(stat) :
-                            firstFloorPGStats.push(stat);
-                    });
+                    const productionDetails = calculateMonthlyProduction(
+                        pvsbStats,
+                        billingDuration);
 
-                    const filteredPVSB = filterCurrentMonthStats(DeviceType.PVSB, pvsbStats);
-
-                    const filteredGroundStats = filterCurrentMonthStats(DeviceType.PGSB, groundFloorPGStats);
-                    const filteredFirstStats = filterCurrentMonthStats(DeviceType.PGSB, firstFloorPGStats);
-
-                    if (!(filteredPVSB && filteredPVSB.length) ||
-                        !(filteredGroundStats && filteredFirstStats.length) ||
-                        !(filteredFirstStats && filteredFirstStats.length)) {
-                        continue;
-                    }
-
-                    const sortedPVSB = sortCurrentMonthStats(DeviceType.PVSB, filteredPVSB);
-
-                    const sortedGroundPGSB = sortCurrentMonthStats(DeviceType.PGSB, filteredGroundStats);
-                    const sortedFirstPGSB = sortCurrentMonthStats(DeviceType.PGSB, filteredFirstStats);
-
-                    const energyToday = filteredPVSB.map(stat => stat.energyToday);
-
-                    const productionDetails = calculateProduction(
-                        sortedPVSB,
-                        energyToday);
-
-                    const consumptionDetails = calculateConsumption(
+                    const consumptionDetails = calculateMonthlyConsumption(
                         dateInstance,
                         consumer,
-                        sortedGroundPGSB,
-                        sortedFirstPGSB,
+                        pgsbStats,
                         productionDetails,
                         billingDuration);
 
@@ -196,28 +174,28 @@ export default function makeAnalysisEndPointHandler({
                 });
 
                 if (status && status.isCompleted) {
-                    const lastDayMS = dateInstance.getTime();
+                    // const lastDayMS = dateInstance.getTime();
 
-                    await pgsbList.flushPGData(lastDayMS).catch(error => {
-                        throw CustomException(error.message);
-                    });
-
-                    await pgsbList.flushPGErrorData(lastDayMS).catch(error => {
-                        throw CustomException(error.message);
-                    });
-
-                    await pvsbList.flushPVData(lastDayMS).catch(error => {
-                        throw CustomException(error.message);
-                    });
+                    // await pgsbList.flushPGData(lastDayMS).catch(error => {
+                    //     throw CustomException(error.message);
+                    // });
+                    //
+                    // await pgsbList.flushPGErrorData(lastDayMS).catch(error => {
+                    //     throw CustomException(error.message);
+                    // });
+                    //
+                    // await pvsbList.flushPVData(lastDayMS).catch(error => {
+                    //     throw CustomException(error.message);
+                    // });
 
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `Reports generated for '${billingPeriod}' is completed`
+                        message: `Monthly reports generated for '${billingPeriod}' is completed`
                     });
                 }
+            } else {
+                throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
             }
-
-            throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
         } catch (error) {
             return objectHandler({
                 code: error.code,
@@ -250,16 +228,18 @@ export default function makeAnalysisEndPointHandler({
                     supplier: config.supplier
                 });
 
-                if (report && report.tariff === 'Net Metering') {
-                    //WARNING: limited resource use with care
-                    await sendEmailPostMark(templateReport, 'monthly-statement-nm').catch(error => {
-                        throw CustomException(error.message);
-                    });
-                } else {
-                    //WARNING: limited resource use with care
-                    await sendEmailPostMark(templateReport, 'monthly-statement-na').catch(error => {
-                        throw CustomException(error.message);
-                    });
+                for (let i = 0; i <= report.subscribers.length; i++) {
+                    if (report && report.tariff === 'Net Metering') {
+                        //WARNING: limited resource use with care
+                        await sendEmailPostMark(templateReport, 'monthly-statement-nm', i).catch(error => {
+                            throw CustomException(error.message);
+                        });
+                    } else {
+                        //WARNING: limited resource use with care
+                        await sendEmailPostMark(templateReport, 'monthly-statement-na', i).catch(error => {
+                            throw CustomException(error.message);
+                        });
+                    }
                 }
             }
 
@@ -411,50 +391,5 @@ export default function makeAnalysisEndPointHandler({
                 message: error.message
             });
         }
-    }
-
-    function filterCurrentMonthStats(type, stats) {
-        const startingDate = new Date();
-        const endingDate = new Date();
-
-        let filteredStats = [];
-
-        startingDate.setDate(0);
-        startingDate.setDate(1);
-
-        endingDate.setDate(0);
-        endingDate.setDate(daysInPreviousMonth());
-
-        const startingMillis = startingDate.setHours(0, 0, 0, 1);
-        const endingMillis = endingDate.setHours(23, 59, 59, 999);
-
-        if (type === DeviceType.PGSB) {
-            filteredStats = stats.filter(stat =>
-                stat.timestamp >= startingMillis && stat.timestamp <= endingMillis);
-
-            filteredStats.sort((dateOne, dateTwo) => dateOne - dateTwo);
-        }
-
-        if (type === DeviceType.PVSB) {
-            filteredStats = stats.filter(stat =>
-                stat.snapshotTimestamp >= startingMillis && stat.snapshotTimestamp <= endingMillis);
-        }
-
-        return filteredStats;
-    }
-
-    function sortCurrentMonthStats(type, stats) {
-        if (type === DeviceType.PGSB) {
-            stats.sort((objOne, objTwo) => objOne.timestamp - objTwo.timestamp);
-        }
-
-        if (type === DeviceType.PVSB) {
-            stats.sort((objOne, objTwo) => objOne.snapshotTimestamp - objTwo.snapshotTimestamp);
-        }
-
-        return {
-            startingValue: stats[0],
-            endingValue: stats[stats.length - 1]
-        };
     }
 }
