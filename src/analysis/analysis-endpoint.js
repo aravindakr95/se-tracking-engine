@@ -222,21 +222,27 @@ export default function makeAnalysisEndPointHandler({
             }
 
             for (const report of reports) {
+                const { accountNumber } = report;
+                const { subscribers } = await consumerList.findConsumerByAccNumber(accountNumber)
+                    .catch(error => {
+                        throw CustomException(error.message);
+                    });
+
                 const templateReport = Object.assign(report, {
                     bodyTitle: `Electricity EBILL for ${billingPeriod}`,
                     currency: config.currency,
                     supplier: config.supplier
                 });
 
-                for (let i = 0; i <= report.subscribers.length; i++) {
+                for (let i = 0; i <= subscribers.length; i++) {
                     if (report && report.tariff === 'Net Metering') {
                         //WARNING: limited resource use with care
-                        await sendEmailPostMark(templateReport, 'monthly-statement-nm', i).catch(error => {
+                        await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-nm', i).catch(error => {
                             throw CustomException(error.message);
                         });
                     } else {
                         //WARNING: limited resource use with care
-                        await sendEmailPostMark(templateReport, 'monthly-statement-na', i).catch(error => {
+                        await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-na', i).catch(error => {
                             throw CustomException(error.message);
                         });
                     }
