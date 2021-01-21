@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
+import { version } from '../../package.json';
 
 dotenv.config();
 
 const config = {
-    version: process.env.npm_package_version,
+    version,
     environment: 'prod', // dev, prod
     currency: 'LKR',
     supplier: 'CEB',
