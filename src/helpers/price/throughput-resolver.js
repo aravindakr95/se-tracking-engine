@@ -1,6 +1,6 @@
-import { makeTwoDecimalNumber } from './number-resolver';
+import { makeTwoDecimalNumber } from '../utilities/number-resolver';
 import { calculateIncome, calculateExpense } from './price-resolver';
-import { CustomException } from './custom-exception';
+import { CustomException } from '../utilities/custom-exception';
 
 function calculateDailyProduction(pvStats) {
     if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
@@ -111,7 +111,7 @@ function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, du
     income = consumer.tariff === 'Net Accounting' ? income : -1;
 
     if (totalGridImported) {
-        expense = calculateExpense(consumer.billingCategory, totalGridImported);
+        expense = calculateExpense(consumer.billingCategory, duration, totalGridImported);
 
         grossAmount = makeTwoDecimalNumber(expense.grossAmount);
         fixedCharge = makeTwoDecimalNumber(expense.fixedCharge);

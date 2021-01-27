@@ -5,7 +5,7 @@ import AccountStatus from '../models/common/account-status';
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { getYesterday } from '../helpers/utilities/date-resolver';
-import { calculateDailyProduction, calculateDailyConsumption } from '../helpers/utilities/throughput-resolver';
+import { calculateDailyProduction, calculateDailyConsumption } from '../helpers/price/throughput-resolver';
 
 export default function makeAnalysisEndPointHandler({ summaryList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {

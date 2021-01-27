@@ -5,7 +5,7 @@ const PVStatSchema = mongoose.Schema;
 let pvStatSchema = PVStatSchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     snapshotTimestamp: {
         type: Number,

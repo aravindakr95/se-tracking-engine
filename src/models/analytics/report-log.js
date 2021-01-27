@@ -5,7 +5,7 @@ const ReportLogSchema = mongoose.Schema;
 let reportLogSchema = ReportLogSchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     billingPeriod: {
         type: String,

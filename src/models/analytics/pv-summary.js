@@ -5,7 +5,7 @@ const PVSummarySchema = mongoose.Schema;
 let pvSummarySchema = PVSummarySchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     accountNumber: {
         type: Number,

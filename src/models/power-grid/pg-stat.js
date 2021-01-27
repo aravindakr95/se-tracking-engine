@@ -5,7 +5,7 @@ const PgStatSchema = mongoose.Schema;
 let powerGridStatSchema = PgStatSchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     deviceId: {
         type: String,

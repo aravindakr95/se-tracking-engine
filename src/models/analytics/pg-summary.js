@@ -5,7 +5,7 @@ const PGSummarySchema = mongoose.Schema;
 let pgSummarySchema = PGSummarySchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     accountNumber: {
         type: Number,

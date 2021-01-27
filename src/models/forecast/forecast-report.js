@@ -5,7 +5,7 @@ const ForecastReportSchema = mongoose.Schema;
 let forecastLogSchema = ForecastReportSchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     accountNumber: {
         type: Number,

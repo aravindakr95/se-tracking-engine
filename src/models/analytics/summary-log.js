@@ -5,7 +5,7 @@ const SummaryLogSchema = mongoose.Schema;
 let summaryLogSchema = SummaryLogSchema({
     timestamp: {
         type: Number,
-        default: Date.now()
+        default: Date.now
     },
     summaryDate: {
         type: String,

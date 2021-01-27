@@ -11,7 +11,7 @@ import {
     getPreviousDate,
     getPreviousMonthStartEndDate
 } from '../helpers/utilities/date-resolver';
-import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/utilities/throughput-resolver';
+import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/price/throughput-resolver';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
 
 export default function makeAnalysisEndPointHandler({
