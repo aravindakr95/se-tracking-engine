@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 
 const PVStatSchema = mongoose.Schema;
 
-let pvStatSchema = PVStatSchema({
+let pvStatSchema = new PVStatSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     snapshotTimestamp: {
         type: Number,
@@ -69,6 +68,8 @@ let pvStatSchema = PVStatSchema({
         type: String,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let pvStat = mongoose.model('PVStat', pvStatSchema, 'pv-stats');

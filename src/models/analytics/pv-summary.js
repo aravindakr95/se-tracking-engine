@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 
 const PVSummarySchema = mongoose.Schema;
 
-let pvSummarySchema = PVSummarySchema({
+let pvSummarySchema = new PVSummarySchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     accountNumber: {
         type: Number,
@@ -33,6 +32,8 @@ let pvSummarySchema = PVSummarySchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let pvSummary = mongoose.model('PVSummary', pvSummarySchema, 'pv-summaries');

@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 
 const PGSummarySchema = mongoose.Schema;
 
-let pgSummarySchema = PGSummarySchema({
+let pgSummarySchema = new PGSummarySchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     accountNumber: {
         type: Number,
@@ -33,6 +32,8 @@ let pgSummarySchema = PGSummarySchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let pgSummary = mongoose.model('PGSummary', pgSummarySchema, 'pg-summaries');

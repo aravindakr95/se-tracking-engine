@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 
-const PgErrorSchema = mongoose.Schema;
+const PGErrorSchema = mongoose.Schema;
 
-let pgErrorSchema = PgErrorSchema({
+let pgErrorSchema = new PGErrorSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     deviceId: {
         type: String,
@@ -27,6 +26,8 @@ let pgErrorSchema = PgErrorSchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let pgError = mongoose.model('PGError', pgErrorSchema, 'pg-errors');

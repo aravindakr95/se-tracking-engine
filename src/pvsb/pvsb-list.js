@@ -42,7 +42,7 @@ export default function makePVSBList() {
     async function findLatestPVStatByAccountNumber(accountNumber) {
         return PVStat
             .find(accountNumber)
-            .sort({ timestamp: -1 })
+            .sort({ snapshotTimestamp: -1 })
             .limit(1);
     }
 

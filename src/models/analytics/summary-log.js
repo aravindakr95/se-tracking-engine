@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 
 const SummaryLogSchema = mongoose.Schema;
 
-let summaryLogSchema = SummaryLogSchema({
+let summaryLogSchema = new SummaryLogSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     summaryDate: {
         type: String,
@@ -15,6 +14,8 @@ let summaryLogSchema = SummaryLogSchema({
         type: Boolean,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let summaryLog = mongoose.model('SummaryLog', summaryLogSchema, 'summary-logs');

@@ -3,10 +3,9 @@ import config from '../../config/config';
 
 const ConsumerSchema = mongoose.Schema;
 
-let consumerSchema = ConsumerSchema({
+let consumerSchema = new ConsumerSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     deviceToken: {
         type: String,
@@ -69,6 +68,7 @@ let consumerSchema = ConsumerSchema({
     accountNumber: {
         type: Number,
         required: true,
+        unique: true,
         minlength: 10,
         maxlength: 10
     },
@@ -100,6 +100,8 @@ let consumerSchema = ConsumerSchema({
             }
         }
     ]
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let Consumer = mongoose.model('Consumer', consumerSchema, 'consumers');

@@ -10,10 +10,9 @@ const date = new Date();
 date.setDate(0);
 const dueDate = new Date(date.getTime() + 12096e5); // 12096e5 = 14 days (magic number programming)
 
-let reportSchema = ReportSchema({
+let reportSchema = new ReportSchema({
     timestamp: {
-        type: Number,
-        default: date.getTime()
+        type: Number
     },
     dueDate: {
         type: String,
@@ -117,6 +116,8 @@ let reportSchema = ReportSchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let report = mongoose.model('Report', reportSchema, 'reports');

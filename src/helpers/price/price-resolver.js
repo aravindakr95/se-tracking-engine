@@ -1,3 +1,5 @@
+import { makeTwoDecimalNumber } from '../utilities/number-resolver';
+
 function calculateIncome(dateTime, consumer, bfUnits) {
     const establishedDuration = dateTime.getFullYear() - consumer.establishedYear;
 
@@ -36,95 +38,93 @@ function calculateUnitCharges(days, units) {
     }
 
     if (units <= 60) {
-        return priceBlockOne(days, units, 'secondary');
+        return priceBlockOne(days, units, 'BELOW_CATEGORY');
     }
 }
 
-function priceBlockOne(days, units, type = 'primary') {
-    const unitCost = type === 'primary' ? 7.85 : 2.50;
+function priceBlockOne(days, units, type = 'ABOVE_CATEGORY') {
+    const unitCost = type === 'ABOVE_CATEGORY' ? 7.85 : 2.50;
     const applicableUnits = units - days;
 
-    let remainBlocks = 0;
-
     if (units < days) {
-        return units * unitCost;
+        return unitCost * units;
     }
 
     if (applicableUnits > 0) {
-        remainBlocks = priceBlockTwo(days, applicableUnits, type);
+        const remainBlocks = priceBlockTwo(days, applicableUnits, type);
+        return (unitCost * days) + remainBlocks;
     }
 
-    return (days * unitCost) + remainBlocks;
+    return unitCost * days;
 }
 
-function priceBlockTwo(days, units, type = 'primary') {
-    const unitCost = type === 'primary' ? 7.85 : 4.85;
+function priceBlockTwo(days, units, type = 'ABOVE_CATEGORY') {
+    const unitCost = type === 'ABOVE_CATEGORY' ? 7.85 : 4.85;
     const applicableUnits = units - days;
 
-    let remainBlocks = 0;
-
     if (units < days) {
-        return units * unitCost;
+        return unitCost * units;
     }
 
     if (applicableUnits > 0) {
-        remainBlocks = priceBlockThree(days, applicableUnits);
+        const remainBlocks = priceBlockThree(days, applicableUnits);
+        return (unitCost * days) + remainBlocks;
     }
 
-    return (days * unitCost) + remainBlocks;
+    return unitCost * days;
 }
 
 function priceBlockThree(days, units) {
-    let remainBlocks = 0;
+    const unitCost = 10.00;
     const applicableUnits = units - days;
 
     if (units < days) {
-        return units * 10.00;
+        return unitCost * units;
     }
 
     if (applicableUnits > 0) {
-        remainBlocks = priceBlockFour(days, applicableUnits);
+        const remainBlocks = priceBlockFour(days, applicableUnits);
+        return (unitCost * days) + remainBlocks;
     }
 
-    return (days * 10.00) + remainBlocks;
+    return unitCost * days;
 }
 
 function priceBlockFour(days, units) {
-    let remainBlocks = 0;
+    const unitCost = 27.75;
     const applicableUnits = units - days;
 
     if (units < days) {
-        return units * 27.75 + remainBlocks;
+        return unitCost * units;
     }
 
     if (applicableUnits > 0) {
-        remainBlocks = priceBlockFive(days, applicableUnits);
+        const remainBlocks = priceBlockFive(days, applicableUnits);
+        return (unitCost * days) + remainBlocks;
     }
 
-    return (days * 27.75) + remainBlocks;
+    return (unitCost * days);
 }
 
 function priceBlockFive(days, units) {
-    let remainBlocks = 0;
+    const unitCost = 32.00;
     const applicableUnits = units - (days * 2);
 
     if (units < days) {
-        return (units * 2) * 32.00 + remainBlocks;
+        return unitCost * units;
     }
 
     if (applicableUnits > 0) {
-        remainBlocks = priceBlockSix(days, applicableUnits);
+        const remainBlocks = priceBlockSix(applicableUnits);
+        return unitCost * (days * 2) + remainBlocks;
     }
 
-    return ((days * 2) * 32.00) + remainBlocks;
+    return unitCost * (days * 2);
 }
 
-function priceBlockSix(days, units) {
-    if (units < days) {
-        return units * 45.00;
-    }
-
-    return days * 45;
+function priceBlockSix(units) {
+    const unitCost = 45.00;
+    return unitCost * units;
 }
 
 function calculateExpense(category, days, units) {
@@ -142,9 +142,9 @@ function calculateExpense(category, days, units) {
     const netAmount = grossAmount + fixedCharge;
 
     return {
-        fixedCharge,
-        grossAmount,
-        netAmount
+        fixedCharge: makeTwoDecimalNumber(fixedCharge),
+        grossAmount: makeTwoDecimalNumber(grossAmount),
+        netAmount: makeTwoDecimalNumber(netAmount)
     };
 }
 
