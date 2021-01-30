@@ -1,6 +1,6 @@
-import HttpResponseType from '../models/http/http-response-type';
-import HttpMethod from '../models/http/http-method';
-import AccountStatus from '../models/common/account-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import HttpMethod from '../enums/http/http-method';
+import AccountStatus from '../enums/account/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';

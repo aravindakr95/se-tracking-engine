@@ -2,13 +2,13 @@ import axios from 'axios';
 
 import config from '../../config/config';
 
-import OperationStatus from '../../models/common/operation-status';
+import OperationStatus from '../../enums/device/operation-status';
 
 async function distributeStats(stats, type) {
     let options = null;
 
     switch (type) {
-    case OperationStatus.GridSuccess:
+    case OperationStatus.GRID_SUCCESS:
         options = {
             url: config.distributor.gridSuccessUrl,
             method: 'get',
@@ -32,7 +32,7 @@ async function distributeStats(stats, type) {
         };
 
         return await axios.get(options.url, options);
-    case OperationStatus.GridError:
+    case OperationStatus.GRID_ERROR:
         options = {
             url: config.distributor.gridErrorUrl,
             method: 'get',
@@ -49,7 +49,7 @@ async function distributeStats(stats, type) {
         };
 
         return await axios.get(options.url, options);
-    case OperationStatus.PVSuccess:
+    case OperationStatus.PV_SUCCESS:
         options = {
             url: config.distributor.pvSuccessUrl,
             method: 'post',

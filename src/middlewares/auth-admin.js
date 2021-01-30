@@ -1,6 +1,8 @@
-import { errorResponse } from '../helpers/response/response-dispatcher';
-import HttpResponseType from '../models/http/http-response-type';
 import config from '../config/config';
+
+import HttpResponseType from '../enums/http/http-response-type';
+
+import { errorResponse } from '../helpers/response/response-dispatcher';
 
 export default function authenticateToGenerate(req, res, next) {
     const adminHeader = req.headers['admin-token'];

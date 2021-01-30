@@ -1,6 +1,6 @@
-import HttpResponseType from '../models/http/http-response-type';
-import OperationStatus from '../models/common/operation-status';
-import HttpMethod from '../models/http/http-method';
+import HttpResponseType from '../enums/http/http-response-type';
+import OperationStatus from '../enums/device/operation-status';
+import HttpMethod from '../enums/http/http-method';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -84,7 +84,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             });
 
             if (result) {
-                await distributeStats(data, OperationStatus.PVSuccess).catch(error => {
+                await distributeStats(data, OperationStatus.PV_SUCCESS).catch(error => {
                     throw CustomException(error.message);
                 });
 

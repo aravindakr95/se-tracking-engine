@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
+
 import config from '../../config/config';
+
+import SchemaType from '../../enums/account/schema-type';
 
 import { getDateString } from '../../helpers/utilities/date-resolver';
 
@@ -29,7 +32,7 @@ let reportSchema = new ReportSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['Net Metering', 'Net Accounting']
+        enum: [SchemaType.NET_METERING, SchemaType.NET_ACCOUNTING]
     },
     accountNumber: {
         type: Number,

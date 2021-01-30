@@ -1,5 +1,5 @@
-import HttpResponseType from '../models/http/http-response-type';
-import OperationStatus from '../models/common/operation-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import OperationStatus from '../enums/device/operation-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -50,7 +50,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 isStored = true;
             }
 
-            await distributeStats(body, OperationStatus.GridSuccess).catch(error => {
+            await distributeStats(body, OperationStatus.GRID_SUCCESS).catch(error => {
                 throw CustomException(error.message);
             });
 
@@ -154,7 +154,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
             });
 
             if (payload) {
-                await distributeStats(body, OperationStatus.GridError).catch(error => {
+                await distributeStats(body, OperationStatus.GRID_ERROR).catch(error => {
                     throw CustomException(error.message);
                 });
 

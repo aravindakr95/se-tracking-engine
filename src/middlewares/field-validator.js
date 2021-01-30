@@ -1,7 +1,7 @@
 import { body, param, validationResult } from 'express-validator';
 
-import HttpResponseType from '../models/http/http-response-type';
-import HttpMethod from '../models/http/http-method';
+import HttpResponseType from '../enums/http/http-response-type';
+import HttpMethod from '../enums/http/http-method';
 
 import { errorResponse } from '../helpers/response/response-dispatcher';
 
@@ -56,9 +56,6 @@ function authValidator(route) {
         ];
     case '/register':
         return [
-            body('establishedYear')
-                .exists().withMessage('Established year is required')
-                .isNumeric().withMessage('Established year should be number'),
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),
@@ -177,9 +174,6 @@ function consumersValidator(method) {
     switch (method) {
     case 'PUT':
         return [
-            body('establishedYear')
-                .exists().withMessage('Established year is required')
-                .isNumeric().withMessage('Established year should be number'),
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),

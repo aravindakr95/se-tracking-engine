@@ -1,7 +1,9 @@
 import handleAuthRequest from './index';
 
+import HttpResponseType from '../enums/http/http-response-type';
+
 import normalizedRequest from '../helpers/utilities/normalize-request';
-import HttpResponseType from '../models/http/http-response-type';
+
 import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
 
 export default function authController(req, res) {

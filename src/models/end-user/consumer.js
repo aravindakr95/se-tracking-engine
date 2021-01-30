@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
+
 import config from '../../config/config';
+
+import SchemaType from '../../enums/account/schema-type';
+import AccountStatus from '../../enums/account/account-status';
 
 const ConsumerSchema = mongoose.Schema;
 
@@ -13,7 +17,7 @@ let consumerSchema = new ConsumerSchema({
     },
     establishedYear: { //connection established year (for yield check)
         type: Number,
-        required: true
+        default: new Date().getFullYear()
     },
     email: {
         type: String,
@@ -63,7 +67,7 @@ let consumerSchema = new ConsumerSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['Net Metering', 'Net Accounting']
+        enum: [SchemaType.NET_METERING, SchemaType.NET_ACCOUNTING]
     },
     accountNumber: {
         type: Number,
@@ -75,8 +79,8 @@ let consumerSchema = new ConsumerSchema({
     status: {
         type: String,
         required: true,
-        default: 'ACTIVE',
-        enum: ['INACTIVE', 'ACTIVE']
+        default: AccountStatus.ACTIVE,
+        enum: [AccountStatus.ACTIVE, AccountStatus.INACTIVE]
     },
     devices: [
         {

@@ -1,7 +1,8 @@
 import config from '../config/config';
 
-import HttpResponseType from '../models/http/http-response-type';
-import AccountStatus from '../models/common/account-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import SchemaType from '../enums/account/schema-type';
+import AccountStatus from '../enums/account/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
@@ -235,7 +236,7 @@ export default function makeAnalysisEndPointHandler({
                 });
 
                 for (let i = 0; i <= subscribers.length; i++) {
-                    if (report && report.tariff === 'Net Metering') {
+                    if (report && report.tariff === SchemaType.NET_METERING) {
                         //WARNING: limited resource use with care
                         await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-nm', i).catch(error => {
                             throw CustomException(error.message);

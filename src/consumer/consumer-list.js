@@ -1,5 +1,6 @@
 import Consumer from '../models/end-user/consumer';
-import AccountStatus from '../models/common/account-status';
+
+import AccountStatus from '../enums/account/account-status';
 
 export default function makeConsumerList() {
     return Object.freeze({

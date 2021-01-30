@@ -1,7 +1,7 @@
 import config from '../config/config';
 
-import HttpResponseType from '../models/http/http-response-type';
-import AccountStatus from '../models/common/account-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import AccountStatus from '../enums/account/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import hashValidator from '../helpers/validators/hash-validator';

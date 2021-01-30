@@ -1,5 +1,6 @@
 import handleForecastRequest from './index';
-import HttpResponseType from '../models/http/http-response-type';
+
+import HttpResponseType from '../enums/http/http-response-type';
 
 import normalizedRequest from '../helpers/utilities/normalize-request';
 

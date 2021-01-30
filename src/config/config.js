@@ -9,6 +9,28 @@ const config = {
     currency: 'LKR',
     supplier: 'CEB',
     adminToken: process.env.ADMIN_TOKEN,
+    prices: {
+        fixed: {
+            blockOne: 30.00,
+            blockTwo: 60.00,
+            blockThree: 90.00,
+            blockFour: 480.00,
+            blockFive: 540.00
+        },
+        import: {
+            blockOne: 2.50,
+            blockTwo: 4.85,
+            blockThree: 7.85,
+            blockFour: 10.00,
+            blockFive: 27.75,
+            blockSix: 32.00,
+            blockSeven: 45.00
+        },
+        export: {
+            blockOne: 15.50,
+            blockTwo: 22.00
+        }
+    },
     distributor: {
         gridSuccessUrl: 'http://apps2.malindaprasad.com/home/em/send.php',
         gridErrorUrl: 'http://apps2.malindaprasad.com/home/error',

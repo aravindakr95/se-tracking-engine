@@ -1,3 +1,5 @@
+import SchemaType from '../../enums/account/schema-type';
+
 import { calculateIncome, calculateExpense } from './price-resolver';
 import { makeTwoDecimalNumber } from '../utilities/number-resolver';
 import { CustomException } from '../utilities/custom-exception';
@@ -96,14 +98,14 @@ function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, du
     const avgDailyConsumption = totalConsumption / duration;
 
     if (excessEnergy > 0) {
-        bfUnits = consumer.tariff === 'Net Metering' ? excessEnergy : -1;
-        income = consumer.tariff === 'Net Accounting' ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
+        bfUnits = consumer.tariff === SchemaType.NET_METERING ? excessEnergy : -1;
+        income = consumer.tariff === SchemaType.NET_ACCOUNTING ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
     } else {
         totalGridImported = Math.abs(excessEnergy);
     }
 
-    bfUnits = consumer.tariff === 'Net Metering' ? bfUnits : -1;
-    income = consumer.tariff === 'Net Accounting' ? makeTwoDecimalNumber(income) : -1;
+    bfUnits = consumer.tariff === SchemaType.NET_METERING ? bfUnits : -1;
+    income = consumer.tariff === SchemaType.NET_ACCOUNTING ? makeTwoDecimalNumber(income) : -1;
 
     if (totalGridImported) {
         expense = calculateExpense(consumer.billingCategory, duration, totalGridImported);

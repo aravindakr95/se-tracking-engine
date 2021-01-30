@@ -1,5 +1,5 @@
-import HttpResponseType from '../models/http/http-response-type';
-import AccountStatus from '../models/common/account-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import AccountStatus from '../enums/account/account-status';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { CustomException } from '../helpers/utilities/custom-exception';
