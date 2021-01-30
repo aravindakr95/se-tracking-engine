@@ -1,11 +1,14 @@
 import dotenv from 'dotenv';
+
 import { version } from '../../package.json';
+
+import EnvironmentType from '../enums/common/environment-type';
 
 dotenv.config();
 
 const config = {
     version,
-    environment: 'prod', // dev, prod
+    environment: EnvironmentType.PRODUCTION, // PRODUCTION, DEVELOPMENT
     currency: 'LKR',
     supplier: 'CEB',
     adminToken: process.env.ADMIN_TOKEN,

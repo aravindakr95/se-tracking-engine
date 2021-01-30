@@ -4,11 +4,13 @@ import dailyRotateFile from 'winston-daily-rotate-file';
 
 import config from './config';
 
+import EnvironmentType from '../enums/common/environment-type';
+
 // define the custom settings for each transport (file, console)
 const options = {
     file: {
         level: 'info',
-        filename: `${appRoot}/logs/${config.environment}/%DATE%.log`,
+        filename: `${appRoot}/logs/${config.environment.toLowerCase()}/%DATE%.log`,
         datePattern: 'MM-DD-YYYY-HH',
         zippedArchive: true,
         handleExceptions: true,
@@ -45,7 +47,7 @@ logger.stream = {
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
 //
 
-if (config.environment !== 'production') {
+if (config.environment !== EnvironmentType.PRODUCTION) {
     logger.add(new winston.transports.Console({
         format: winston.format.simple()
     }));

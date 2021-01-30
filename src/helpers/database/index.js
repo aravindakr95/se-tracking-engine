@@ -2,15 +2,15 @@ import { connect, connection } from 'mongoose';
 
 import config from '../../config/config';
 
+import EnvironmentType from '../../enums/common/environment-type';
+
 export default async function initializeDB() {
     let uri = null;
 
-    if (config.environment === 'prod') {
+    if (config.environment === EnvironmentType.PRODUCTION) {
         uri = `mongodb+srv://${config.database.user}:${config.database.credentials}` +
             `@se-tracking-engine.jw1zk.mongodb.net/${config.database.name}?retryWrites=true&w=majority`;
-    }
-
-    if (config.environment === 'dev') {
+    } else {
         uri = `${config.database.devUri}/${config.database.name}?retryWrites=true&w=majority`;
     }
 
