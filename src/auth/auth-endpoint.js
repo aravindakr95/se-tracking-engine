@@ -96,12 +96,12 @@ export default function makeAuthEndPointHandler({ authList }) {
                 throw CustomException(error.message);
             });
 
-            const templateConsumer = Object.assign(consumer, {
+            const templateConsumer = Object.assign(consumer.toObject(), {
                 bodyTitle: `${config.supplier} Electricity EBILL Registration Completed`,
-                supplier: config.supplier
+                serverVer: `V${config.version}`
             });
 
-            if (!consumer) {
+            if (!templateConsumer) {
                 throw CustomException(
                     `Consumer '${body.email}' account create failed`
                 );
@@ -114,7 +114,7 @@ export default function makeAuthEndPointHandler({ authList }) {
 
             return objectHandler({
                 status: HttpResponseType.SUCCESS,
-                message: `${consumer.email} account created successful`
+                message: `Consumer account '${consumer.email}' created successful`
             });
         } catch (error) {
             return objectHandler({

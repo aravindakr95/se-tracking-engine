@@ -240,8 +240,7 @@ export default function makeAnalysisEndPointHandler({
 
                 const templateReport = Object.assign(report, {
                     bodyTitle: `Electricity EBILL for ${billingPeriod}`,
-                    currency: config.currency,
-                    supplier: config.supplier
+                    serverVer: `V${config.version}`
                 });
 
                 for (let i = 0; i <= subscribers.length; i++) {
