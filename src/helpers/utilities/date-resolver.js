@@ -43,7 +43,7 @@ function getPreviousMonthStartEndDate() {
 }
 
 function getYesterday() {
-    const yesterday = new Date(Date.now - 864e5);
+    const yesterday = new Date(Date.now() - 864e5);
 
     const year = yesterday.getFullYear();
     const month = yesterday.getMonth() + 1;

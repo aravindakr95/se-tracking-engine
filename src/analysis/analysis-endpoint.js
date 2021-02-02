@@ -1,5 +1,7 @@
 import config from '../config/config';
 
+import logger from '../config/log-level';
+
 import HttpResponseType from '../enums/http/http-response-type';
 import SchemaType from '../enums/account/schema-type';
 import AccountStatus from '../enums/account/account-status';
@@ -114,7 +116,8 @@ export default function makeAnalysisEndPointHandler({
                             throw CustomException(error.message);
                         });
 
-                    if (!(pvsbStats) || !(pgsbStats && pgsbStats.length)) {
+                    if (!pvsbStats || !(pgsbStats && pgsbStats.length)) {
+                        logger.error(`PVSB or PGSB Stats not found for the consumer ${accountNumber}`);
                         continue;
                     }
 
@@ -137,8 +140,14 @@ export default function makeAnalysisEndPointHandler({
                         throw CustomException(error.message);
                     });
 
+                    if (!forecastValues) {
+                        logger.error(
+                            `Forecast values not found for the consumer ${accountNumber}`);
+                        continue;
+                    }
+
                     const forecastedValues = {
-                        forecastedPayable: forecastValues.value || 0
+                        forecastedPayable: forecastValues.value
                     };
 
                     const commonDetails = {

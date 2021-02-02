@@ -43,7 +43,6 @@ function calculateDailyConsumption(pgStats) {
 }
 
 function calculateMonthlyProduction(pvStats, duration) {
-
     if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
         throw CustomException('PV stats, PV stats latest or old fields are empty');
     }

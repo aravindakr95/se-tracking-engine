@@ -20,14 +20,14 @@ export default function makePVSBList() {
 
     async function findLatestOldestPVStatByTime(accountNumber, startTime, endTime) {
         const latestPVStat = await PVStat.findOne({
-            accountNumber: accountNumber,
+            accountNumber,
             snapshotTimestamp: { $lte: endTime, $gte: startTime }
         })
             .sort({ snapshotTimestamp: -1 }) // latest doc
             .limit(1);
 
         const oldestPVStat = await PVStat.findOne({
-            accountNumber: accountNumber,
+            accountNumber,
             snapshotTimestamp: { $lte: endTime, $gte: startTime }
         })
             .sort({ snapshotTimestamp: 1 }) // oldest doc
