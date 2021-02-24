@@ -35,6 +35,7 @@ const config = {
         }
     },
     distributor: {
+        isAllowed: true,
         gridSuccessUrl: 'http://apps2.malindaprasad.com/home/em/send.php',
         gridErrorUrl: 'http://apps2.malindaprasad.com/home/error',
         pvSuccessUrl: 'http://apps2.malindaprasad.com/home/solar/live-data.php'

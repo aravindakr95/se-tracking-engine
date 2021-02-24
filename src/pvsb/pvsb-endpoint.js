@@ -1,3 +1,5 @@
+import config from '../config/config';
+
 import HttpResponseType from '../enums/http/http-response-type';
 import OperationStatus from '../enums/device/operation-status';
 import HttpMethod from '../enums/http/http-method';
@@ -70,7 +72,6 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
             }
 
             if (customPayload && !customPayload.totalEnergy) {
-
                 // Send success response or device will restarts if error occurs recursively
                 return objectHandler({
                     status: HttpResponseType.SUCCESS,
@@ -83,17 +84,17 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 throw CustomException(error.message);
             });
 
-            if (result) {
+            if (result && config.distributor.isAllowed) {
                 await distributeStats(data, OperationStatus.PV_SUCCESS).catch(error => {
                     throw CustomException(error.message);
                 });
-
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: null,
-                    message: `Inverter data for '${result.accountNumber}' payload statistics received`
-                });
             }
+
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                data: null,
+                message: `Inverter data for '${result.accountNumber}' payload statistics received`
+            });
         } catch (error) {
             return objectHandler({
                 code: error.code,

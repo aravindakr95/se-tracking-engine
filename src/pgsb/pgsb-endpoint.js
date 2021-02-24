@@ -1,3 +1,5 @@
+import config from '../config/config';
+
 import HttpResponseType from '../enums/http/http-response-type';
 import OperationStatus from '../enums/device/operation-status';
 
@@ -50,9 +52,11 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
                 isStored = true;
             }
 
-            await distributeStats(body, OperationStatus.GRID_SUCCESS).catch(error => {
-                throw CustomException(error.message);
-            });
+            if (config.distributor.isAllowed) {
+                await distributeStats(body, OperationStatus.GRID_SUCCESS).catch(error => {
+                    throw CustomException(error.message);
+                });
+            }
 
             if (isStored) {
                 return objectHandler({
