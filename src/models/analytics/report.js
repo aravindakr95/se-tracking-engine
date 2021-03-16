@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
+
 import config from '../../config/config';
+
+import SchemaType from '../../enums/account/schema-type';
 
 import { getDateString } from '../../helpers/utilities/date-resolver';
 
@@ -10,10 +13,9 @@ const date = new Date();
 date.setDate(0);
 const dueDate = new Date(date.getTime() + 12096e5); // 12096e5 = 14 days (magic number programming)
 
-let reportSchema = ReportSchema({
+let reportSchema = new ReportSchema({
     timestamp: {
-        type: Number,
-        default: date.getTime()
+        type: Number
     },
     dueDate: {
         type: String,
@@ -30,7 +32,7 @@ let reportSchema = ReportSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['Net Metering', 'Net Accounting']
+        enum: [SchemaType.NET_METERING, SchemaType.NET_ACCOUNTING]
     },
     accountNumber: {
         type: Number,
@@ -117,6 +119,8 @@ let reportSchema = ReportSchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let report = mongoose.model('Report', reportSchema, 'reports');

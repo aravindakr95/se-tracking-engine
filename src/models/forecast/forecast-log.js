@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 
 const ForecastLogSchema = mongoose.Schema;
 
-let forecastLogSchema = ForecastLogSchema({
+let forecastLogSchema = new ForecastLogSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     forecastPeriod: {
         type: String,
@@ -15,6 +14,8 @@ let forecastLogSchema = ForecastLogSchema({
         type: Boolean,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let forecastLog = mongoose.model('ForecastLog', forecastLogSchema, 'forecast-logs');

@@ -1,5 +1,6 @@
 import Consumer from '../models/end-user/consumer';
-import AccountStatus from '../models/common/account-status';
+
+import AccountStatus from '../enums/account/account-status';
 
 export default function makeConsumerList() {
     return Object.freeze({
@@ -7,22 +8,21 @@ export default function makeConsumerList() {
         findConsumersByStatus,
         findConsumerByAccNumber,
         findConsumerByDeviceId,
-        findDeviceIdByAccNumber,
+        findDeviceIdsByAccNumber,
         updateConsumerByAccNumber,
-        updateConsumerStatusByContactNumber,
         deleteConsumerByAccNumber
     });
 
     async function getAllConsumers() {
-        return await Consumer.find();
+        return Consumer.find();
     }
 
     async function findConsumersByStatus(status) {
-        return await Consumer.find(status);
+        return Consumer.find(status);
     }
 
     async function findConsumerByAccNumber(accNumber) {
-        return await Consumer.findOne({
+        return Consumer.findOne({
             accountNumber: accNumber,
             status: AccountStatus.ACTIVE
         }).lean();
@@ -35,14 +35,12 @@ export default function makeConsumerList() {
         });
     }
 
-    async function findDeviceIdByAccNumber(accNumber, type) {
+    async function findDeviceIdsByAccNumber(accNumber) {
         try {
             const consumer = await findConsumerByAccNumber(accNumber);
 
             if (consumer && consumer.devices) {
-                const { deviceId } = consumer.devices.find(device => device.type === type);
-
-                return deviceId;
+                return consumer.devices.map(device => device.deviceId);
             } else {
                 return null;
             }
@@ -59,11 +57,7 @@ export default function makeConsumerList() {
         );
     }
 
-    async function updateConsumerStatusByContactNumber(contactNumber, data) {
-        return await Consumer.updateOne(contactNumber, data);
-    }
-
     async function deleteConsumerByAccNumber(accNumber) {
-        return await Consumer.deleteOne(accNumber);
+        return Consumer.deleteOne(accNumber);
     }
 }

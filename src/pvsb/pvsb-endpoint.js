@@ -1,18 +1,29 @@
-import HttpResponseType from '../models/common/http-response-type';
+import config from '../config/config';
+
+import HttpResponseType from '../enums/http/http-response-type';
+import OperationStatus from '../enums/device/operation-status';
+import HttpMethod from '../enums/http/http-method';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
+import { fetchInverter } from '../helpers/renac/fetch-pv-data';
+import { distributeStats } from '../helpers/distributor/distribute-stats';
 
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     return async function handle(httpRequest) {
-        switch (httpRequest.path) {
-        case '/payloads':
-            if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
+        switch (httpRequest.method) {
+        case HttpMethod.GET:
+            if (httpRequest.queryParams &&
+                (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
                 return getConsumerPVStats(httpRequest);
             }
 
-            if (httpRequest.queryParams &&
-                (httpRequest.queryParams.deviceId && httpRequest.queryParams.fetchMode)) {
+            return objectHandler({
+                code: HttpResponseType.METHOD_NOT_ALLOWED,
+                message: `${httpRequest.method} method not allowed`
+            });
+        case HttpMethod.POST:
+            if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
                 return addPVStat(httpRequest);
             }
 
@@ -20,8 +31,6 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 code: HttpResponseType.METHOD_NOT_ALLOWED,
                 message: `${httpRequest.method} method not allowed`
             });
-        case '/errors':
-            return addPVError(httpRequest);
         default:
             return objectHandler({
                 code: HttpResponseType.METHOD_NOT_ALLOWED,
@@ -31,11 +40,29 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     };
 
     async function addPVStat(httpRequest) {
-        const body = httpRequest.body;
-        const { deviceId, fetchMode } = httpRequest.queryParams;
+        const { accountNumber } = httpRequest.queryParams;
 
         try {
-            const customPayload = pvsbList.mapPayload(deviceId, fetchMode, body);
+            const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
+
+            if (!consumer) {
+                throw CustomException(
+                    'Account is not associated with any available consumers',
+                    HttpResponseType.NOT_FOUND
+                );
+            }
+
+            const pvStats = await fetchInverter().catch(error => {
+                throw CustomException(error.message);
+            });
+
+            const { data } = pvStats;
+
+            if (!pvStats && !data) {
+                throw CustomException('PV statistics retrieval failed from the manufacturer server');
+            }
+
+            const customPayload = pvsbList.mapPayload(data, accountNumber);
 
             if (!customPayload) {
                 throw CustomException(
@@ -44,17 +71,30 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 );
             }
 
+            if (customPayload && !customPayload.totalEnergy) {
+                // Send success response or device will restarts if error occurs recursively
+                return objectHandler({
+                    status: HttpResponseType.SUCCESS,
+                    data: null,
+                    message: `Inverter data for '${accountNumber}' payload statistics ignored because body is not valid`
+                });
+            }
+
             const result = await pvsbList.addPVStats(customPayload).catch(error => {
                 throw CustomException(error.message);
             });
 
-            if (result) {
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    data: null,
-                    message: `PVSB '${result.deviceId}' payload statistics received`
+            if (result && config.distributor.isAllowed) {
+                await distributeStats(data, OperationStatus.PV_SUCCESS).catch(error => {
+                    throw CustomException(error.message);
                 });
             }
+
+            return objectHandler({
+                status: HttpResponseType.SUCCESS,
+                data: null,
+                message: `Inverter data for '${result.accountNumber}' payload statistics received`
+            });
         } catch (error) {
             return objectHandler({
                 code: error.code,
@@ -64,7 +104,8 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
     }
 
     async function getConsumerPVStats(httpRequest) {
-        const { accountNumber } = httpRequest.queryParams;
+        const { accountNumber, type } = httpRequest.queryParams;
+        let result = null;
 
         try {
             const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch(error => {
@@ -78,20 +119,21 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                 );
             }
 
-            const deviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
-                .catch(error => {
+            if (type === 'ALL') {
+                result = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber }).catch(error => {
                     throw CustomException(error.message);
                 });
 
-            if (!deviceId) {
+            } else if (type === 'LATEST') {
+                result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber }).catch(error => {
+                    throw CustomException(error.message);
+                });
+            } else {
                 throw CustomException(
-                    `PVSB Device Id '${accountNumber}' is not exists for account '${accountNumber}'`,
-                    HttpResponseType.NOT_FOUND);
+                    'Provided parameters are missing or invalid',
+                    HttpResponseType.NOT_FOUND
+                );
             }
-
-            const result = await pvsbList.findAllPVStatsByDeviceId({ deviceId }).catch(error => {
-                throw CustomException(error.message);
-            });
 
             if (result && result.length) {
                 return objectHandler({
@@ -104,30 +146,6 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
                     `Requested consumer account '${accountNumber}' PV statistics not found`,
                     HttpResponseType.NOT_FOUND
                 );
-            }
-        } catch (error) {
-            return objectHandler({
-                code: error.code,
-                message: error.message
-            });
-        }
-    }
-
-    async function addPVError(httpRequest) {
-        const body = httpRequest.body;
-        const { deviceId } = httpRequest.queryParams;
-
-        try {
-            Object.assign(body, { deviceId });
-            const payload = await pvsbList.addPVError(body).catch(error => {
-                throw CustomException(error.message);
-            });
-
-            if (payload) {
-                return objectHandler({
-                    status: HttpResponseType.SUCCESS,
-                    message: `PVSB '${deviceId}' error log received`
-                });
             }
         } catch (error) {
             return objectHandler({

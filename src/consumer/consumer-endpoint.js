@@ -1,8 +1,8 @@
-import HttpResponseType from '../models/common/http-response-type';
+import HttpResponseType from '../enums/http/http-response-type';
 
+import hasher from '../helpers/hasher';
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import hasher from '../helpers/hasher';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
     return async function handle(httpRequest) {
@@ -121,7 +121,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
                     });
                 } else {
                     throw CustomException(
-                        `Requested Device Id '${deviceId}' not found`,
+                        `Requested Device Id '${deviceId}' not associated with any account`,
                         HttpResponseType.NOT_FOUND
                     );
                 }

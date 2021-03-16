@@ -4,7 +4,7 @@ import pvsbController from '../pvsb/pvsb-controller';
 
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
-import authenticateJWT from '../middlewares/auth';
+import authenticateJWT from '../middlewares/auth-jwt';
 
 let pvsbRouter = express.Router();
 

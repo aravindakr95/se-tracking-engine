@@ -7,7 +7,9 @@ function daysInPreviousMonth() {
 
 function getPreviousDate() {
     const date = new Date();
+
     date.setDate(0);
+    date.setHours(23, 59, 59, 999);
 
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -21,8 +23,38 @@ function getPreviousDate() {
     };
 }
 
-function getFirstDay(dateInstance) {
-    return new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 1);
+function getPreviousMonthStartEndDate() {
+    const date = new Date();
+    let startTime, endTime;
+
+    date.setDate(0);
+    date.setDate(1);
+
+    startTime = date.setHours(0, 0, 0, 1);
+
+    date.setDate(daysInPreviousMonth());
+
+    endTime = date.setHours(23, 59, 59, 999);
+
+    return {
+        startTime,
+        endTime
+    };
+}
+
+function getYesterday() {
+    const yesterday = new Date(Date.now() - 864e5);
+
+    const year = yesterday.getFullYear();
+    const month = yesterday.getMonth() + 1;
+    const day = yesterday.getDate();
+
+    return {
+        startTime: yesterday.setHours(0, 0, 0, 1),
+        endTime: yesterday.setHours(23, 59, 59, 999),
+        summaryDate: `${month}-${day}-${year}`,
+        dateInstance: yesterday
+    };
 }
 
 function getLastDay(dateInstance) {
@@ -33,16 +65,18 @@ function getDateString(dateInstance) {
     return `${dateInstance.getMonth() + 1}-${dateInstance.getDate()}-${dateInstance.getFullYear()}`;
 }
 
-function getNextMonthString(dateInstance) {
-    let date = null;
-
-    if (dateInstance.getMonth() === 11) {
-        date = new Date(dateInstance.getFullYear() + 1, 0, 1);
-    } else {
-        date = new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 1);
-    }
+function getCurrentMonthString(dateInstance) {
+    const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), 1);
 
     return `${date.getMonth() + 1}-${date.getFullYear()}`;
 }
 
-module.exports = { daysInPreviousMonth, getPreviousDate, getFirstDay, getLastDay, getDateString, getNextMonthString };
+module.exports = {
+    daysInPreviousMonth,
+    getPreviousDate,
+    getPreviousMonthStartEndDate,
+    getYesterday,
+    getLastDay,
+    getDateString,
+    getCurrentMonthString
+};

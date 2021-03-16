@@ -1,5 +1,7 @@
 import express from 'express';
 
+import authenticateToGenerate from '../middlewares/auth-admin';
+
 import authController from '../auth/auth-controller';
 import { validate, fieldStateChecker } from '../middlewares/field-validator';
 
@@ -13,14 +15,8 @@ authRouter.post('/login',
     });
 
 authRouter.post('/register',
+    authenticateToGenerate,
     validate('auth', '/register', 'POST'),
-    fieldStateChecker,
-    (req, res) => {
-        authController(req, res);
-    });
-
-authRouter.post('/verify',
-    validate('auth', '/verify', 'POST'),
     fieldStateChecker,
     (req, res) => {
         authController(req, res);

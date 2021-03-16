@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 
-const PgErrorSchema = mongoose.Schema;
+const PGErrorSchema = mongoose.Schema;
 
-let pgErrorSchema = PgErrorSchema({
+let pgErrorSchema = new PGErrorSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     deviceId: {
         type: String,
@@ -21,14 +20,14 @@ let pgErrorSchema = PgErrorSchema({
     },
     wifiFailCount: {
         type: Number,
-        required: true,
-        default: 0
+        required: true
     },
     httpFailCount: {
         type: Number,
-        required: true,
-        default: 0
+        required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let pgError = mongoose.model('PGError', pgErrorSchema, 'pg-errors');

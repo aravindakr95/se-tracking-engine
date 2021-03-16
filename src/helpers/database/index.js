@@ -1,25 +1,33 @@
-import mongoose from 'mongoose';
+import { connect, connection } from 'mongoose';
 
 import config from '../../config/config';
 
-export default async function initializeDB() {
-    const dbUrl = `mongodb+srv://${config.database.user}:${config.database.credentials}@${config.database.url}/${config.database.name}?retryWrites=true&w=majority`;
+import EnvironmentType from '../../enums/common/environment-type';
 
-    mongoose.connect(dbUrl, {
+export default async function initializeDB() {
+    let uri = null;
+
+    if (config.environment === EnvironmentType.PRODUCTION) {
+        uri = `mongodb+srv://${config.database.user}:${config.database.credentials}` +
+            `@se-tracking-engine.jw1zk.mongodb.net/${config.database.name}?retryWrites=true&w=majority`;
+    } else {
+        uri = `${config.database.devUri}/${config.database.name}?retryWrites=true&w=majority`;
+    }
+
+    await connect(uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
         useFindAndModify: false
     }).then(() => {
-        console.log(`Connected to ${dbUrl}`);
+        console.log(`Connected to ${uri}`);
     }).catch((error) => {
-        console.log(error);
         console.log(`Database starting error: ${error.message}`);
 
         process.exit(1);
     });
 
-    let database = mongoose.connection;
+    let database = connection;
 
     database.once('open', () => console.log('Database connection is opened'));
 

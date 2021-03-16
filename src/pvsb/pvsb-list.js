@@ -1,13 +1,12 @@
 import PVStat from '../models/photo-voltaic/pv-stat';
-import PVError from '../models/photo-voltaic/pv-error';
-
-import config from '../config/config';
 
 export default function makePVSBList() {
     return Object.freeze({
         addPVStats,
-        addPVError,
-        findAllPVStatsByDeviceId,
+        findAllPVStatsByAccountNumber,
+        findLatestOldestPVStatByTime,
+        findLatestPVStatByAccountNumber,
+        flushPVData,
         mapPayload
     });
 
@@ -15,22 +14,50 @@ export default function makePVSBList() {
         return await new PVStat(stats).save();
     }
 
-    async function addPVError(error) {
-        return await new PVError(error).save();
+    async function findAllPVStatsByAccountNumber(accountNumber) {
+        return PVStat.find(accountNumber).lean();
     }
 
-    async function findAllPVStatsByDeviceId(deviceId) {
-        return await PVStat.find(deviceId).lean();
+    async function findLatestOldestPVStatByTime(accountNumber, startTime, endTime) {
+        const latestPVStat = await PVStat.findOne({
+            accountNumber,
+            snapshotTimestamp: { $lte: endTime, $gte: startTime }
+        })
+            .sort({ snapshotTimestamp: -1 }) // latest doc
+            .limit(1);
+
+        const oldestPVStat = await PVStat.findOne({
+            accountNumber,
+            snapshotTimestamp: { $lte: endTime, $gte: startTime }
+        })
+            .sort({ snapshotTimestamp: 1 }) // oldest doc
+            .limit(1);
+
+        return {
+            latest: latestPVStat,
+            oldest: oldestPVStat
+        };
     }
 
-    function mapPayload(deviceId, fetchMode, body) {
-        const { results, success } = body;
+    async function findLatestPVStatByAccountNumber(accountNumber) {
+        return PVStat
+            .find(accountNumber)
+            .sort({ snapshotTimestamp: -1 })
+            .limit(1);
+    }
+
+    async function flushPVData(startTime, endTime) {
+        return PVStat.deleteMany({ snapshotTimestamp: { $lte: endTime, $gte: startTime } });
+    }
+
+    function mapPayload(pvStats, accountNumber) {
+        const { results, success } = pvStats;
         const customPayload = {};
-        const ssTimestamp = fetchMode === 'API' ? new Date(results['TIME'] + config.timezone).getTime() : null;
+        const ssTimestamp = new Date(results['TIME']).getTime();
 
         if (results && success) {
             customPayload['snapshotTimestamp'] = ssTimestamp;
-            customPayload['deviceId'] = deviceId;
+            customPayload['accountNumber'] = accountNumber;
             customPayload['load'] = results['LOAD'];
             customPayload['pv'] = results['PV'];
             customPayload['energyToday'] = results['ENERGY_TODAY'];

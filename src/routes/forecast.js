@@ -3,7 +3,7 @@ import express from 'express';
 import forecastController from '../forecast/forecast-controller';
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
-import authenticateJWT from '../middlewares/auth';
+import authenticateJWT from '../middlewares/auth-jwt';
 
 let forecastRouter = express.Router();
 

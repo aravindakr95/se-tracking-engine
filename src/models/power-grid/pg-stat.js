@@ -1,18 +1,17 @@
 import mongoose from 'mongoose';
 
-const PgStatSchema = mongoose.Schema;
+const PGStatSchema = mongoose.Schema;
 
-let powerGridStatSchema = PgStatSchema({
+let pgStatSchema = new PGStatSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     deviceId: {
         type: String,
         required: true
     },
     slaveId: {
-        type: String,
+        type: Number,
         required: true
     },
     currentRound: {
@@ -55,8 +54,10 @@ let powerGridStatSchema = PgStatSchema({
         type: Number,
         required: true
     }
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
-let pgStat = mongoose.model('PGStat', powerGridStatSchema, 'pg-stats');
+let pgStat = mongoose.model('PGStat', pgStatSchema, 'pg-stats');
 
 module.exports = pgStat;

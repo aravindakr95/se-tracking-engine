@@ -1,22 +1,26 @@
 import config from '../config/config';
 
-import HttpResponseType from '../models/common/http-response-type';
-import AccountStatus from '../models/common/account-status';
+import logger from '../config/log-level';
+
+import HttpResponseType from '../enums/http/http-response-type';
+import SchemaType from '../enums/account/schema-type';
+import AccountStatus from '../enums/account/account-status';
 
 import { CustomException } from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import { daysInPreviousMonth, getNextMonthString, getPreviousDate } from '../helpers/utilities/date-resolver';
-import { calculateProduction, calculateConsumption } from '../helpers/utilities/throughput-resolver';
-import { configSMS, sendSMS } from '../helpers/sms/messenger';
+import {
+    daysInPreviousMonth,
+    getCurrentMonthString,
+    getPreviousDate
+} from '../helpers/utilities/date-resolver';
+import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/price/throughput-resolver';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
-import { getInvoiceSMSTemplate } from '../helpers/templates/sms/sms-broker';
 
 export default function makeAnalysisEndPointHandler({
     analysisList,
     consumerList,
-    pvsbList,
-    pgsbList,
-    forecastList
+    forecastList,
+    summaryList
 }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
@@ -56,6 +60,8 @@ export default function makeAnalysisEndPointHandler({
 
     // execute on 1st day of the month at 09.00 Hours (IST)
     async function generateReports() {
+        const dateNow = new Date();
+
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
@@ -64,7 +70,7 @@ export default function makeAnalysisEndPointHandler({
 
             if (log && log.isCompleted) {
                 throw CustomException(
-                    `Reports already generated for '${billingPeriod}' previous month`,
+                    `Monthly reports already generated for '${billingPeriod}'`,
                     HttpResponseType.CONFLICT
                 );
             }
@@ -84,55 +90,33 @@ export default function makeAnalysisEndPointHandler({
                         billingCategory
                     } = consumer;
 
-                    const pgsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PGSB')
+                    const pvSummaries = await summaryList.findPVSummary(accountNumber, year, month)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pgsbStats = await pgsbList.findAllPGStatsByDeviceId({ deviceId: pgsbDeviceId })
+                    const pgSummaries = await summaryList.findPGSummary(accountNumber, year, month)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pvsbDeviceId = await consumerList.findDeviceIdByAccNumber(accountNumber, 'PVSB')
-                        .catch(error => {
-                            throw CustomException(error.message);
-                        });
-
-                    const pvsbStats = await pvsbList.findAllPVStatsByDeviceId({ deviceId: pvsbDeviceId })
-                        .catch(error => {
-                            throw CustomException(error.message);
-                        });
-
-                    if (!(pvsbStats && pvsbStats.length) || !(pgsbStats && pgsbStats.length)) {
+                    if ((!pvSummaries || !pvSummaries.length) || (!pgSummaries || !pgSummaries.length)) {
+                        logger.error(`PVSB or PGSB summaries not found for the consumer ${accountNumber}`);
                         continue;
                     }
 
-                    const filteredPVSB = filterCurrentMonthStats('PVSB', pvsbStats);
-                    const filteredPGSB = filterCurrentMonthStats('PGSB', pgsbStats);
+                    const productionDetails = calculateMonthlyProduction(
+                        pvSummaries,
+                        billingDuration);
 
-                    if (!(filteredPVSB && filteredPVSB.length) ||
-                        !(filteredPGSB && filteredPGSB.length)) {
-                        continue;
-                    }
-
-                    const sortedPVSB = sortCurrentMonthStats('PVSB', filteredPVSB);
-                    const sortedPGSB = sortCurrentMonthStats('PGSB', filteredPGSB);
-
-                    const energyToday = filteredPVSB.map(stat => stat.energyToday);
-
-                    const productionDetails = calculateProduction(
-                        sortedPVSB,
-                        energyToday);
-
-                    const consumptionDetails = calculateConsumption(
+                    const consumptionDetails = calculateMonthlyConsumption(
                         dateInstance,
                         consumer,
-                        sortedPGSB,
+                        pgSummaries,
                         productionDetails,
                         billingDuration);
 
-                    const forecastPeriod = getNextMonthString(new Date());
+                    const forecastPeriod = getCurrentMonthString(dateNow);
 
                     const forecastValues = await forecastList.findForecastReportByAccountNumber(
                         accountNumber, forecastPeriod
@@ -140,11 +124,14 @@ export default function makeAnalysisEndPointHandler({
                         throw CustomException(error.message);
                     });
 
-                    const forecastedPayable = forecastValues ? forecastValues.Forecast.Predictions.mean
-                        .map(field => field.Value) : 0;
+                    if (!forecastValues) {
+                        logger.error(
+                            `Forecast values not found for the consumer ${accountNumber}`);
+                        continue;
+                    }
 
                     const forecastedValues = {
-                        forecastedPayable: forecastedPayable ? forecastedPayable[0] : 0
+                        forecastedPayable: forecastValues.value
                     };
 
                     const commonDetails = {
@@ -183,14 +170,13 @@ export default function makeAnalysisEndPointHandler({
                 if (status && status.isCompleted) {
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
-                        message: `Reports generated for '${billingPeriod}' is completed`
+                        message: `Monthly reports generated for '${billingPeriod}' is completed`
                     });
                 }
+            } else {
+                throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
             }
-
-            throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
         } catch (error) {
-            console.log(error.message);
             return objectHandler({
                 code: error.code,
                 message: error.message
@@ -201,11 +187,6 @@ export default function makeAnalysisEndPointHandler({
     // execute on 1st day of the month at 15.00 Hours (IST)
     async function dispatchReports() {
         try {
-            const smsOptions = {
-                url: config.notifier.IBSMSOut,
-                method: 'post'
-            };
-
             const { billingPeriod } = getPreviousDate();
 
             const reports = await analysisList.findAllReportsForMonth({ billingPeriod })
@@ -221,31 +202,29 @@ export default function makeAnalysisEndPointHandler({
             }
 
             for (const report of reports) {
-                const smsTemplate = getInvoiceSMSTemplate(report);
-
-                const sms = configSMS(report.contactNumber, smsTemplate);
-
-                //WARNING: limited resource use with care
-                await sendSMS(smsOptions, sms).catch(error => {
-                    throw CustomException(error.message);
-                });
+                const { accountNumber } = report;
+                const { subscribers } = await consumerList.findConsumerByAccNumber(accountNumber)
+                    .catch(error => {
+                        throw CustomException(error.message);
+                    });
 
                 const templateReport = Object.assign(report, {
                     bodyTitle: `Electricity EBILL for ${billingPeriod}`,
-                    currency: config.currency,
-                    supplier: config.supplier
+                    serverVer: `V${config.version}`
                 });
 
-                if (report && report.tariff === 'Net Metering') {
-                    //WARNING: limited resource use with care
-                    await sendEmailPostMark(templateReport, 'monthly-statement-nm').catch(error => {
-                        throw CustomException(error.message);
-                    });
-                } else {
-                    //WARNING: limited resource use with care
-                    await sendEmailPostMark(templateReport, 'monthly-statement-na').catch(error => {
-                        throw CustomException(error.message);
-                    });
+                for (let i = 0; i <= subscribers.length; i++) {
+                    if (report && report.tariff === SchemaType.NET_METERING) {
+                        //WARNING: limited resource use with care
+                        await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-nm', i).catch(error => {
+                            throw CustomException(error.message);
+                        });
+                    } else {
+                        //WARNING: limited resource use with care
+                        await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-na', i).catch(error => {
+                            throw CustomException(error.message);
+                        });
+                    }
                 }
             }
 
@@ -397,50 +376,5 @@ export default function makeAnalysisEndPointHandler({
                 message: error.message
             });
         }
-    }
-
-    function filterCurrentMonthStats(type, stats) {
-        const startingDate = new Date();
-        const endingDate = new Date();
-
-        let filteredStats = [];
-
-        startingDate.setDate(0);
-        startingDate.setDate(1);
-
-        endingDate.setDate(0);
-        endingDate.setDate(daysInPreviousMonth());
-
-        const startingMillis = startingDate.setHours(0, 0, 0, 1);
-        const endingMillis = endingDate.setHours(23, 59, 59, 999);
-
-        if (type === 'PGSB') {
-            filteredStats = stats.filter(stat =>
-                stat.timestamp >= startingMillis && stat.timestamp <= endingMillis);
-
-            filteredStats.sort((dateOne, dateTwo) => dateOne - dateTwo);
-        }
-
-        if (type === 'PVSB') {
-            filteredStats = stats.filter(stat =>
-                stat.snapshotTimestamp >= startingMillis && stat.snapshotTimestamp <= endingMillis);
-        }
-
-        return filteredStats;
-    }
-
-    function sortCurrentMonthStats(type, stats) {
-        if (type === 'PGSB') {
-            stats.sort((objOne, objTwo) => objOne.timestamp - objTwo.timestamp);
-        }
-
-        if (type === 'PVSB') {
-            stats.sort((objOne, objTwo) => objOne.snapshotTimestamp - objTwo.snapshotTimestamp);
-        }
-
-        return {
-            startingValue: stats[0],
-            endingValue: stats[stats.length - 1]
-        };
     }
 }

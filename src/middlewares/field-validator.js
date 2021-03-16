@@ -1,6 +1,9 @@
 import { body, param, validationResult } from 'express-validator';
+
+import HttpResponseType from '../enums/http/http-response-type';
+import HttpMethod from '../enums/http/http-method';
+
 import { errorResponse } from '../helpers/response/response-dispatcher';
-import HttpResponseType from '../models/common/http-response-type';
 
 function fieldStateChecker(req, res, next) {
     const errors = validationResult(req);
@@ -28,6 +31,8 @@ const validate = (main, route, method) => {
         return pvsbValidator(route);
     case 'consumers':
         return consumersValidator(method);
+    case 'summary':
+        return summaryValidator(method);
     case 'analysis':
         return reportsValidator(route);
     case 'forecast':
@@ -51,12 +56,17 @@ function authValidator(route) {
         ];
     case '/register':
         return [
-            body('establishedYear')
-                .exists().withMessage('Established year is required')
-                .isNumeric().withMessage('Established year should be number'),
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),
+            body('subscribers', 'Subscribers is required').exists()
+                .isArray().withMessage('Subscribers should be Array'),
+            body('subscribers.*.holder')
+                .exists().withMessage('Subscribers.Holder is required')
+                .isString().withMessage('Subscribers.Holder should be String'),
+            body('subscribers.*.email')
+                .exists().withMessage('Subscribers.Email is required')
+                .isString().withMessage('Subscribers.Email should be String'),
             body('password')
                 .exists().withMessage('Password is required')
                 .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
@@ -77,22 +87,18 @@ function authValidator(route) {
                 .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
             body('devices', 'Devices is required').exists()
                 .isArray().withMessage('Devices should be Array'),
-            body('devices.*.type')
-                .exists().withMessage('Devices.Type is required')
-                .isString().withMessage('Devices.Type should be String'),
+            body('devices.*.floor')
+                .exists().withMessage('Devices.Floor is required')
+                .isString().withMessage('Devices.Floor should be String'),
+            body('devices.*.description')
+                .exists().withMessage('Devices.Description is required')
+                .isString().withMessage('Devices.Description should be String'),
             body('devices.*.deviceId')
                 .exists().withMessage('Devices.DeviceId is required')
-                .isMACAddress().withMessage('Devices.DeviceId should be MAC address')
-        ];
-    case '/verify':
-        return [
-            body('contactNumber')
-                .exists().withMessage('Contact number is required')
-                .isString().withMessage('Contact number should be Number')
-                .isLength({ min: 11, max: 11 }).withMessage('Contact number should be 11 characters long'),
-            body('pin')
-                .exists().withMessage('PIN is required')
-                .isLength({ min: 6, max: 6 }).withMessage('PIN should be 6 characters long')
+                .isMACAddress().withMessage('Devices.DeviceId should be MAC address'),
+            body('devices.*.slaveId')
+                .exists().withMessage('Devices.SlaveId is required')
+                .isNumeric().withMessage('Devices.SlaveId should be Number')
         ];
     default:
         return [];
@@ -157,35 +163,8 @@ function pgsbValidator(route) {
 
 function pvsbValidator(route) {
     switch (route) {
-    //todo: add query parameter validators
     case '/payloads':
-        return [
-            body('isOwn')
-                .exists().withMessage('Is own is required')
-                .isBoolean().withMessage('Is own should be Boolean'),
-            body('success')
-                .exists().withMessage('Success is required')
-                .isBoolean().withMessage('Success should be Boolean'),
-            body('messageCode')
-                .exists().withMessage('Message code is required'),
-            body('results')
-                .exists().withMessage('results is required')
-        ];
-    case '/errors':
-        return [
-            body('error')
-                .exists().withMessage('Error is required')
-                .isString().withMessage('Error should be String'),
-            body('rssi')
-                .exists().withMessage('RSSI is required')
-                .isNumeric().withMessage('RSSI should be Number'),
-            body('wifiFailCount')
-                .exists().withMessage('Wifi fail count is required')
-                .isNumeric().withMessage('Wifi fail count should be Number'),
-            body('httpFailCount')
-                .exists().withMessage('Http fail count is required')
-                .isNumeric().withMessage('Http fail count should be Number')
-        ];
+        return [];
     default:
         return [];
     }
@@ -195,12 +174,17 @@ function consumersValidator(method) {
     switch (method) {
     case 'PUT':
         return [
-            body('establishedYear')
-                .exists().withMessage('Established year is required')
-                .isNumeric().withMessage('Established year should be number'),
             body('email')
                 .exists().withMessage('Email is required')
                 .isEmail().withMessage('Email is not in valid format'),
+            body('subscribers', 'Subscribers is required').exists()
+                .isArray().withMessage('Subscribers should be Array'),
+            body('subscribers.*.holder')
+                .exists().withMessage('Subscribers.Holder is required')
+                .isString().withMessage('Subscribers.Holder should be String'),
+            body('subscribers.*.email')
+                .exists().withMessage('Subscribers.Email is required')
+                .isString().withMessage('Subscribers.Email should be String'),
             body('password')
                 .exists().withMessage('Password is required')
                 .isLength({ min: 8 }).withMessage('Password should be 8 characters long')
@@ -221,12 +205,28 @@ function consumersValidator(method) {
                 .isLength({ min: 10, max: 10 }).withMessage('Account number should be 10 characters long'),
             body('devices', 'Devices is required').exists()
                 .isArray().withMessage('Devices should be Array'),
-            body('devices.*.type')
-                .exists().withMessage('Devices.Type is required')
-                .isString().withMessage('Devices.Type should be String'),
+            body('devices.*.floor')
+                .exists().withMessage('Devices.Floor is required')
+                .isString().withMessage('Devices.Floor should be String'),
+            body('devices.*.description')
+                .exists().withMessage('Devices.Description is required')
+                .isString().withMessage('Devices.Description should be String'),
             body('devices.*.deviceId')
-                .isMACAddress().withMessage('Devices.DeviceId should be MAC address')
+                .exists().withMessage('Devices.DeviceId is required')
+                .isMACAddress().withMessage('Devices.DeviceId should be MAC address'),
+            body('devices.*.slaveId')
+                .exists().withMessage('Devices.SlaveId is required')
+                .isNumeric().withMessage('Devices.SlaveId should be Number')
         ];
+    default:
+        return [];
+    }
+}
+
+function summaryValidator(method) {
+    switch (method) {
+    case HttpMethod.POST:
+        return [];
     default:
         return [];
     }

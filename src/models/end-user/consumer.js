@@ -1,12 +1,15 @@
 import mongoose from 'mongoose';
+
 import config from '../../config/config';
+
+import SchemaType from '../../enums/account/schema-type';
+import AccountStatus from '../../enums/account/account-status';
 
 const ConsumerSchema = mongoose.Schema;
 
-let consumerSchema = ConsumerSchema({
+let consumerSchema = new ConsumerSchema({
     timestamp: {
-        type: Number,
-        default: Date.now
+        type: Number
     },
     deviceToken: {
         type: String,
@@ -14,7 +17,7 @@ let consumerSchema = ConsumerSchema({
     },
     establishedYear: { //connection established year (for yield check)
         type: Number,
-        required: true
+        default: new Date().getFullYear()
     },
     email: {
         type: String,
@@ -22,6 +25,20 @@ let consumerSchema = ConsumerSchema({
         unique: true,
         lowercase: true
     },
+    subscribers: [
+        {
+            _id: false,
+            holder: {
+                type: String,
+                required: true
+            },
+            email: {
+                type: String,
+                required: true,
+                lowercase: true
+            }
+        }
+    ],
     password: {
         type: String,
         required: true,
@@ -50,38 +67,45 @@ let consumerSchema = ConsumerSchema({
     tariff: {
         type: String,
         required: true,
-        enum: ['Net Metering', 'Net Accounting']
+        enum: [SchemaType.NET_METERING, SchemaType.NET_ACCOUNTING]
     },
     accountNumber: {
         type: Number,
         required: true,
+        unique: true,
         minlength: 10,
         maxlength: 10
     },
     status: {
         type: String,
         required: true,
-        default: 'INACTIVE',
-        enum: ['INACTIVE', 'ACTIVE']
+        default: AccountStatus.ACTIVE,
+        enum: [AccountStatus.ACTIVE, AccountStatus.INACTIVE]
     },
     devices: [
         {
             _id: false,
-            type: {
+            floor: {
                 type: String,
                 required: true,
-                enum: ['PGSB', 'PVSB']
+                enum: ['Ground Floor', 'First Floor', 'Second Floor']
+            },
+            description: {
+                type: String,
+                default: ''
             },
             deviceId: {
                 type: String,
                 required: true
             },
             slaveId: {
-                type: String,
+                type: Number,
                 default: null
             }
         }
     ]
+}, {
+    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
 });
 
 let Consumer = mongoose.model('Consumer', consumerSchema, 'consumers');

@@ -4,7 +4,7 @@ import pgsbController from '../pgsb/pgsb-controller';
 
 import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
-import authenticateJWT from '../middlewares/auth';
+import authenticateJWT from '../middlewares/auth-jwt';
 
 let pgsbRouter = express.Router();
 

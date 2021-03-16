@@ -1,25 +1,60 @@
 import dotenv from 'dotenv';
 
+import { version } from '../../package.json';
+
+import EnvironmentType from '../enums/common/environment-type';
+
 dotenv.config();
 
 const config = {
-    environment: 'prod', // dev, prod
+    version,
+    environment: EnvironmentType.PRODUCTION, // PRODUCTION, DEVELOPMENT
     currency: 'LKR',
     supplier: 'CEB',
-    timezone: '+05:30',
+    adminToken: process.env.ADMIN_TOKEN,
+    prices: {
+        fixed: {
+            blockOne: 30.00,
+            blockTwo: 60.00,
+            blockThree: 90.00,
+            blockFour: 480.00,
+            blockFive: 540.00
+        },
+        import: {
+            blockOne: 2.50,
+            blockTwo: 4.85,
+            blockThree: 7.85,
+            blockFour: 10.00,
+            blockFive: 27.75,
+            blockSix: 32.00,
+            blockSeven: 45.00
+        },
+        export: {
+            blockOne: 15.50,
+            blockTwo: 22.00
+        }
+    },
+    distributor: {
+        isAllowed: true,
+        gridSuccessUrl: 'http://apps2.malindaprasad.com/home/em/send.php',
+        gridErrorUrl: 'http://apps2.malindaprasad.com/home/error',
+        pvSuccessUrl: 'http://apps2.malindaprasad.com/home/solar/live-data.php'
+    },
+    inverter: {
+        url: 'http://apiapp.le-pv.com:8080/api/equipDetail',
+        serialNumber: process.env.RENAC_SN,
+        email: process.env.RENAC_EMAIL
+    },
     database: {
-        url: 'se-tracking-engine.jw1zk.mongodb.net',
+        prodUri: 'se-tracking-engine.jw1zk.mongodb.net',
+        devUri: 'mongodb://127.0.0.1:27017',
         name: 'se-tracking-engine',
         user: 'admin',
         credentials: process.env.DB_CREDENTIALS
     },
     notifier: {
         admin: 'inquiries@brilliant-apps.club',
-        mailAuthToken: process.env.POSTMARK_AUTH_TOKEN,
-        IBAuthToken: process.env.IDEABIZ_AUTH_TOKEN,
-        IBSMSOut: process.env.IDEABIZ_SMS_OUT,
-        IBOTPSubscribe: process.env.IDEABIZ_OTP_SUBSCRIBE,
-        IBOTPVerify: process.env.IDEABIZ_OTP_VERIFY
+        mailAuthToken: process.env.POSTMARK_AUTH_TOKEN
     },
     authentication: {
         jwtSecret: process.env.JWT_AUTH_KEY,
@@ -28,12 +63,6 @@ const config = {
     deployment: {
         host: '127.0.0.1',
         port: process.env.PORT || 3000
-    },
-    sdk: {
-        accessKey: process.env.AWS_ACCESS_KEY,
-        secretKey: process.env.AWS_SECRET_KEY,
-        sessionToken: process.env.AWS_SESSION_TOKEN,
-        forecastArn: process.env.AWS_FORECAST_ARN
     }
 };
 

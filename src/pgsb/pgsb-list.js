@@ -4,7 +4,10 @@ import PGError from '../models/power-grid/pg-error';
 export default function makePGSBList() {
     return Object.freeze({
         addPGStats,
-        findAllPGStatsByDeviceId,
+        findAllPGStatsByDeviceIds,
+        findLatestOldestPGStatsByDeviceIds,
+        findLatestPGStatByDeviceIds,
+        flushPGData,
         addPGError
     });
 
@@ -12,11 +15,73 @@ export default function makePGSBList() {
         return await new PGStat(stats).save();
     }
 
-    async function findAllPGStatsByDeviceId(deviceId) {
-        return await PGStat.find(deviceId).lean();
+    async function findAllPGStatsByDeviceIds(deviceIds) {
+        return PGStat.find({ deviceId: { $in: deviceIds } });
+    }
+
+    async function findLatestOldestPGStatsByDeviceIds(deviceIds, startTime, endTime) {
+        return PGStat.aggregate([
+            {
+                $match: {
+                    deviceId: { $in: deviceIds },
+                    timestamp: { $lte: endTime, $gte: startTime }
+                }
+            },
+            { $sort: { timestamp: -1 } },
+            {
+                $facet: {
+                    latest: [
+                        {
+                            $group: {
+                                _id: '$slaveId',
+                                result: { $first: '$$ROOT' }
+                            }
+                        },
+                        { $limit: 2 }
+                    ],
+                    oldest: [
+                        {
+                            $group: {
+                                _id: '$slaveId',
+                                result: { $last: '$$ROOT' }
+                            }
+                        },
+                        { $limit: 2 }
+                    ]
+                }
+            }
+        ]).allowDiskUse(true);
+    }
+
+    async function findLatestPGStatByDeviceIds(deviceIds, limit = 2) {
+        return PGStat.aggregate([
+            {
+                $match: {
+                    deviceId: { $in: deviceIds }
+                }
+            },
+            { $sort: { timestamp: -1 } },
+            {
+                $facet: {
+                    latest: [
+                        {
+                            $group: {
+                                _id: '$slaveId',
+                                result: { $first: '$$ROOT' }
+                            }
+                        },
+                        { $limit: limit }
+                    ]
+                }
+            }
+        ]).allowDiskUse(true);
     }
 
     async function addPGError(error) {
         return await new PGError(error).save();
+    }
+
+    async function flushPGData(startTime, endTime) {
+        return PGStat.deleteMany({ timestamp: { $lte: endTime, $gte: startTime } });
     }
 }

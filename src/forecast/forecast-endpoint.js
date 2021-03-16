@@ -1,10 +1,10 @@
-import HttpResponseType from '../models/common/http-response-type';
-import AccountStatus from '../models/common/account-status';
+import HttpResponseType from '../enums/http/http-response-type';
+import AccountStatus from '../enums/account/account-status';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { CustomException } from '../helpers/utilities/custom-exception';
-import { getFirstDay, getLastDay, getNextMonthString } from '../helpers/utilities/date-resolver';
-import { generateForecastValues } from '../helpers/forecast/forecast-engine';
+import { getLastDay, getCurrentMonthString } from '../helpers/utilities/date-resolver';
+import { getAvgValues } from '../helpers/forecast/forecast-engine';
 
 export default function makeAnalysisEndPointHandler({
     forecastList,
@@ -28,15 +28,14 @@ export default function makeAnalysisEndPointHandler({
         try {
             const date = new Date();
 
-            const startDate = getFirstDay(date);
             const endDate = getLastDay(date);
-            const forecastPeriod = getNextMonthString(date);
+            const forecastPeriod = getCurrentMonthString(date);
 
             const log = await forecastList.findForecastLog({ forecastPeriod });
 
             if (log && log.isCompleted) {
                 throw CustomException(
-                    `Forecast Reports already generated for '${forecastPeriod}' next month`,
+                    `Forecast Reports already generated for '${forecastPeriod}' month`,
                     HttpResponseType.CONFLICT
                 );
             }
@@ -50,26 +49,18 @@ export default function makeAnalysisEndPointHandler({
                 for (const consumer of consumers) {
                     let { accountNumber } = consumer;
 
-                    // Demonstration purposes only
-                    const forecast = await generateForecastValues(
-                        { startDate, endDate }, accountNumber)
-                        .catch(error => error);
-
                     const reports = await analysisList.findReportsByAccNumber({ accountNumber })
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    if (reports && reports.length) {
-                        await forecastList.addForecastReport(
-                            reports,
-                            endDate,
-                            { forecastPeriod },
-                            { accountNumber }
-                        ).catch(error => {
-                            throw CustomException(error.message);
-                        });
-                    }
+                    const averageForecast = getAvgValues(reports, endDate);
+
+                    Object.assign(averageForecast, { forecastPeriod }, { accountNumber });
+
+                    await forecastList.addForecastReport(averageForecast).catch(error => {
+                        throw CustomException(error.message);
+                    });
                 }
 
                 const forecastLog = {

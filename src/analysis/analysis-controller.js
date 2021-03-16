@@ -1,7 +1,8 @@
 import handleAnalysisRequest from './index';
 
+import HttpResponseType from '../enums/http/http-response-type';
+
 import normalizedRequest from '../helpers/utilities/normalize-request';
-import HttpResponseType from '../models/common/http-response-type';
 import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
 
 export default function analysisController(req, res) {
@@ -16,7 +17,6 @@ export default function analysisController(req, res) {
             }
         })
         .catch((error) => {
-            console.log(error);
             errorResponse(res, {
                 code: HttpResponseType.INTERNAL_SERVER_ERROR,
                 message: error.message
