@@ -2,7 +2,6 @@
  * Smart Electricity Tracking Engine (SETE)
  * -----------------------------------------------------
  *
- * 2020© NIB303COM Individual Project, National Institute of Business Management (affiliated with Coventry University, England)
  * @author: Aravinda Rathnayake
  */
 
@@ -16,7 +15,7 @@ import config from './config/config';
 
 import HttpResponseType from './enums/http/http-response-type';
 
-import initializeDB from './helpers/database';
+import initializeDB from './helpers/storage/database-handler';
 import { errorResponse } from './helpers/response/response-dispatcher';
 import logger from './config/log-level';
 
@@ -49,21 +48,19 @@ app.use('/v1/sete/analysis', analysisRouter);
 app.use('/v1/sete/meta', metaRouter);
 
 app.all('*',
-    authenticateJWT,
-    (req, res) => {
-        return errorResponse(res, {
-            code: HttpResponseType.NOT_FOUND,
-            message: 'Request URL not found'
-        });
-    });
+  authenticateJWT,
+  (req, res) => errorResponse(res, {
+    code: HttpResponseType.NOT_FOUND,
+    message: 'Request URL not found',
+  }));
 
 app.listen(config.deployment.port, () => {
-    console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-    console.log(chalk.yellow('Server Environment Details'));
-    console.log(chalk.magenta('-----------------------------------------------------------------------------'));
+  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
+  console.log(chalk.yellow('Server Environment Details'));
+  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
 
-    console.log(chalk.green(`Listening URL: ${config.deployment.host}:${config.deployment.port}`));
-    console.log(chalk.green('API Docs URL: https://bit.ly/32lfoy2'));
-    console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-    console.log(chalk.green.bold('Smart Electricity Tracking Engine (SETE) is up and running...'));
+  console.log(chalk.green(`Listening URL: ${config.deployment.host}:${config.deployment.port}`));
+  console.log(chalk.green('API Docs URL: https://bit.ly/32lfoy2'));
+  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
+  console.log(chalk.green.bold('Smart Electricity Tracking Engine (SETE) is up and running...'));
 });

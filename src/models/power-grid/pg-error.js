@@ -1,35 +1,35 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const PGErrorSchema = mongoose.Schema;
+const PGErrorSchema = Schema;
 
-let pgErrorSchema = new PGErrorSchema({
-    timestamp: {
-        type: Number
-    },
-    deviceId: {
-        type: String,
-        required: true
-    },
-    error: {
-        type: String,
-        required: true
-    },
-    rssi: {
-        type: Number,
-        required: true
-    },
-    wifiFailCount: {
-        type: Number,
-        required: true
-    },
-    httpFailCount: {
-        type: Number,
-        required: true
-    }
+const pgErrorSchema = new PGErrorSchema({
+  timestamp: {
+    type: Number,
+  },
+  deviceId: {
+    type: String,
+    required: true,
+  },
+  error: {
+    type: String,
+    required: true,
+  },
+  rssi: {
+    type: Number,
+    required: true,
+  },
+  wifiFailCount: {
+    type: Number,
+    required: true,
+  },
+  httpFailCount: {
+    type: Number,
+    required: true,
+  },
 }, {
-    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
+  timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-let pgError = mongoose.model('PGError', pgErrorSchema, 'pg-errors');
+const PGError = model('PGError', pgErrorSchema, 'pg-errors');
 
-module.exports = pgError;
+export default PGError;

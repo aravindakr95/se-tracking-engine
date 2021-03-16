@@ -5,21 +5,23 @@ import authenticateToGenerate from '../middlewares/auth-admin';
 import authController from '../auth/auth-controller';
 import { validate, fieldStateChecker } from '../middlewares/field-validator';
 
-let authRouter = express.Router();
+const authRouter = express.Router();
 
 authRouter.post('/login',
-    validate('auth', '/login', 'POST'),
-    fieldStateChecker,
-    (req, res) => {
-        authController(req, res);
-    });
+  validate('auth', '/login', 'POST'),
+  fieldStateChecker,
+  (req, res) => {
+    authController(req, res);
+  });
 
 authRouter.post('/register',
-    authenticateToGenerate,
-    validate('auth', '/register', 'POST'),
-    fieldStateChecker,
-    (req, res) => {
-        authController(req, res);
-    });
+  authenticateToGenerate,
+  validate('auth', '/register', 'POST'),
+  fieldStateChecker,
+  (req, res) => {
+    authController(req, res);
+  });
+
+export default authRouter;
 
 module.exports = authRouter;

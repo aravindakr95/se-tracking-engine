@@ -5,14 +5,14 @@ import { fieldStateChecker, validate } from '../middlewares/field-validator';
 
 import authenticateJWT from '../middlewares/auth-jwt';
 
-let forecastRouter = express.Router();
+const forecastRouter = express.Router();
 
 forecastRouter.post('/reports/generate',
-    authenticateJWT,
-    validate('forecast', '/reports/generate', 'POST'),
-    fieldStateChecker,
-    (req, res) => {
-        forecastController(req, res);
-    });
+  authenticateJWT,
+  validate('forecast', '/reports/generate', 'POST'),
+  fieldStateChecker,
+  (req, res) => {
+    forecastController(req, res);
+  });
 
-module.exports = forecastRouter;
+export default forecastRouter;

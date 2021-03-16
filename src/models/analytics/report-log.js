@@ -1,23 +1,23 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const ReportLogSchema = mongoose.Schema;
+const ReportLogSchema = Schema;
 
-let reportLogSchema = new ReportLogSchema({
-    timestamp: {
-        type: Number
-    },
-    billingPeriod: {
-        type: String,
-        required: true
-    },
-    isCompleted: {
-        type: Boolean,
-        required: true
-    }
+const reportLogSchema = new ReportLogSchema({
+  timestamp: {
+    type: Number,
+  },
+  billingPeriod: {
+    type: String,
+    required: true,
+  },
+  isCompleted: {
+    type: Boolean,
+    required: true,
+  },
 }, {
-    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
+  timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-let reportLog = mongoose.model('ReportLog', reportLogSchema, 'report-logs');
+const reportLog = model('ReportLog', reportLogSchema, 'report-logs');
 
-module.exports = reportLog;
+export default reportLog;

@@ -1,23 +1,23 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const SummaryLogSchema = mongoose.Schema;
+const SummaryLogSchema = Schema;
 
-let summaryLogSchema = new SummaryLogSchema({
-    timestamp: {
-        type: Number
-    },
-    summaryDate: {
-        type: String,
-        required: true
-    },
-    isCompleted: {
-        type: Boolean,
-        required: true
-    }
+const summaryLogSchema = new SummaryLogSchema({
+  timestamp: {
+    type: Number,
+  },
+  summaryDate: {
+    type: String,
+    required: true,
+  },
+  isCompleted: {
+    type: Boolean,
+    required: true,
+  },
 }, {
-    timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false }
+  timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-let summaryLog = mongoose.model('SummaryLog', summaryLogSchema, 'summary-logs');
+const summaryLog = model('SummaryLog', summaryLogSchema, 'summary-logs');
 
-module.exports = summaryLog;
+export default summaryLog;

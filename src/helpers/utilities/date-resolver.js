@@ -1,82 +1,62 @@
 function daysInPreviousMonth() {
-    const date = new Date();
+  const date = new Date();
 
-    date.setDate(0);
-    return date.getDate();
+  date.setDate(0);
+  return date.getDate();
 }
 
 function getPreviousDate() {
-    const date = new Date();
+  const date = new Date();
 
-    date.setDate(0);
-    date.setHours(23, 59, 59, 999);
+  date.setDate(0);
+  date.setHours(23, 59, 59, 999);
 
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
 
-    return {
-        dateInstance: date,
-        billingPeriod: `${month}-${day}-${year}`,
-        month,
-        year
-    };
-}
-
-function getPreviousMonthStartEndDate() {
-    const date = new Date();
-    let startTime, endTime;
-
-    date.setDate(0);
-    date.setDate(1);
-
-    startTime = date.setHours(0, 0, 0, 1);
-
-    date.setDate(daysInPreviousMonth());
-
-    endTime = date.setHours(23, 59, 59, 999);
-
-    return {
-        startTime,
-        endTime
-    };
+  return {
+    dateInstance: date,
+    billingPeriod: `${month}-${day}-${year}`,
+    month,
+    year,
+  };
 }
 
 function getYesterday() {
-    const yesterday = new Date(Date.now() - 864e5);
+  const yesterday = new Date(Date.now() - 864e5);
 
-    const year = yesterday.getFullYear();
-    const month = yesterday.getMonth() + 1;
-    const day = yesterday.getDate();
+  const year = yesterday.getFullYear();
+  const month = yesterday.getMonth() + 1;
+  const day = yesterday.getDate();
 
-    return {
-        startTime: yesterday.setHours(0, 0, 0, 1),
-        endTime: yesterday.setHours(23, 59, 59, 999),
-        summaryDate: `${month}-${day}-${year}`,
-        dateInstance: yesterday
-    };
+  return {
+    startTime: yesterday.setHours(0, 0, 0, 1),
+    endTime: yesterday.setHours(23, 59, 59, 999),
+    summaryDate: `${month}-${day}-${year}`,
+    dateInstance: yesterday,
+  };
 }
 
 function getLastDay(dateInstance) {
-    return new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 0);
+  return new Date(dateInstance.getFullYear(), dateInstance.getMonth() + 1, 0);
 }
 
 function getDateString(dateInstance) {
-    return `${dateInstance.getMonth() + 1}-${dateInstance.getDate()}-${dateInstance.getFullYear()}`;
+  return `${dateInstance.getMonth() + 1}-${dateInstance.getDate()}-${dateInstance.getFullYear()}`;
 }
 
 function getCurrentMonthString(dateInstance) {
-    const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), 1);
+  const date = new Date(dateInstance.getFullYear(), dateInstance.getMonth(), 1);
 
-    return `${date.getMonth() + 1}-${date.getFullYear()}`;
+  return `${date.getMonth() + 1}-${date.getFullYear()}`;
 }
 
-module.exports = {
-    daysInPreviousMonth,
-    getPreviousDate,
-    getPreviousMonthStartEndDate,
-    getYesterday,
-    getLastDay,
-    getDateString,
-    getCurrentMonthString
+export {
+  daysInPreviousMonth,
+  getPreviousDate,
+  getYesterday,
+  getLastDay,
+  getDateString,
+  getCurrentMonthString,
 };
