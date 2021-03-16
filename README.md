@@ -24,17 +24,22 @@
  ```
  npm install
  ```
- 
+OR 
+ ```
+ docker tag se-tracking-engine aravindakr95/se-tracking-engine:<VERSION>
+ ```
 ## :sparkles: Technologies
  
  Usage          	            | Technology
- --------------------------	| --------------------------
- Language        | JavaScript (ES6)
- Framework     	| Express
- Transpiler           	| Babel
- HTTP Client        	| Axios
- Encryption        	| BCrypt
+ --------------------------	    | --------------------------
+ Language                       | JavaScript
+ Framework     	                | Express
+ Transpiler           	        | Babel
+ HTTP Client        	        | Axios
+ Encryption        	            | BCrypt
  Code Quality Tools         	| ES Lint
+ Logger                         | Winston
+ Database                       | MongoDB Atlas
  Dependency Registries      	| NPM
  
 ## :sparkles: How to Use
@@ -47,6 +52,10 @@
    lint              Run Code quality operations 
    watch             Watches file changes in Development mode
    start             Run the build task and mount index file in dist directory
+ ```
+OR
+ ```
+docker run -p <MAP_PORT>:3000 se-tracking-engine
  ```
 
 ## :sparkles: License
