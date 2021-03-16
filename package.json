@@ -46,6 +46,7 @@
     "mongoose": "^5.11.15",
     "morgan": "^1.10.0",
     "postmark": "^2.7.3",
+    "regenerator-runtime": "^0.13.7",
     "rimraf": "^3.0.2",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.5.1"

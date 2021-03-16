@@ -36,7 +36,7 @@ export default function makeSummaryEndPointHandler({
           const uniqueDeviceIds = [];
           const { accountNumber } = consumer;
 
-          const pgsbDeviceIds = consumerList.findDeviceIdsByAccNumber(accountNumber)
+          const pgsbDeviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
             .catch((error) => {
               throw CustomException(error.message);
             });
@@ -47,13 +47,13 @@ export default function makeSummaryEndPointHandler({
             }
           });
 
-          const pgsbStats = pgsbList
+          const pgsbStats = await pgsbList
             .findLatestOldestPGStatsByDeviceIds(uniqueDeviceIds, startTime, endTime)
             .catch((error) => {
               throw CustomException(error.message);
             });
 
-          const pvsbStats = pvsbList
+          const pvsbStats = await pvsbList
             .findLatestOldestPVStatByTime(accountNumber, startTime, endTime)
             .catch((error) => {
               throw CustomException(error.message);
@@ -117,6 +117,7 @@ export default function makeSummaryEndPointHandler({
         throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
       }
     } catch (error) {
+      console.log(error)
       return objectHandler({
         code: error.code,
         message: error.message,
