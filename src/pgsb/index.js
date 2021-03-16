@@ -6,8 +6,8 @@ const pgsbList = makePGSBList();
 const consumerList = makeConsumerList();
 
 const pgsbEndpointHandler = makePGSBEndPointHandler({
-    pgsbList,
-    consumerList
+  pgsbList,
+  consumerList,
 });
 
 export default pgsbEndpointHandler;

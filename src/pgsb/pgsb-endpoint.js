@@ -8,33 +8,6 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import distributeStats from '../helpers/distributor/distribute-stats';
 
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.path) {
-      case '/payloads':
-        if (httpRequest.queryParams
-                && (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
-          return getConsumerPGStats(httpRequest);
-        }
-
-        if (httpRequest.queryParams
-                && (httpRequest.queryParams.deviceId && httpRequest.queryParams.slaveId)) {
-          return addPGStat(httpRequest);
-        }
-
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-      case '/errors':
-        return addPGError(httpRequest);
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   async function addPGStat(httpRequest) {
     const { body } = httpRequest;
     const { deviceId, slaveId } = httpRequest.queryParams;
@@ -172,4 +145,31 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.path) {
+      case '/payloads':
+        if (httpRequest.queryParams
+                && (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
+          return getConsumerPGStats(httpRequest);
+        }
+
+        if (httpRequest.queryParams
+                && (httpRequest.queryParams.deviceId && httpRequest.queryParams.slaveId)) {
+          return addPGStat(httpRequest);
+        }
+
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+      case '/errors':
+        return addPGError(httpRequest);
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

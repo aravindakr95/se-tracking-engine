@@ -4,7 +4,7 @@ import makeMetaEndPointHandler from './meta-endpoint';
 const metaList = makeMetaList();
 
 const metaEndpointHandler = makeMetaEndPointHandler({
-    metaList
+  metaList,
 });
 
 export default metaEndpointHandler;

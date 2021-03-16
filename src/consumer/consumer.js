@@ -1,3 +1,3 @@
 export default function makeConsumer(
-    consumerInfo
+  consumerInfo,
 ) { return Object.freeze(consumerInfo); }

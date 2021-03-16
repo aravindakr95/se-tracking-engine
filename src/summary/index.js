@@ -11,10 +11,10 @@ const pvsbList = makePVSBList();
 const pgsbList = makePGSBList();
 
 const summaryEndpointHandler = makeSummaryEndPointHandler({
-    summaryList,
-    consumerList,
-    pvsbList,
-    pgsbList
+  summaryList,
+  consumerList,
+  pvsbList,
+  pgsbList,
 });
 
 export default summaryEndpointHandler;

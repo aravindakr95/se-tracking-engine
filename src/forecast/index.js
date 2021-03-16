@@ -9,9 +9,9 @@ const consumerList = makeConsumerList();
 const analysisList = makeAnalysisList();
 
 const forecastEndpointHandler = makeForecastEndPointHandler({
-    forecastList,
-    consumerList,
-    analysisList
+  forecastList,
+  consumerList,
+  analysisList,
 });
 
 export default forecastEndpointHandler;

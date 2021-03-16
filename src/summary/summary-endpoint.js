@@ -10,30 +10,6 @@ import CustomException from '../helpers/utilities/custom-exception';
 export default function makeSummaryEndPointHandler({
   summaryList, consumerList, pvsbList, pgsbList,
 }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.method) {
-      case HttpMethod.POST:
-        return generateSummary();
-      case HttpMethod.GET:
-        if (httpRequest.queryParams
-                && httpRequest.queryParams.type
-                && httpRequest.queryParams.accountNumber
-                && httpRequest.queryParams.year
-                && httpRequest.queryParams.month) {
-          return getSummary(httpRequest);
-        }
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   // execute on next day beginning for the previous day at 00.05 Hours (IST)
   async function generateSummary() {
     const {
@@ -60,7 +36,7 @@ export default function makeSummaryEndPointHandler({
           const uniqueDeviceIds = [];
           const { accountNumber } = consumer;
 
-          const pgsbDeviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
+          const pgsbDeviceIds = consumerList.findDeviceIdsByAccNumber(accountNumber)
             .catch((error) => {
               throw CustomException(error.message);
             });
@@ -71,13 +47,13 @@ export default function makeSummaryEndPointHandler({
             }
           });
 
-          const pgsbStats = await pgsbList
+          const pgsbStats = pgsbList
             .findLatestOldestPGStatsByDeviceIds(uniqueDeviceIds, startTime, endTime)
             .catch((error) => {
               throw CustomException(error.message);
             });
 
-          const pvsbStats = await pvsbList
+          const pvsbStats = pvsbList
             .findLatestOldestPVStatByTime(accountNumber, startTime, endTime)
             .catch((error) => {
               throw CustomException(error.message);
@@ -205,4 +181,28 @@ export default function makeSummaryEndPointHandler({
       }
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.method) {
+      case HttpMethod.POST:
+        return generateSummary();
+      case HttpMethod.GET:
+        if (httpRequest.queryParams
+                && httpRequest.queryParams.type
+                && httpRequest.queryParams.accountNumber
+                && httpRequest.queryParams.year
+                && httpRequest.queryParams.month) {
+          return getSummary(httpRequest);
+        }
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

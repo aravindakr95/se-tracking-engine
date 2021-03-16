@@ -11,18 +11,6 @@ export default function makeAnalysisEndPointHandler({
   consumerList,
   analysisList,
 }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.path) {
-      case '/reports/generate':
-        return generateForecast();
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   // execute on 1st day of the month at 06.00 Hours (IST)
   async function generateForecast() {
     try {
@@ -88,4 +76,16 @@ export default function makeAnalysisEndPointHandler({
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.path) {
+      case '/reports/generate':
+        return generateForecast();
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

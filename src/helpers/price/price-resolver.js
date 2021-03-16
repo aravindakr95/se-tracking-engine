@@ -27,21 +27,33 @@ function calculateFixedCharge(units) {
     if (units >= 31) return config.prices.fixed.blockTwo;
     if (units >= 0) return config.prices.fixed.blockOne;
   }
+
+  return null;
 }
 
-function calculateUnitCharges(days, units) {
-  if (units > 60) {
-    return priceBlockOne(days, units);
-  }
-
-  if (units <= 60) {
-    return priceBlockOne(days, units, PriceCategories.BELOW);
-  }
+function priceBlockSix(units) {
+  const unitCost = config.prices.import.blockSeven;
+  return unitCost * units;
 }
 
-function priceBlockOne(days, units, type = PriceCategories.ABOVE) {
-  const unitCost = type === PriceCategories.ABOVE
-    ? config.prices.import.blockThree : config.prices.import.blockOne;
+function priceBlockFive(days, units) {
+  const unitCost = config.prices.import.blockSix;
+  const applicableUnits = units - (days * 2);
+
+  if (units < days) {
+    return unitCost * units;
+  }
+
+  if (applicableUnits > 0) {
+    const remainBlocks = priceBlockSix(applicableUnits);
+    return unitCost * (days * 2) + remainBlocks;
+  }
+
+  return unitCost * (days * 2);
+}
+
+function priceBlockFour(days, units) {
+  const unitCost = config.prices.import.blockFive;
   const applicableUnits = units - days;
 
   if (units < days) {
@@ -49,7 +61,23 @@ function priceBlockOne(days, units, type = PriceCategories.ABOVE) {
   }
 
   if (applicableUnits > 0) {
-    const remainBlocks = priceBlockTwo(days, applicableUnits, type);
+    const remainBlocks = priceBlockFive(days, applicableUnits);
+    return (unitCost * days) + remainBlocks;
+  }
+
+  return (unitCost * days);
+}
+
+function priceBlockThree(days, units) {
+  const unitCost = config.prices.import.blockFour;
+  const applicableUnits = units - days;
+
+  if (units < days) {
+    return unitCost * units;
+  }
+
+  if (applicableUnits > 0) {
+    const remainBlocks = priceBlockFour(days, applicableUnits);
     return (unitCost * days) + remainBlocks;
   }
 
@@ -73,8 +101,9 @@ function priceBlockTwo(days, units, type = PriceCategories.ABOVE) {
   return unitCost * days;
 }
 
-function priceBlockThree(days, units) {
-  const unitCost = config.prices.import.blockFour;
+function priceBlockOne(days, units, type = PriceCategories.ABOVE) {
+  const unitCost = type === PriceCategories.ABOVE
+    ? config.prices.import.blockThree : config.prices.import.blockOne;
   const applicableUnits = units - days;
 
   if (units < days) {
@@ -82,48 +111,23 @@ function priceBlockThree(days, units) {
   }
 
   if (applicableUnits > 0) {
-    const remainBlocks = priceBlockFour(days, applicableUnits);
+    const remainBlocks = priceBlockTwo(days, applicableUnits, type);
     return (unitCost * days) + remainBlocks;
   }
 
   return unitCost * days;
 }
 
-function priceBlockFour(days, units) {
-  const unitCost = config.prices.import.blockFive;
-  const applicableUnits = units - days;
-
-  if (units < days) {
-    return unitCost * units;
+function calculateUnitCharges(days, units) {
+  if (units > 60) {
+    return priceBlockOne(days, units);
   }
 
-  if (applicableUnits > 0) {
-    const remainBlocks = priceBlockFive(days, applicableUnits);
-    return (unitCost * days) + remainBlocks;
+  if (units <= 60) {
+    return priceBlockOne(days, units, PriceCategories.BELOW);
   }
 
-  return (unitCost * days);
-}
-
-function priceBlockFive(days, units) {
-  const unitCost = config.prices.import.blockSix;
-  const applicableUnits = units - (days * 2);
-
-  if (units < days) {
-    return unitCost * units;
-  }
-
-  if (applicableUnits > 0) {
-    const remainBlocks = priceBlockSix(applicableUnits);
-    return unitCost * (days * 2) + remainBlocks;
-  }
-
-  return unitCost * (days * 2);
-}
-
-function priceBlockSix(units) {
-  const unitCost = config.prices.import.blockSeven;
-  return unitCost * units;
+  return null;
 }
 
 function calculateExpense(category, days, units) {

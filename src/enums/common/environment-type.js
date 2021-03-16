@@ -1,6 +1,6 @@
-let EnvironmentType = Object.freeze({
-    PRODUCTION: 'PRODUCTION',
-    DEVELOPMENT: 'DEVELOPMENT'
+const EnvironmentType = Object.freeze({
+  PRODUCTION: 'PRODUCTION',
+  DEVELOPMENT: 'DEVELOPMENT',
 });
 
 export default EnvironmentType;

@@ -4,18 +4,6 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import CustomException from '../helpers/utilities/custom-exception';
 
 export default function makeMetaEndPointHandler({ metaList }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.path) {
-      case '/version':
-        return getServerVersion();
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   async function getServerVersion() {
     try {
       const version = metaList.getServerVersion();
@@ -37,4 +25,16 @@ export default function makeMetaEndPointHandler({ metaList }) {
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.path) {
+      case '/version':
+        return getServerVersion();
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

@@ -6,8 +6,8 @@ const authList = makeAuthList();
 const consumerList = makeConsumerList();
 
 const authEndpointHandler = makeAuthEndPointHandler({
-    authList,
-    consumerList
+  authList,
+  consumerList,
 });
 
 export default authEndpointHandler;

@@ -5,23 +5,6 @@ import hasher from '../helpers/hasher';
 import CustomException from '../helpers/utilities/custom-exception';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.method) {
-      case 'GET':
-        return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId
-          ? getConsumer(httpRequest) : getConsumers(httpRequest);
-      case 'PUT':
-        return updateConsumer(httpRequest);
-      case 'DELETE':
-        return deleteConsumer(httpRequest);
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   async function getConsumers(httpRequest) {
     const status = (httpRequest.queryParams) && (httpRequest.queryParams.status)
       ? httpRequest.queryParams.status : null;
@@ -184,4 +167,21 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.method) {
+      case 'GET':
+        return httpRequest.queryParams.accountNumber || httpRequest.queryParams.deviceId
+          ? getConsumer(httpRequest) : getConsumers(httpRequest);
+      case 'PUT':
+        return updateConsumer(httpRequest);
+      case 'DELETE':
+        return deleteConsumer(httpRequest);
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

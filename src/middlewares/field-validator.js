@@ -21,27 +21,6 @@ function fieldStateChecker(req, res, next) {
   });
 }
 
-const validate = (main, route, method) => {
-  switch (main) {
-    case 'auth':
-      return authValidator(route);
-    case 'pgsb':
-      return pgsbValidator(route);
-    case 'pvsb':
-      return pvsbValidator(route);
-    case 'consumers':
-      return consumersValidator(method);
-    case 'summary':
-      return summaryValidator(method);
-    case 'analysis':
-      return reportsValidator(route);
-    case 'forecast':
-      return forecastValidator(route);
-    default:
-      return [];
-  }
-};
-
 function authValidator(route) {
   switch (route) {
     case '/login':
@@ -307,5 +286,26 @@ function forecastValidator(route) {
       return [];
   }
 }
+
+const validate = (main, route, method) => {
+  switch (main) {
+    case 'auth':
+      return authValidator(route);
+    case 'pgsb':
+      return pgsbValidator(route);
+    case 'pvsb':
+      return pvsbValidator(route);
+    case 'consumers':
+      return consumersValidator(method);
+    case 'summary':
+      return summaryValidator(method);
+    case 'analysis':
+      return reportsValidator(route);
+    case 'forecast':
+      return forecastValidator(route);
+    default:
+      return [];
+  }
+};
 
 export { validate, fieldStateChecker };

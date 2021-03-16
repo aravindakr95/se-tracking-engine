@@ -11,20 +11,6 @@ import jwtHandler from '../helpers/validators/token-handler';
 import sendEmailPostMark from '../helpers/mail/mailer';
 
 export default function makeAuthEndPointHandler({ authList }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.path) {
-      case '/login':
-        return loginConsumer(httpRequest);
-      case '/register':
-        return registerConsumer(httpRequest);
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   async function loginConsumer(httpRequest) {
     let isValidPw = false;
     const { email, password } = httpRequest.body;
@@ -122,4 +108,18 @@ export default function makeAuthEndPointHandler({ authList }) {
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.path) {
+      case '/login':
+        return loginConsumer(httpRequest);
+      case '/register':
+        return registerConsumer(httpRequest);
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

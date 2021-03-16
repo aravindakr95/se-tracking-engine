@@ -1,6 +1,6 @@
 import appRoot from 'app-root-path';
-import winston from 'winston';
-import dailyRotateFile from 'winston-daily-rotate-file';
+import { createLogger as CreateLogger, transports, format } from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 import config from './config';
 
@@ -28,11 +28,11 @@ const options = {
 };
 
 // instantiate a new Winston Logger with the settings defined above
-const logger = new winston.createLogger({
+const logger = new CreateLogger({
   level: 'info',
   transports: [
-    new dailyRotateFile(options.file),
-    new winston.transports.Console(options.console),
+    new DailyRotateFile(options.file),
+    new transports.Console(options.console),
   ],
   exitOnError: false, // do not exit on handled exceptions
 });
@@ -48,8 +48,8 @@ logger.stream = {
 //
 
 if (config.environment !== EnvironmentType.PRODUCTION) {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
+  logger.add(new transports.Console({
+    format: format.simple(),
   }));
 }
 

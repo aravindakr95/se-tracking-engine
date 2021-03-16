@@ -10,35 +10,6 @@ import fetchInverter from '../helpers/renac/fetch-pv-data';
 import distributeStats from '../helpers/distributor/distribute-stats';
 
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.method) {
-      case HttpMethod.GET:
-        if (httpRequest.queryParams
-                && (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
-          return getConsumerPVStats(httpRequest);
-        }
-
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-      case HttpMethod.POST:
-        if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
-          return addPVStat(httpRequest);
-        }
-
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   async function addPVStat(httpRequest) {
     const { accountNumber } = httpRequest.queryParams;
 
@@ -124,9 +95,10 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
           throw CustomException(error.message);
         });
       } else if (type === 'LATEST') {
-        result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber }).catch((error) => {
-          throw CustomException(error.message);
-        });
+        result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber })
+          .catch((error) => {
+            throw CustomException(error.message);
+          });
       } else {
         throw CustomException(
           'Provided parameters are missing or invalid',
@@ -152,4 +124,33 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.method) {
+      case HttpMethod.GET:
+        if (httpRequest.queryParams
+                && (httpRequest.queryParams.accountNumber && httpRequest.queryParams.type)) {
+          return getConsumerPVStats(httpRequest);
+        }
+
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+      case HttpMethod.POST:
+        if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
+          return addPVStat(httpRequest);
+        }
+
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

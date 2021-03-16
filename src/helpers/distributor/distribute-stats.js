@@ -31,7 +31,7 @@ async function distributeStats(stats, type) {
         },
       };
 
-      return await axios.get(options.url, options);
+      return axios.get(options.url, options);
     case OperationStatus.GRID_ERROR:
       options = {
         url: config.distributor.gridErrorUrl,
@@ -48,7 +48,7 @@ async function distributeStats(stats, type) {
         },
       };
 
-      return await axios.get(options.url, options);
+      return axios.get(options.url, options);
     case OperationStatus.PV_SUCCESS:
       options = {
         url: config.distributor.pvSuccessUrl,
@@ -58,7 +58,9 @@ async function distributeStats(stats, type) {
         },
       };
 
-      return await axios.post(options.url, stats, options);
+      return axios.post(options.url, stats, options);
+    default:
+      return null;
   }
 }
 

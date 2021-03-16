@@ -4,7 +4,7 @@ import makeConsumerEndpointHandler from './consumer-endpoint';
 const consumerList = makeConsumerList();
 
 const consumerEndpointHandler = makeConsumerEndpointHandler({
-    consumerList
+  consumerList,
 });
 
 export default consumerEndpointHandler;

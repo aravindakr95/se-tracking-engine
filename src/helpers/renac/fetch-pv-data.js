@@ -21,7 +21,7 @@ async function fetchInverter() {
     },
   };
 
-  return await axios.post(opt.url, body, options);
+  return axios.post(opt.url, body, options);
 }
 
 export default fetchInverter;

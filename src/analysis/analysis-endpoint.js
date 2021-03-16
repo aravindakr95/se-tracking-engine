@@ -22,42 +22,6 @@ export default function makeAnalysisEndPointHandler({
   forecastList,
   summaryList,
 }) {
-  return async function handle(httpRequest) {
-    switch (httpRequest.path) {
-      case '/reports/generate':
-        return generateReports();
-      case '/reports/dispatch':
-        return dispatchReports();
-      case '/reports':
-        if (httpRequest.queryParams
-                && httpRequest.queryParams.accountNumber
-                && httpRequest.queryParams.year
-                && httpRequest.queryParams.month) {
-          return getReportForMonth(httpRequest);
-        }
-
-        if (httpRequest.queryParams
-                && httpRequest.queryParams.accountNumber
-                && httpRequest.queryParams.year) {
-          return getReportsForYear(httpRequest);
-        }
-
-        if (httpRequest.queryParams
-                && httpRequest.queryParams.accountNumber) {
-          return getAllReportsForAccount(httpRequest);
-        }
-
-        return getAllReports(httpRequest);
-      case `/reports/${httpRequest.pathParams._id}`:
-        return getReportByInvoiceID(httpRequest);
-      default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
-    }
-  };
-
   // execute on 1st day of the month at 09.00 Hours (IST)
   async function generateReports() {
     const dateNow = new Date();
@@ -377,4 +341,40 @@ export default function makeAnalysisEndPointHandler({
       });
     }
   }
+
+  return async function handle(httpRequest) {
+    switch (httpRequest.path) {
+      case '/reports/generate':
+        return generateReports();
+      case '/reports/dispatch':
+        return dispatchReports();
+      case '/reports':
+        if (httpRequest.queryParams
+                && httpRequest.queryParams.accountNumber
+                && httpRequest.queryParams.year
+                && httpRequest.queryParams.month) {
+          return getReportForMonth(httpRequest);
+        }
+
+        if (httpRequest.queryParams
+                && httpRequest.queryParams.accountNumber
+                && httpRequest.queryParams.year) {
+          return getReportsForYear(httpRequest);
+        }
+
+        if (httpRequest.queryParams
+                && httpRequest.queryParams.accountNumber) {
+          return getAllReportsForAccount(httpRequest);
+        }
+
+        return getAllReports(httpRequest);
+      case `/reports/${httpRequest.pathParams.id}`:
+        return getReportByInvoiceID(httpRequest);
+      default:
+        return objectHandler({
+          code: HttpResponseType.METHOD_NOT_ALLOWED,
+          message: `${httpRequest.method} method not allowed`,
+        });
+    }
+  };
 }

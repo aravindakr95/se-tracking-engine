@@ -6,8 +6,8 @@ const pvsbList = makePVSBList();
 const consumerList = makeConsumerList();
 
 const pvsbEndpointHandler = makePVSBEndPointHandler({
-    pvsbList,
-    consumerList
+  pvsbList,
+  consumerList,
 });
 
 export default pvsbEndpointHandler;

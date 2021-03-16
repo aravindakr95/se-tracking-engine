@@ -20,16 +20,16 @@ function calculateDailyConsumption(pgStats) {
   }
 
   const groundFloorLatest = pgStats[0].latest
-    .find((stat) => stat._id === 101);
+    .find((stat) => stat.id === 101);
 
   const firstFloorLatest = pgStats[0].latest
-    .find((stat) => stat._id === 201);
+    .find((stat) => stat.id === 201);
 
   const groundFloorOldest = pgStats[0].oldest
-    .find((stat) => stat._id === 101);
+    .find((stat) => stat.id === 101);
 
   const firstFloorOldest = pgStats[0].oldest
-    .find((stat) => stat._id === 201);
+    .find((stat) => stat.id === 201);
 
   if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result)
         || (!groundFloorOldest.result || !firstFloorOldest.result)) {
@@ -79,8 +79,10 @@ function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, du
   const avgDailyConsumption = totalConsumption / duration;
 
   if (excessEnergy > 0) {
-    bfUnits = consumer.tariff === SchemaType.NET_METERING ? excessEnergy : -1;
-    income = consumer.tariff === SchemaType.NET_ACCOUNTING ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
+    bfUnits = consumer.tariff === SchemaType.NET_METERING
+      ? excessEnergy : -1;
+    income = consumer.tariff === SchemaType.NET_ACCOUNTING
+      ? calculateIncome(dateTime, consumer, excessEnergy) : -1;
   } else {
     totalGridImported = Math.abs(excessEnergy);
   }
