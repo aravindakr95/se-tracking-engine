@@ -26,7 +26,7 @@
  ```
 OR 
  ```
- docker tag se-tracking-engine aravindakr95/se-tracking-engine:<VERSION>
+ docker pull aravindakr95/se-tracking-engine:<VERSION>
  ```
 ## :sparkles: Technologies
  
