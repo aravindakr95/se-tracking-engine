@@ -11,8 +11,7 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import {
     daysInPreviousMonth,
     getCurrentMonthString,
-    getPreviousDate,
-    getPreviousMonthStartEndDate
+    getPreviousDate
 } from '../helpers/utilities/date-resolver';
 import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/price/throughput-resolver';
 import { sendEmailPostMark } from '../helpers/mail/mailer';
@@ -20,9 +19,8 @@ import { sendEmailPostMark } from '../helpers/mail/mailer';
 export default function makeAnalysisEndPointHandler({
     analysisList,
     consumerList,
-    pvsbList,
-    pgsbList,
-    forecastList
+    forecastList,
+    summaryList
 }) {
     return async function handle(httpRequest) {
         switch (httpRequest.path) {
@@ -67,7 +65,6 @@ export default function makeAnalysisEndPointHandler({
         try {
             const { dateInstance, billingPeriod, month, year } = getPreviousDate();
             const billingDuration = daysInPreviousMonth();
-            const { startTime, endTime } = getPreviousMonthStartEndDate();
 
             const log = await analysisList.findReportLog({ billingPeriod });
 
@@ -85,8 +82,6 @@ export default function makeAnalysisEndPointHandler({
 
             if (consumers && consumers.length) {
                 for (const consumer of consumers) {
-                    let uniqueDeviceIds = [];
-
                     let {
                         accountNumber,
                         contactNumber,
@@ -95,40 +90,29 @@ export default function makeAnalysisEndPointHandler({
                         billingCategory
                     } = consumer;
 
-                    const pgsbDeviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
+                    const pvSummaries = await summaryList.findPVSummary(accountNumber, year, month)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    pgsbDeviceIds.forEach((deviceId) => {
-                        if (!uniqueDeviceIds.includes(deviceId)) {
-                            uniqueDeviceIds.push(deviceId);
-                        }
-                    });
-
-                    const pgsbStats = await pgsbList.findLatestOldestPGStatsByDeviceIds(uniqueDeviceIds, startTime, endTime)
+                    const pgSummaries = await summaryList.findPGSummary(accountNumber, year, month)
                         .catch(error => {
                             throw CustomException(error.message);
                         });
 
-                    const pvsbStats = await pvsbList.findLatestOldestPVStatByTime(accountNumber, startTime, endTime)
-                        .catch(error => {
-                            throw CustomException(error.message);
-                        });
-
-                    if (!pvsbStats || !(pgsbStats && pgsbStats.length)) {
-                        logger.error(`PVSB or PGSB Stats not found for the consumer ${accountNumber}`);
+                    if ((!pvSummaries || !pvSummaries.length) || (!pgSummaries || !pgSummaries.length)) {
+                        logger.error(`PVSB or PGSB summaries not found for the consumer ${accountNumber}`);
                         continue;
                     }
 
                     const productionDetails = calculateMonthlyProduction(
-                        pvsbStats,
+                        pvSummaries,
                         billingDuration);
 
                     const consumptionDetails = calculateMonthlyConsumption(
                         dateInstance,
                         consumer,
-                        pgsbStats,
+                        pgSummaries,
                         productionDetails,
                         billingDuration);
 

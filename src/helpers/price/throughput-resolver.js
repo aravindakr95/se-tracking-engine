@@ -43,12 +43,12 @@ function calculateDailyConsumption(pgStats) {
 }
 
 function calculateMonthlyProduction(pvStats, duration) {
-    if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
-        throw CustomException('PV stats, PV stats latest or old fields are empty');
+    if (!pvStats || !pvStats.length) {
+        throw CustomException('PV stats summary records are empty');
     }
-    const { latest, oldest } = pvStats;
 
-    const totalProduction = latest.totalEnergy - oldest.totalEnergy;
+    const totalProduction = pvStats.reduce((acc, current) => acc + current.productionToday, 0);
+
     const avgDailyProduction = totalProduction / duration;
 
     return {
@@ -68,29 +68,11 @@ function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, du
 
     let expense = null;
 
-    if (!pgStats || (!pgStats[0].latest.length || !pgStats[0].oldest.length)) {
-        throw CustomException('PG stats, PG stats latest or old fields are empty');
+    if (!pgStats || !pgStats.length) {
+        throw CustomException('PG stats summary records are empty');
     }
 
-    const groundFloorLatest = pgStats[0].latest
-        .find(stat => stat._id === 101);
-
-    const firstFloorLatest = pgStats[0].latest
-        .find(stat => stat._id === 201);
-
-    const groundFloorOldest = pgStats[0].oldest
-        .find(stat => stat._id === 101);
-
-    const firstFloorOldest = pgStats[0].oldest
-        .find(stat => stat._id === 201);
-
-    if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result) ||
-        (!groundFloorOldest.result || !firstFloorOldest.result)) {
-        throw CustomException('One or more data fields are empty');
-    }
-
-    const totalConsumption = (groundFloorLatest.result.totalPower - groundFloorOldest.result.totalPower) +
-        (firstFloorLatest.result.totalPower - firstFloorOldest.result.totalPower);
+    const totalConsumption = pgStats.reduce((acc, current) => acc + current.consumptionToday, 0);
 
     const excessEnergy = production.totalProduction - totalConsumption;
 
