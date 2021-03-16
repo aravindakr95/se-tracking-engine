@@ -8,7 +8,7 @@ const config = {
     supplier: 'CEB',
     timezone: '+05:30',
     database: {
-        url: 'se-tracking-engine.jw1zk.mongodb.net',
+        url: process.env.PROD_URI,
         name: 'se-tracking-engine',
         user: 'admin',
         credentials: process.env.DB_CREDENTIALS
