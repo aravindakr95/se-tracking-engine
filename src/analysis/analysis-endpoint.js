@@ -184,20 +184,6 @@ export default function makeAnalysisEndPointHandler({
                 });
 
                 if (status && status.isCompleted) {
-                    // const lastDayMS = dateInstance.getTime();
-
-                    // await pgsbList.flushPGData(lastDayMS).catch(error => {
-                    //     throw CustomException(error.message);
-                    // });
-                    //
-                    // await pgsbList.flushPGErrorData(lastDayMS).catch(error => {
-                    //     throw CustomException(error.message);
-                    // });
-                    //
-                    // await pvsbList.flushPVData(lastDayMS).catch(error => {
-                    //     throw CustomException(error.message);
-                    // });
-
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
                         message: `Monthly reports generated for '${billingPeriod}' is completed`

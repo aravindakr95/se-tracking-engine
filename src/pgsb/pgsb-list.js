@@ -8,8 +8,7 @@ export default function makePGSBList() {
         findLatestOldestPGStatsByDeviceIds,
         findLatestPGStatByDeviceIds,
         flushPGData,
-        addPGError,
-        flushPGErrorData
+        addPGError
     });
 
     async function addPGStats(stats) {
@@ -82,11 +81,7 @@ export default function makePGSBList() {
         return await new PGError(error).save();
     }
 
-    async function flushPGData(dateMS) {
-        return PGStat.deleteMany({ timestamp: { $lte: dateMS } });
-    }
-
-    async function flushPGErrorData(dateMS) {
-        return PGError.deleteMany({ timestamp: { $lte: dateMS } });
+    async function flushPGData(startTime, endTime) {
+        return PGStat.deleteMany({ timestamp: { $lte: endTime, $gte: startTime } });
     }
 }

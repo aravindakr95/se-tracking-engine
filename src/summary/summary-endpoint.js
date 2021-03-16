@@ -7,7 +7,7 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import { getYesterday } from '../helpers/utilities/date-resolver';
 import { calculateDailyProduction, calculateDailyConsumption } from '../helpers/price/throughput-resolver';
 
-export default function makeAnalysisEndPointHandler({ summaryList, consumerList, pvsbList, pgsbList }) {
+export default function makeSummaryEndPointHandler({ summaryList, consumerList, pvsbList, pgsbList }) {
     return async function handle(httpRequest) {
         switch (httpRequest.method) {
         case HttpMethod.POST:
@@ -120,6 +120,14 @@ export default function makeAnalysisEndPointHandler({ summaryList, consumerList,
                 });
 
                 if (status && status.isCompleted) {
+                    await pgsbList.flushPGData(startTime, endTime).catch(error => {
+                        throw CustomException(error.message);
+                    });
+
+                    await pvsbList.flushPVData(startTime, endTime).catch(error => {
+                        throw CustomException(error.message);
+                    });
+
                     return objectHandler({
                         status: HttpResponseType.SUCCESS,
                         message: `Daily summary reports generated for '${summaryDate}' is completed`

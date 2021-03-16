@@ -46,8 +46,8 @@ export default function makePVSBList() {
             .limit(1);
     }
 
-    async function flushPVData(dateMS) {
-        return PVStat.deleteMany({ snapshotTimestamp: { $lte: dateMS } });
+    async function flushPVData(startTime, endTime) {
+        return PVStat.deleteMany({ snapshotTimestamp: { $lte: endTime, $gte: startTime } });
     }
 
     function mapPayload(pvStats, accountNumber) {
