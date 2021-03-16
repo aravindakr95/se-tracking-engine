@@ -51,7 +51,7 @@ web_modules/
 .npm
 
 # dotenv environment variables file
-.env.test
+.env
 
 # Optional eslint cache
 .eslintcache
