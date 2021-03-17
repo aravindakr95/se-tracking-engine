@@ -8,16 +8,16 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import chalk from 'chalk';
 import morgan from 'morgan';
 
 import config from './config/config';
+
+import logger from './config/log-level';
 
 import HttpResponseType from './enums/http/http-response-type';
 
 import initializeDB from './helpers/storage/database-handler';
 import { errorResponse } from './helpers/response/response-dispatcher';
-import logger from './config/log-level';
 
 import authenticateJWT from './middlewares/auth-jwt';
 
@@ -55,12 +55,6 @@ app.all('*',
   }));
 
 app.listen(config.deployment.port, () => {
-  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-  console.log(chalk.yellow('Server Environment Details'));
-  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-
-  console.log(chalk.green(`Listening URL: ${config.deployment.host}:${config.deployment.port}`));
-  console.log(chalk.green('API Docs URL: https://bit.ly/32lfoy2'));
-  console.log(chalk.magenta('-----------------------------------------------------------------------------'));
-  console.log(chalk.green.bold('Smart Electricity Tracking Engine (SETE) is up and running...'));
+  logger.info(`[index]: Listening URL: ${config.deployment.host}${config.deployment.port}`);
+  logger.info('[index]: API Docs URL: https://bit.ly/32lfoy2');
 });
