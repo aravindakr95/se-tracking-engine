@@ -1,6 +1,6 @@
 {
   "name": "se-tracking-engine",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Act as the middleware for the PGSB, PVSB devices and serve the content to the users by consuming and listening to RESTful APIs",
   "main": "dist/index.js",
   "scripts": {
