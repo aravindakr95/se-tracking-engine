@@ -2,11 +2,11 @@ import SchemaType from '../../enums/account/schema-type';
 
 import { calculateIncome, calculateExpense } from './price-resolver';
 import makeTwoDecimalNumber from '../utilities/number-resolver';
-import CustomException from '../utilities/custom-exception';
+import customException from '../utilities/custom-exception';
 
 function calculateDailyProduction(pvStats) {
   if (!pvStats || (!pvStats.latest || !pvStats.oldest)) {
-    throw CustomException('PV stats, PV stats latest or old fields are empty');
+    throw customException('PV stats, PV stats latest or old fields are empty');
   }
 
   const result = pvStats.latest.totalEnergy - pvStats.oldest.totalEnergy;
@@ -16,7 +16,7 @@ function calculateDailyProduction(pvStats) {
 
 function calculateDailyConsumption(pgStats) {
   if (!pgStats || (!pgStats[0].latest.length || !pgStats[0].oldest.length)) {
-    throw CustomException('PG stats, PG stats latest or old fields are empty');
+    throw customException('PG stats, PG stats latest or old fields are empty');
   }
 
   const groundFloorLatest = pgStats[0].latest
@@ -33,7 +33,7 @@ function calculateDailyConsumption(pgStats) {
 
   if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result)
         || (!groundFloorOldest.result || !firstFloorOldest.result)) {
-    throw CustomException('One or more data fields are empty');
+    throw customException('One or more data fields are empty');
   }
 
   const result = (groundFloorLatest.result.totalPower - groundFloorOldest.result.totalPower)
@@ -44,7 +44,7 @@ function calculateDailyConsumption(pgStats) {
 
 function calculateMonthlyProduction(pvStats, duration) {
   if (!pvStats || !pvStats.length) {
-    throw CustomException('PV stats summary records are empty');
+    throw customException('PV stats summary records are empty');
   }
 
   const totalProduction = pvStats.reduce((acc, current) => acc + current.productionToday, 0);
@@ -69,7 +69,7 @@ function calculateMonthlyConsumption(dateTime, consumer, pgStats, production, du
   let expense = null;
 
   if (!pgStats || !pgStats.length) {
-    throw CustomException('PG stats summary records are empty');
+    throw customException('PG stats summary records are empty');
   }
 
   const totalConsumption = pgStats.reduce((acc, current) => acc + current.consumptionToday, 0);

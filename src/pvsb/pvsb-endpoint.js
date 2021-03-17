@@ -5,7 +5,7 @@ import OperationStatus from '../enums/device/operation-status';
 import HttpMethod from '../enums/http/http-method';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 import fetchInverter from '../helpers/renac/fetch-pv-data';
 import distributeStats from '../helpers/distributor/distribute-stats';
 
@@ -17,26 +17,26 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
       const consumer = await consumerList.findConsumerByAccNumber(accountNumber);
 
       if (!consumer) {
-        throw CustomException(
+        throw customException(
           'Account is not associated with any available consumers',
           HttpResponseType.NOT_FOUND,
         );
       }
 
       const pvStats = await fetchInverter().catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       const { data } = pvStats;
 
       if (!pvStats && !data) {
-        throw CustomException('PV statistics retrieval failed from the manufacturer server');
+        throw customException('PV statistics retrieval failed from the manufacturer server');
       }
 
       const customPayload = pvsbList.mapPayload(data, accountNumber);
 
       if (!customPayload) {
-        throw CustomException(
+        throw customException(
           'Custom payload is empty',
           HttpResponseType.NOT_FOUND,
         );
@@ -52,12 +52,12 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
       }
 
       const result = await pvsbList.addPVStats(customPayload).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (result && config.distributor.isAllowed) {
         await distributeStats(data, OperationStatus.PV_SUCCESS).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
       }
 
@@ -80,11 +80,11 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
     try {
       const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (!consumer) {
-        throw CustomException(
+        throw customException(
           `Requested account number '${accountNumber}' is not exists`,
           HttpResponseType.NOT_FOUND,
         );
@@ -92,15 +92,15 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
 
       if (type === 'ALL') {
         result = await pvsbList.findAllPVStatsByAccountNumber({ accountNumber }).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
       } else if (type === 'LATEST') {
         result = await pvsbList.findLatestPVStatByAccountNumber({ accountNumber })
           .catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
       } else {
-        throw CustomException(
+        throw customException(
           'Provided parameters are missing or invalid',
           HttpResponseType.NOT_FOUND,
         );
@@ -113,7 +113,7 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested consumer account '${accountNumber}' PV statistics not found`,
         HttpResponseType.NOT_FOUND,
       );

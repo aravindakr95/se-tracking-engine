@@ -3,7 +3,7 @@ import config from '../config/config';
 import HttpResponseType from '../enums/http/http-response-type';
 import OperationStatus from '../enums/device/operation-status';
 
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import distributeStats from '../helpers/distributor/distribute-stats';
 
@@ -15,11 +15,16 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     let isStored = false;
 
     try {
-      Object.assign(body, { deviceId, slaveId });
+      const deviceDetails = {
+        deviceId,
+        slaveId,
+      };
+
+      const pgDetails = { ...body, deviceDetails };
 
       if (slaveId === '101' || slaveId === '201') {
-        await pgsbList.addPGStats(body).catch((error) => {
-          throw CustomException(error.message);
+        await pgsbList.addPGStats(pgDetails).catch((error) => {
+          throw customException(error.message);
         });
 
         isStored = true;
@@ -27,7 +32,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
       if (config.distributor.isAllowed) {
         await distributeStats(body, OperationStatus.GRID_SUCCESS).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
       }
 
@@ -56,11 +61,11 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
     try {
       const consumer = await consumerList.findConsumerByAccNumber(accountNumber).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (!consumer) {
-        throw CustomException(
+        throw customException(
           `Requested account number '${accountNumber}' is not exists`,
           HttpResponseType.NOT_FOUND,
         );
@@ -68,7 +73,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
       const deviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
         .catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
       deviceIds.forEach((deviceId) => {
@@ -78,7 +83,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
       });
 
       if (!uniqueDeviceIds && !uniqueDeviceIds.length) {
-        throw CustomException(
+        throw customException(
           `PGSB Device Id '${deviceIds}' is not exists for account '${accountNumber}'`,
           HttpResponseType.NOT_FOUND,
         );
@@ -86,14 +91,14 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
 
       if (type === 'ALL') {
         result = await pgsbList.findAllPGStatsByDeviceIds(uniqueDeviceIds).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
       } else if (type === 'LATEST') {
         result = await pgsbList.findLatestPGStatByDeviceIds(uniqueDeviceIds).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
       } else {
-        throw CustomException(
+        throw customException(
           'Provided parameters are missing or invalid',
           HttpResponseType.NOT_FOUND,
         );
@@ -106,7 +111,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested consumer account '${accountNumber}' PG statistics not found`,
         HttpResponseType.NOT_FOUND,
       );
@@ -125,12 +130,12 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     try {
       Object.assign(body, { deviceId });
       const payload = await pgsbList.addPGError(body).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (payload) {
         await distributeStats(body, OperationStatus.GRID_ERROR).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
         return objectHandler({

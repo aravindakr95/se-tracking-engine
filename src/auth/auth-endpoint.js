@@ -4,7 +4,7 @@ import HttpResponseType from '../enums/http/http-response-type';
 import AccountStatus from '../enums/account/account-status';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 import hashValidator from '../helpers/validators/hash-validator';
 import hasher from '../helpers/hasher';
 import jwtHandler from '../helpers/validators/token-handler';
@@ -17,11 +17,11 @@ export default function makeAuthEndPointHandler({ authList }) {
 
     try {
       const consumer = await authList.findConsumerByEmail({ email }).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (consumer && consumer.status === AccountStatus.INACTIVE) {
-        throw CustomException(
+        throw customException(
           `Account number '${consumer.accountNumber}' is pending for verification`,
           HttpResponseType.FORBIDDEN,
         );
@@ -44,12 +44,12 @@ export default function makeAuthEndPointHandler({ authList }) {
             message: `Consumer '${email}' authentication successful`,
           });
         }
-        throw CustomException(
+        throw customException(
           'Device token not found in the database',
           HttpResponseType.NOT_FOUND,
         );
       } else {
-        throw CustomException(
+        throw customException(
           'Invalid email or password',
           HttpResponseType.AUTH_REQUIRED,
         );
@@ -67,7 +67,7 @@ export default function makeAuthEndPointHandler({ authList }) {
 
     try {
       const deviceToken = await jwtHandler(body).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       const editedFields = {
@@ -75,10 +75,10 @@ export default function makeAuthEndPointHandler({ authList }) {
         deviceToken,
       };
 
-      Object.assign(body, editedFields);
+      const fields = { ...body, ...editedFields };
 
-      const consumer = await authList.addConsumer(body).catch((error) => {
-        throw CustomException(error.message);
+      const consumer = await authList.addConsumer(fields).catch((error) => {
+        throw customException(error.message);
       });
 
       const templateConsumer = Object.assign(consumer.toObject(), {
@@ -87,14 +87,14 @@ export default function makeAuthEndPointHandler({ authList }) {
       });
 
       if (!templateConsumer) {
-        throw CustomException(
+        throw customException(
           `Consumer '${body.email}' account create failed`,
         );
       }
 
       // WARNING: limited resource use with care
       await sendEmailPostMark(templateConsumer, 'registration-complete').catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       return objectHandler({

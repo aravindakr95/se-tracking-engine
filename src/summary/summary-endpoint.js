@@ -5,7 +5,7 @@ import AccountStatus from '../enums/account/account-status';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { getYesterday } from '../helpers/utilities/date-resolver';
 import { calculateDailyProduction, calculateDailyConsumption } from '../helpers/price/throughput-resolver';
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 
 export default function makeSummaryEndPointHandler({
   summaryList, consumerList, pvsbList, pgsbList,
@@ -20,7 +20,7 @@ export default function makeSummaryEndPointHandler({
       const log = await summaryList.findSummaryLog({ summaryDate });
 
       if (log && log.isCompleted) {
-        throw CustomException(
+        throw customException(
           `Daily summary already generated for '${summaryDate}'`,
           HttpResponseType.CONFLICT,
         );
@@ -28,7 +28,7 @@ export default function makeSummaryEndPointHandler({
 
       const consumers = await consumerList.findConsumersByStatus({ status: AccountStatus.ACTIVE })
         .catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
       if (consumers && consumers.length) {
@@ -38,7 +38,7 @@ export default function makeSummaryEndPointHandler({
 
           const pgsbDeviceIds = await consumerList.findDeviceIdsByAccNumber(accountNumber)
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           pgsbDeviceIds.forEach((deviceId) => {
@@ -50,13 +50,13 @@ export default function makeSummaryEndPointHandler({
           const pgsbStats = await pgsbList
             .findLatestOldestPGStatsByDeviceIds(uniqueDeviceIds, startTime, endTime)
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           const pvsbStats = await pvsbList
             .findLatestOldestPVStatByTime(accountNumber, startTime, endTime)
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           if (!(pvsbStats) || !(pgsbStats && pgsbStats.length)) {
@@ -82,11 +82,11 @@ export default function makeSummaryEndPointHandler({
           };
 
           await summaryList.addPVSummary(dailyProduction).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
           await summaryList.addPGSummary(dailyConsumption).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
         }
 
@@ -96,16 +96,16 @@ export default function makeSummaryEndPointHandler({
         };
 
         const status = await summaryList.addSummaryLog(summaryLog).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
         if (status && status.isCompleted) {
           await pgsbList.flushPGData(startTime, endTime).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
           await pvsbList.flushPVData(startTime, endTime).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
           return objectHandler({
@@ -114,10 +114,10 @@ export default function makeSummaryEndPointHandler({
           });
         }
       } else {
-        throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
+        throw customException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return objectHandler({
         code: error.code,
         message: error.message,
@@ -134,7 +134,7 @@ export default function makeSummaryEndPointHandler({
       try {
         const result = await summaryList
           .findPVSummary(accountNumber, year, month).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
         if (result) {
@@ -144,7 +144,8 @@ export default function makeSummaryEndPointHandler({
             message: '',
           });
         }
-        throw CustomException(
+
+        throw customException(
           'Requested daily reports not found',
           HttpResponseType.NOT_FOUND,
         );
@@ -160,7 +161,7 @@ export default function makeSummaryEndPointHandler({
       try {
         const result = await summaryList
           .findPGSummary(accountNumber, year, month).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
         if (result) {
@@ -170,7 +171,7 @@ export default function makeSummaryEndPointHandler({
             message: '',
           });
         }
-        throw CustomException(
+        throw customException(
           'Requested daily reports not found',
           HttpResponseType.NOT_FOUND,
         );

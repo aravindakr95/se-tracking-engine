@@ -1,7 +1,7 @@
 import HttpResponseType from '../enums/http/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 
 export default function makeMetaEndPointHandler({ metaList }) {
   async function getServerVersion() {
@@ -15,7 +15,7 @@ export default function makeMetaEndPointHandler({ metaList }) {
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         'Server version not found',
       );
     } catch (error) {

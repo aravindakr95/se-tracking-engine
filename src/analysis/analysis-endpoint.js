@@ -6,7 +6,7 @@ import HttpResponseType from '../enums/http/http-response-type';
 import SchemaType from '../enums/account/schema-type';
 import AccountStatus from '../enums/account/account-status';
 
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import {
   daysInPreviousMonth,
@@ -35,7 +35,7 @@ export default function makeAnalysisEndPointHandler({
       const log = await analysisList.findReportLog({ billingPeriod });
 
       if (log && log.isCompleted) {
-        throw CustomException(
+        throw customException(
           `Monthly reports already generated for '${billingPeriod}'`,
           HttpResponseType.CONFLICT,
         );
@@ -43,7 +43,7 @@ export default function makeAnalysisEndPointHandler({
 
       const consumers = await consumerList.findConsumersByStatus({ status: AccountStatus.ACTIVE })
         .catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
       if (consumers && consumers.length) {
@@ -58,12 +58,12 @@ export default function makeAnalysisEndPointHandler({
 
           const pvSummaries = await summaryList.findPVSummary(accountNumber, year, month)
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           const pgSummaries = await summaryList.findPGSummary(accountNumber, year, month)
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           if ((!pvSummaries || !pvSummaries.length) || (!pgSummaries || !pgSummaries.length)) {
@@ -89,7 +89,7 @@ export default function makeAnalysisEndPointHandler({
           const forecastValues = await forecastList.findForecastReportByAccountNumber(
             accountNumber, forecastPeriod,
           ).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
           if (!forecastValues) {
@@ -123,7 +123,7 @@ export default function makeAnalysisEndPointHandler({
           };
 
           await analysisList.addReport(report).catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
         }
 
@@ -133,7 +133,7 @@ export default function makeAnalysisEndPointHandler({
         };
 
         const status = await analysisList.addReportLog(reportLog).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
         if (status && status.isCompleted) {
@@ -143,7 +143,7 @@ export default function makeAnalysisEndPointHandler({
           });
         }
       } else {
-        throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
+        throw customException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
       }
     } catch (error) {
       return objectHandler({
@@ -160,11 +160,11 @@ export default function makeAnalysisEndPointHandler({
 
       const reports = await analysisList.findAllReportsForMonth({ billingPeriod })
         .catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
-      if (reports && !reports.length) {
-        throw CustomException(
+      if (!reports || !reports.length) {
+        throw customException(
           `Zero reports found for the '${billingPeriod}' period`,
           HttpResponseType.NOT_FOUND,
         );
@@ -172,26 +172,29 @@ export default function makeAnalysisEndPointHandler({
 
       for (const report of reports) {
         const { accountNumber } = report;
+        // eslint-disable-next-line no-await-in-loop
         const { subscribers } = await consumerList.findConsumerByAccNumber(accountNumber)
           .catch((error) => {
-            throw CustomException(error.message);
+            throw customException(error.message);
           });
 
-        const templateReport = Object.assign(report, {
+        const commonDetails = {
           bodyTitle: `Electricity EBILL for ${billingPeriod}`,
           serverVer: `V${config.version}`,
-        });
+        };
+
+        const templateReport = { ...report, commonDetails };
 
         for (let i = 0; i <= subscribers.length; i++) {
           if (report && report.tariff === SchemaType.NET_METERING) {
             // WARNING: limited resource use with care
             await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-nm', i).catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
           } else {
             // WARNING: limited resource use with care
             await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-na', i).catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
           }
         }
@@ -212,7 +215,7 @@ export default function makeAnalysisEndPointHandler({
   async function getAllReports() {
     try {
       const result = await analysisList.findAllReports().catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (result && result.length) {
@@ -222,7 +225,7 @@ export default function makeAnalysisEndPointHandler({
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         'Reports collection is empty',
         HttpResponseType.NOT_FOUND,
       );
@@ -239,7 +242,7 @@ export default function makeAnalysisEndPointHandler({
 
     try {
       const result = await analysisList.findReportsByAccNumber({ accountNumber }).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (result && result.length) {
@@ -249,7 +252,7 @@ export default function makeAnalysisEndPointHandler({
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested Reports for consumer '${accountNumber}' not found`,
         HttpResponseType.NOT_FOUND,
       );
@@ -266,7 +269,7 @@ export default function makeAnalysisEndPointHandler({
 
     try {
       const result = await analysisList.findReportsForYear(accountNumber, year).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (result && result.length) {
@@ -276,7 +279,7 @@ export default function makeAnalysisEndPointHandler({
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested Reports for consumer '${accountNumber}' in '${year}' not found`,
         HttpResponseType.NOT_FOUND,
       );
@@ -292,9 +295,10 @@ export default function makeAnalysisEndPointHandler({
     const { accountNumber, year, month } = httpRequest.queryParams;
 
     try {
-      const result = await analysisList.findReportForMonth(accountNumber, year, month).catch((error) => {
-        throw CustomException(error.message);
-      });
+      const result = await analysisList.findReportForMonth(accountNumber, year, month)
+        .catch((error) => {
+          throw customException(error.message);
+        });
 
       if (result) {
         return objectHandler({
@@ -303,7 +307,7 @@ export default function makeAnalysisEndPointHandler({
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested Reports for consumer '${accountNumber}' in '${year}-${month}' not found`,
         HttpResponseType.NOT_FOUND,
       );
@@ -320,7 +324,7 @@ export default function makeAnalysisEndPointHandler({
 
     try {
       const result = await analysisList.findReportByInvoiceID({ _id }).catch((error) => {
-        throw CustomException(error.message);
+        throw customException(error.message);
       });
 
       if (result) {
@@ -330,7 +334,7 @@ export default function makeAnalysisEndPointHandler({
           message: '',
         });
       }
-      throw CustomException(
+      throw customException(
         `Requested Reports '${_id}' not found`,
         HttpResponseType.NOT_FOUND,
       );

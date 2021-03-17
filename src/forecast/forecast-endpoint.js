@@ -3,7 +3,7 @@ import AccountStatus from '../enums/account/account-status';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { getLastDay, getCurrentMonthString } from '../helpers/utilities/date-resolver';
-import CustomException from '../helpers/utilities/custom-exception';
+import customException from '../helpers/utilities/custom-exception';
 import getAvgValues from '../helpers/forecast/forecast-engine';
 
 export default function makeAnalysisEndPointHandler({
@@ -22,7 +22,7 @@ export default function makeAnalysisEndPointHandler({
       const log = await forecastList.findForecastLog({ forecastPeriod });
 
       if (log && log.isCompleted) {
-        throw CustomException(
+        throw customException(
           `Forecast Reports already generated for '${forecastPeriod}' month`,
           HttpResponseType.CONFLICT,
         );
@@ -30,7 +30,7 @@ export default function makeAnalysisEndPointHandler({
 
       const consumers = await consumerList.findConsumersByStatus({ status: AccountStatus.ACTIVE })
         .catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
       if (consumers && consumers.length) {
@@ -39,15 +39,20 @@ export default function makeAnalysisEndPointHandler({
 
           const reports = await analysisList.findReportsByAccNumber({ accountNumber })
             .catch((error) => {
-              throw CustomException(error.message);
+              throw customException(error.message);
             });
 
           const averageForecast = getAvgValues(reports, endDate);
 
-          Object.assign(averageForecast, { forecastPeriod }, { accountNumber });
+          const commonDetails = {
+            forecastPeriod,
+            accountNumber,
+          };
 
-          await forecastList.addForecastReport(averageForecast).catch((error) => {
-            throw CustomException(error.message);
+          const forecastDetails = { ...averageForecast, ...commonDetails };
+
+          await forecastList.addForecastReport(forecastDetails).catch((error) => {
+            throw customException(error.message);
           });
         }
 
@@ -57,7 +62,7 @@ export default function makeAnalysisEndPointHandler({
         };
 
         const status = await forecastList.addForecastLog(forecastLog).catch((error) => {
-          throw CustomException(error.message);
+          throw customException(error.message);
         });
 
         if (status && status.isCompleted) {
@@ -68,7 +73,7 @@ export default function makeAnalysisEndPointHandler({
         }
       }
 
-      throw CustomException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
+      throw customException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
     } catch (error) {
       return objectHandler({
         code: error.code,
