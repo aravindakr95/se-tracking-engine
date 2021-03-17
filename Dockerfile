@@ -27,6 +27,6 @@ COPY --from=builder /app/dist ./dist
 
 USER node
 
-CMD ["node", "./dist/server.js"]
+CMD ["node", "./dist/index.js"]
 
 
