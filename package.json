@@ -8,8 +8,8 @@
     "start": "npm run build && node dist/index.js",
     "clean": "rimraf dist && rimraf logs",
     "lint": "eslint --fix --config .eslintrc.json \"src/**/*.js\"",
-    "build": "npm run clean && babel src -s -D -d dist",
-    "watch": "nodemon -e js --watch src --exec \"npm run start\""
+    "build": "npm run clean && babel src --out-dir dist",
+    "watch": "nodemon --exec babel-node src/index.js"
   },
   "keywords": [
     "Smart Electricity Tracking Engine",
@@ -54,6 +54,7 @@
   "devDependencies": {
     "@babel/cli": "^7.13.10",
     "@babel/core": "^7.13.10",
+    "@babel/node": "^7.13.10",
     "@babel/preset-env": "^7.13.10",
     "chalk": "^4.1.0",
     "eslint": "^7.22.0",

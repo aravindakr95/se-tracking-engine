@@ -1,22 +1,32 @@
-FROM node:lts-alpine
+# -----Base-----
+FROM node:lts-alpine AS base
 
-# Create app directory
-WORKDIR /usr/src
+WORKDIR /app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
+# ---------- Builder ----------
+# Creates:
+# - node_modules: production dependencies (no dev dependencies)
+# - dist: A production build compiled with Babel
+FROM base AS builder
+
+COPY package*.json .babelrc.json ./
 
 RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
 
-# Bundle app source
-COPY . .
+COPY ./src ./src
 
-EXPOSE 3000
+RUN npm run build
 
-CMD ["npm", "run", "start"]
+RUN npm prune --production # Remove dev dependencies
+
+# ---------- Release ----------
+FROM base AS release
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+USER node
+
+CMD ["node", "./dist/server.js"]
 
 
