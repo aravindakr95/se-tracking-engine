@@ -55,6 +55,6 @@ app.all('*',
   }));
 
 app.listen(config.deployment.port, () => {
-  logger.info(`[index]: Listening URL: ${config.deployment.host}${config.deployment.port}`);
+  logger.info(`[index]: Listening URL: ${config.deployment.host}:${config.deployment.port}`);
   logger.info('[index]: API Docs URL: https://bit.ly/32lfoy2');
 });

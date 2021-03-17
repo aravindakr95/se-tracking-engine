@@ -49,7 +49,7 @@ const config = {
     prodUri: process.env.PROD_URI,
     devUri: 'mongodb://127.0.0.1:27017',
     name: 'se-tracking-engine',
-    user: 'admin',
+    user: 'sete',
     credentials: process.env.DB_CREDENTIALS,
   },
   notifier: {
