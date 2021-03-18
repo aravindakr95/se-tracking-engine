@@ -183,7 +183,7 @@ export default function makeAnalysisEndPointHandler({
           serverVer: `V${config.version}`,
         };
 
-        const templateReport = { ...report, commonDetails };
+        const templateReport = { ...report, ...commonDetails };
 
         for (let i = 0; i <= subscribers.length; i++) {
           if (report && report.tariff === SchemaType.NET_METERING) {
