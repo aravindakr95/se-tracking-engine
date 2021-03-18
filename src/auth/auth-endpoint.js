@@ -4,11 +4,10 @@ import HttpResponseType from '../enums/http/http-response-type';
 import AccountStatus from '../enums/account/account-status';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import customException from '../helpers/utilities/custom-exception';
-import hashValidator from '../helpers/validators/hash-validator';
-import hasher from '../helpers/hasher';
-import jwtHandler from '../helpers/validators/token-handler';
+import { compareField, hashField } from '../helpers/auth/encryption-handler';
+import { signAuthToken } from '../helpers/auth/token-handler';
 import sendEmailPostMark from '../helpers/mail/mailer';
+import customException from '../helpers/utilities/custom-exception';
 
 export default function makeAuthEndPointHandler({ authList }) {
   async function loginConsumer(httpRequest) {
@@ -28,7 +27,7 @@ export default function makeAuthEndPointHandler({ authList }) {
       }
 
       if (consumer) {
-        isValidPw = await hashValidator({
+        isValidPw = await compareField({
           password,
           hash: consumer.password,
         });
@@ -66,12 +65,12 @@ export default function makeAuthEndPointHandler({ authList }) {
     const { body } = httpRequest;
 
     try {
-      const deviceToken = await jwtHandler(body).catch((error) => {
+      const deviceToken = await signAuthToken(body).catch((error) => {
         throw customException(error.message);
       });
 
       const editedFields = {
-        password: hasher({ password: body.password }),
+        password: hashField({ password: body.password }),
         deviceToken,
       };
 

@@ -1,7 +1,7 @@
 import HttpResponseType from '../enums/http/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
-import hasher from '../helpers/hasher';
+import { hashField } from '../helpers/auth/encryption-handler';
 import customException from '../helpers/utilities/custom-exception';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
@@ -119,7 +119,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
     const { accountNumber } = httpRequest.queryParams;
 
     try {
-      const passwords = { password: hasher({ password }) };
+      const passwords = { password: hashField({ password }) };
       const updatedDetails = { ...body, ...passwords };
 
       const result = await consumerList.updateConsumerByAccNumber(

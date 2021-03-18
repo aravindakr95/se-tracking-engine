@@ -1,71 +1,92 @@
-import jwt from 'jsonwebtoken';
-
-import config from '../config/config';
+import loglevel from '../config/log-level';
 
 import HttpResponseType from '../enums/http/http-response-type';
 
-import { errorResponse } from '../helpers/response/response-dispatcher';
-
 import makeAuthList from '../auth/auth-list';
 
+import { errorResponse } from '../helpers/http/response-dispatcher';
+import { verifyAuthToken, decodeAuthToken } from '../helpers/auth/token-handler';
+
 async function validateProfile(email) {
+  loglevel.info('[middlewares][validateProfile]: Start');
   try {
     const authList = makeAuthList();
     const result = await authList.findConsumerByEmail(email);
 
+    loglevel.info('[middlewares][validateProfile]: Finish');
     return !!result;
   } catch (error) {
+    loglevel.info(`[middlewares][validateProfile]: ${error.message}`);
+    loglevel.info('[middlewares][validateProfile]: Finish');
+
     return false;
   }
 }
 
 // token check middleware
-export default function authenticateJWT(req, res, next) {
-  const authHeader = req.headers.authorization;
+// eslint-disable-next-line consistent-return
+export default async function authenticateJWT(req, res, next) {
+  loglevel.info('[middlewares][authenticateJWT]: Start');
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.split(' ')[1] : null;
+    const consumer = verifyAuthToken(token);
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
+    if (!authHeader || !token) {
+      loglevel.error('[middlewares][authenticateJWT]: Bearer token is not presented');
+      loglevel.info('[middlewares][authenticateJWT]: Finish');
 
-    if (token) {
-      jwt.verify(token, config.authentication.jwtSecret, (error, consumer) => {
-        const decodedToken = jwt.decode(token);
-
-        if (error) {
-          return errorResponse(res, {
-            code: HttpResponseType.FORBIDDEN,
-            message: error.message,
-          });
-        }
-
-        if (decodedToken && decodedToken.email) {
-          validateProfile({ email: decodedToken.email }).then((valid) => {
-            if (valid) {
-              req.consumer = consumer;
-              next();
-            } else {
-              return errorResponse(res, {
-                code: HttpResponseType.AUTH_REQUIRED,
-                message: 'Present Authorization header does not compatible',
-              });
-            }
-          });
-        } else {
-          return errorResponse(res, {
-            code: HttpResponseType.AUTH_REQUIRED,
-            message: 'Required fields are not available to authenticate',
-          });
-        }
-      });
-    } else {
       return errorResponse(res, {
         code: HttpResponseType.AUTH_REQUIRED,
-        message: 'Bearer token is not presented or invalid format',
+        message: 'Bearer token is not presented',
       });
     }
-  } else {
+
+    if (consumer && (!consumer.email || !consumer.accountNumber)) {
+      loglevel.error('[middlewares][authenticateJWT]: Bearer token is in invalid format');
+      loglevel.info('[middlewares][authenticateJWT]: Finish');
+
+      return errorResponse(res, {
+        code: HttpResponseType.AUTH_REQUIRED,
+        message: 'Bearer token is in invalid format',
+      });
+    }
+
+    const email = decodeAuthToken(token);
+
+    if (!email) {
+      loglevel.error('[middlewares][authenticateJWT]: Required fields are not available on token');
+      loglevel.info('[middlewares][authenticateJWT]: Finish');
+
+      return errorResponse(res, {
+        code: HttpResponseType.AUTH_REQUIRED,
+        message: 'Required fields are not available on token',
+      });
+    }
+
+    const isValid = await validateProfile({ email });
+
+    if (!isValid) {
+      loglevel.error('[middlewares][authenticateJWT]: Present Authorization header does not comply with records');
+      loglevel.info('[middlewares][authenticateJWT]: Finish');
+
+      return errorResponse(res, {
+        code: HttpResponseType.AUTH_REQUIRED,
+        message: 'Present Authorization header does not comply with records',
+      });
+    }
+
+    loglevel.info('[middlewares][authenticateJWT]: Finish');
+
+    req.consumer = consumer;
+    next();
+  } catch (error) {
+    loglevel.error(`[middlewares][authenticateJWT]: ${error.message}`);
+    loglevel.info('[middlewares][authenticateJWT]: Finish');
+
     return errorResponse(res, {
-      code: HttpResponseType.AUTH_REQUIRED,
-      message: 'Unauthorized to access this resource',
+      code: HttpResponseType.INTERNAL_SERVER_ERROR,
+      message: error.message,
     });
   }
 }

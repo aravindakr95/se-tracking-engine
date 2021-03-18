@@ -36,6 +36,6 @@ const pvSummarySchema = new PVSummarySchema({
   timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-const pvSummary = model('PVSummary', pvSummarySchema, 'pv-summaries');
+const PVSummary = model('PVSummary', pvSummarySchema, 'pv-summaries');
 
-export default pvSummary;
+export default PVSummary;

@@ -2,7 +2,7 @@ import handleMetaRequest from './index';
 import HttpResponseType from '../enums/http/http-response-type';
 
 import { normalizeRequest } from '../helpers/utilities/normalize-request';
-import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
+import { successResponse, errorResponse } from '../helpers/http/response-dispatcher';
 
 export default function metaController(req, res) {
   const httpRequest = normalizeRequest(req);

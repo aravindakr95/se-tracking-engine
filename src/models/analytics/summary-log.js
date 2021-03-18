@@ -18,6 +18,6 @@ const summaryLogSchema = new SummaryLogSchema({
   timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-const summaryLog = model('SummaryLog', summaryLogSchema, 'summary-logs');
+const SummaryLog = model('SummaryLog', summaryLogSchema, 'summary-logs');
 
-export default summaryLog;
+export default SummaryLog;

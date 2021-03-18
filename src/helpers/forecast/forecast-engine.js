@@ -10,9 +10,7 @@ function getAvgValues(reports, endDate) {
     };
   }
 
-  reports.map((report) => {
-    totalValues += report.netAmount;
-  });
+  reports.map((report) => totalValues += report.netAmount);
 
   return {
     endDate: endDate.getTime(),

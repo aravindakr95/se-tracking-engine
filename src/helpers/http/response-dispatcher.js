@@ -1,6 +1,6 @@
 import HttpResponseType from '../../enums/http/http-response-type';
 
-import httpErrorStatusMapper from '../utilities/http-error-status-mapper';
+import httpErrorStatusMapper from './http-error-status-mapper';
 
 const successResponse = (res, obj) => {
   const headers = { 'Content-Type': 'application/json' };

@@ -18,6 +18,6 @@ const reportLogSchema = new ReportLogSchema({
   timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-const reportLog = model('ReportLog', reportLogSchema, 'report-logs');
+const ReportLog = model('ReportLog', reportLogSchema, 'report-logs');
 
-export default reportLog;
+export default ReportLog;

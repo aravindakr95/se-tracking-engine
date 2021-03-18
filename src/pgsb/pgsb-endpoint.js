@@ -3,9 +3,9 @@ import config from '../config/config';
 import HttpResponseType from '../enums/http/http-response-type';
 import OperationStatus from '../enums/device/operation-status';
 
-import customException from '../helpers/utilities/custom-exception';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import distributeStats from '../helpers/distributor/distribute-stats';
+import customException from '../helpers/utilities/custom-exception';
 
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
   async function addPGStat(httpRequest) {

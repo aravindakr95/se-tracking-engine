@@ -3,7 +3,7 @@ import handlePVSBRequest from './index';
 import HttpResponseType from '../enums/http/http-response-type';
 
 import { normalizeRequest } from '../helpers/utilities/normalize-request';
-import { successResponse, errorResponse } from '../helpers/response/response-dispatcher';
+import { successResponse, errorResponse } from '../helpers/http/response-dispatcher';
 
 export default function pvsbController(req, res) {
   const httpRequest = normalizeRequest(req);

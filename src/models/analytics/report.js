@@ -123,6 +123,6 @@ const reportSchema = new ReportSchema({
   timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-const report = model('Report', reportSchema, 'reports');
+const Report = model('Report', reportSchema, 'reports');
 
-export default report;
+export default Report;

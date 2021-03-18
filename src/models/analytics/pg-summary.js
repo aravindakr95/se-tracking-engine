@@ -36,6 +36,6 @@ const pgSummarySchema = new PGSummarySchema({
   timestamps: { currentTime: () => Date.now(), createdAt: 'timestamp', updatedAt: false },
 });
 
-const pgSummary = model('PGSummary', pgSummarySchema, 'pg-summaries');
+const PGSummary = model('PGSummary', pgSummarySchema, 'pg-summaries');
 
-export default pgSummary;
+export default PGSummary;

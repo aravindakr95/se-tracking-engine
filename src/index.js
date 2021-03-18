@@ -17,7 +17,7 @@ import logger from './config/log-level';
 import HttpResponseType from './enums/http/http-response-type';
 
 import initializeDB from './helpers/storage/database-handler';
-import { errorResponse } from './helpers/response/response-dispatcher';
+import { errorResponse } from './helpers/http/response-dispatcher';
 
 import authenticateJWT from './middlewares/auth-jwt';
 

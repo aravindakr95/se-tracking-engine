@@ -117,7 +117,6 @@ export default function makeSummaryEndPointHandler({
         throw customException('Consumers collection is empty', HttpResponseType.NOT_FOUND);
       }
     } catch (error) {
-      console.log(error);
       return objectHandler({
         code: error.code,
         message: error.message,
@@ -130,7 +129,7 @@ export default function makeSummaryEndPointHandler({
       type, accountNumber, year, month,
     } = httpRequest.queryParams;
 
-    if (type === 'pv') {
+    if (type === 'pv' || type === 'PV') {
       try {
         const result = await summaryList
           .findPVSummary(accountNumber, year, month).catch((error) => {
@@ -157,7 +156,7 @@ export default function makeSummaryEndPointHandler({
       }
     }
 
-    if (type === 'pg') {
+    if (type === 'pg' || type === 'PG') {
       try {
         const result = await summaryList
           .findPGSummary(accountNumber, year, month).catch((error) => {

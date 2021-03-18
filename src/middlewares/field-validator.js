@@ -3,7 +3,7 @@ import { body, param, validationResult } from 'express-validator';
 import HttpResponseType from '../enums/http/http-response-type';
 import HttpMethod from '../enums/http/http-method';
 
-import { errorResponse } from '../helpers/response/response-dispatcher';
+import { errorResponse } from '../helpers/http/response-dispatcher';
 
 function fieldStateChecker(req, res, next) {
   const errors = validationResult(req);
