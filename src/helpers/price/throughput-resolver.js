@@ -21,20 +21,25 @@ function calculateDailyConsumption(pgStats) {
   }
 
   const groundFloorLatest = pgStats[0].latest
-    .find((stat) => stat.id === HouseholdFloor.FIRST);
+    .find((stat) => stat._id === HouseholdFloor.FIRST);
 
   const firstFloorLatest = pgStats[0].latest
-    .find((stat) => stat.id === HouseholdFloor.SECOND);
+    .find((stat) => stat._id === HouseholdFloor.SECOND);
 
   const groundFloorOldest = pgStats[0].oldest
-    .find((stat) => stat.id === HouseholdFloor.FIRST);
+    .find((stat) => stat._id === HouseholdFloor.FIRST);
 
   const firstFloorOldest = pgStats[0].oldest
-    .find((stat) => stat.id === HouseholdFloor.SECOND);
+    .find((stat) => stat._id === HouseholdFloor.SECOND);
 
-  if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result)
-        || (!groundFloorOldest.result || !firstFloorOldest.result)) {
-    throw customException('One or more data fields are empty');
+  if ((!groundFloorLatest || !groundFloorLatest.result)
+      || (!firstFloorLatest || !firstFloorLatest.result)) {
+    throw customException('Latest PG statistics not found for the day');
+  }
+
+  if ((!groundFloorOldest || !groundFloorOldest.result)
+      || (!groundFloorOldest || !groundFloorOldest.result)) {
+    throw customException('Oldest PG statistics not found for the day');
   }
 
   const result = (groundFloorLatest.result.totalPower - groundFloorOldest.result.totalPower)
