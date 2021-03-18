@@ -2,6 +2,7 @@ import config from '../config/config';
 
 import HttpResponseType from '../enums/http/http-response-type';
 import OperationStatus from '../enums/device/operation-status';
+import HouseholdFloor from '../enums/device/household-floor';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import distributeStats from '../helpers/distributor/distribute-stats';
@@ -11,18 +12,19 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
   async function addPGStat(httpRequest) {
     const { body } = httpRequest;
     const { deviceId, slaveId } = httpRequest.queryParams;
+    const convertedSlaveId = Number(slaveId);
 
     let isStored = false;
 
     try {
       const deviceDetails = {
         deviceId,
-        slaveId,
+        slaveId: convertedSlaveId,
       };
 
       const pgDetails = { ...body, deviceDetails };
 
-      if (slaveId === '101' || slaveId === '201') {
+      if (convertedSlaveId === HouseholdFloor.FIRST || slaveId === HouseholdFloor.SECOND) {
         await pgsbList.addPGStats(pgDetails).catch((error) => {
           throw customException(error.message);
         });
@@ -128,8 +130,8 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
     const { deviceId } = httpRequest.queryParams;
 
     try {
-      Object.assign(body, { deviceId });
-      const payload = await pgsbList.addPGError(body).catch((error) => {
+      const pgDetails = { ...body, deviceId };
+      const payload = await pgsbList.addPGError(pgDetails).catch((error) => {
         throw customException(error.message);
       });
 
@@ -143,6 +145,11 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
           message: `PGSB ${deviceId} error log received`,
         });
       }
+
+      return objectHandler({
+        status: HttpResponseType.INTERNAL_SERVER_ERROR,
+        message: `PGSB ${deviceId} error log add failed`,
+      });
     } catch (error) {
       return objectHandler({
         code: HttpResponseType.CLIENT_ERROR,

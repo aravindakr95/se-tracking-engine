@@ -1,4 +1,5 @@
 import SchemaType from '../../enums/account/schema-type';
+import HouseholdFloor from '../../enums/device/household-floor';
 
 import { calculateIncome, calculateExpense } from './price-resolver';
 import makeTwoDecimalNumber from '../utilities/number-resolver';
@@ -20,16 +21,16 @@ function calculateDailyConsumption(pgStats) {
   }
 
   const groundFloorLatest = pgStats[0].latest
-    .find((stat) => stat.id === 101);
+    .find((stat) => stat.id === HouseholdFloor.FIRST);
 
   const firstFloorLatest = pgStats[0].latest
-    .find((stat) => stat.id === 201);
+    .find((stat) => stat.id === HouseholdFloor.SECOND);
 
   const groundFloorOldest = pgStats[0].oldest
-    .find((stat) => stat.id === 101);
+    .find((stat) => stat.id === HouseholdFloor.FIRST);
 
   const firstFloorOldest = pgStats[0].oldest
-    .find((stat) => stat.id === 201);
+    .find((stat) => stat.id === HouseholdFloor.SECOND);
 
   if (!groundFloorLatest || (!groundFloorLatest.result || !firstFloorLatest.result)
         || (!groundFloorOldest.result || !firstFloorOldest.result)) {

@@ -63,11 +63,10 @@ export default function makeAuthEndPointHandler({ authList }) {
 
   async function registerConsumer(httpRequest) {
     const { body } = httpRequest;
+    const { email, accountNumber } = httpRequest.body;
 
     try {
-      const deviceToken = await signAuthToken(body).catch((error) => {
-        throw customException(error.message);
-      });
+      const deviceToken = signAuthToken({ email, accountNumber });
 
       const editedFields = {
         password: hashField({ password: body.password }),
@@ -80,10 +79,12 @@ export default function makeAuthEndPointHandler({ authList }) {
         throw customException(error.message);
       });
 
-      const templateConsumer = Object.assign(consumer.toObject(), {
+      const commonDetails = {
         bodyTitle: `${config.supplier} Electricity EBILL Registration Completed`,
         serverVer: `V${config.version}`,
-      });
+      };
+
+      const templateConsumer = { ...consumer.toObject(), ...commonDetails };
 
       if (!templateConsumer) {
         throw customException(

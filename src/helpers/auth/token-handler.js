@@ -3,10 +3,7 @@ import { sign, verify, decode } from 'jsonwebtoken';
 import config from '../../config/config';
 
 function signAuthToken(consumer) {
-  return sign({
-    email: consumer.email,
-    accountNumber: consumer.accountNumber,
-  }, config.authentication.jwtSecret);
+  return sign(consumer, config.authentication.jwtSecret);
 }
 
 function verifyAuthToken(token) {
