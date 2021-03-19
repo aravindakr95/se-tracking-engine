@@ -22,9 +22,9 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
         slaveId: convertedSlaveId,
       };
 
-      const pgDetails = { ...body, deviceDetails };
+      const pgDetails = { ...body, ...deviceDetails };
 
-      if (convertedSlaveId === HouseholdFloor.FIRST || slaveId === HouseholdFloor.SECOND) {
+      if (convertedSlaveId === HouseholdFloor.FIRST || convertedSlaveId === HouseholdFloor.SECOND) {
         await pgsbList.addPGStats(pgDetails).catch((error) => {
           throw customException(error.message);
         });
