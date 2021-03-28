@@ -2,6 +2,7 @@ import HttpResponseType from '../enums/http/http-response-type';
 
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import customException from '../helpers/utilities/custom-exception';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeMetaEndPointHandler({ metaList }) {
   async function getServerVersion() {
@@ -31,10 +32,7 @@ export default function makeMetaEndPointHandler({ metaList }) {
       case '/version':
         return getServerVersion();
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

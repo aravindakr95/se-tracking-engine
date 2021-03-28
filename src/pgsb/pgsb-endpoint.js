@@ -7,6 +7,7 @@ import HouseholdFloor from '../enums/device/household-floor';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import distributeStats from '../helpers/distributor/distribute-stats';
 import customException from '../helpers/utilities/custom-exception';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
   async function addPGStat(httpRequest) {
@@ -171,17 +172,11 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
           return addPGStat(httpRequest);
         }
 
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
       case '/errors':
         return addPGError(httpRequest);
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

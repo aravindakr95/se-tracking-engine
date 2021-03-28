@@ -8,6 +8,7 @@ import { compareField, hashField } from '../helpers/auth/encryption-handler';
 import { signAuthToken } from '../helpers/auth/token-handler';
 import sendEmailPostMark from '../helpers/mail/mailer';
 import customException from '../helpers/utilities/custom-exception';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeAuthEndPointHandler({ authList }) {
   async function loginConsumer(httpRequest) {
@@ -116,10 +117,7 @@ export default function makeAuthEndPointHandler({ authList }) {
       case '/register':
         return registerConsumer(httpRequest);
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

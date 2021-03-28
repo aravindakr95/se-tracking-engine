@@ -9,6 +9,7 @@ import { getYesterday } from '../helpers/utilities/date-resolver';
 import { calculateDailyProduction, calculateDailyConsumption } from '../helpers/price/throughput-resolver';
 import customException from '../helpers/utilities/custom-exception';
 import sendEmailPostMark from '../helpers/mail/mailer';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeSummaryEndPointHandler({
   summaryList, consumerList, pvsbList, pgsbList,
@@ -269,10 +270,7 @@ export default function makeSummaryEndPointHandler({
         if (httpRequest.path === '/dispatch') {
           return dispatchSummaries();
         }
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
       case HttpMethod.GET:
         if (httpRequest.queryParams
                 && httpRequest.queryParams.type
@@ -281,15 +279,10 @@ export default function makeSummaryEndPointHandler({
                 && httpRequest.queryParams.month) {
           return getSummary(httpRequest);
         }
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+
+        return defaultRouteHandler();
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

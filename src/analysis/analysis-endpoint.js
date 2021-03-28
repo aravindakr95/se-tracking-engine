@@ -15,6 +15,7 @@ import {
 } from '../helpers/utilities/date-resolver';
 import { calculateMonthlyProduction, calculateMonthlyConsumption } from '../helpers/price/throughput-resolver';
 import sendEmailPostMark from '../helpers/mail/mailer';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeAnalysisEndPointHandler({
   analysisList,
@@ -375,10 +376,7 @@ export default function makeAnalysisEndPointHandler({
       case `/reports/${httpRequest.pathParams.id}`:
         return getReportByInvoiceID(httpRequest);
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

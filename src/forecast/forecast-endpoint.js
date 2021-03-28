@@ -5,6 +5,7 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import { getLastDay, getCurrentMonthString } from '../helpers/utilities/date-resolver';
 import customException from '../helpers/utilities/custom-exception';
 import getAvgValues from '../helpers/forecast/forecast-engine';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeAnalysisEndPointHandler({
   forecastList,
@@ -87,10 +88,7 @@ export default function makeAnalysisEndPointHandler({
       case '/reports/generate':
         return generateForecast();
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

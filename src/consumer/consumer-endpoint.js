@@ -3,6 +3,7 @@ import HttpResponseType from '../enums/http/http-response-type';
 import { objectHandler } from '../helpers/utilities/normalize-request';
 import { hashField } from '../helpers/auth/encryption-handler';
 import customException from '../helpers/utilities/custom-exception';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makeConsumerEndpointHandler({ consumerList }) {
   async function getConsumers(httpRequest) {
@@ -185,10 +186,7 @@ export default function makeConsumerEndpointHandler({ consumerList }) {
       case 'DELETE':
         return deleteConsumer(httpRequest);
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }

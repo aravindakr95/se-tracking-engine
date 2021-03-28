@@ -8,6 +8,7 @@ import { objectHandler } from '../helpers/utilities/normalize-request';
 import customException from '../helpers/utilities/custom-exception';
 import fetchInverter from '../helpers/renac/fetch-pv-data';
 import distributeStats from '../helpers/distributor/distribute-stats';
+import defaultRouteHandler from '../helpers/http/default-route-handler';
 
 export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
   async function addPVStat(httpRequest) {
@@ -133,24 +134,15 @@ export default function makePVSBEndPointHandler({ pvsbList, consumerList }) {
           return getConsumerPVStats(httpRequest);
         }
 
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
       case HttpMethod.POST:
         if (httpRequest.queryParams && httpRequest.queryParams.accountNumber) {
           return addPVStat(httpRequest);
         }
 
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
       default:
-        return objectHandler({
-          code: HttpResponseType.METHOD_NOT_ALLOWED,
-          message: `${httpRequest.method} method not allowed`,
-        });
+        return defaultRouteHandler();
     }
   };
 }
