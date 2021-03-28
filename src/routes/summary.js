@@ -16,6 +16,14 @@ summaryRouter.post('/generate',
     summaryController(req, res);
   });
 
+summaryRouter.post('/dispatch',
+  authenticateJWT,
+  validate('summary', '/dispatch', 'POST'),
+  fieldStateChecker,
+  (req, res) => {
+    summaryController(req, res);
+  });
+
 summaryRouter.get('/',
   authenticateJWT,
   (req, res) => {

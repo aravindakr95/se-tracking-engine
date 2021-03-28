@@ -15,12 +15,30 @@ export default function makeSummaryList() {
     return new SummaryLog(log).save();
   }
 
-  async function findPVSummary(accountNumber, year, month) {
+  async function findPVSummariesForMonth(accountNumber, year, month) {
     return PVSummary.find({ accountNumber, year, month });
   }
 
-  async function findPGSummary(accountNumber, year, month) {
+  async function findPGSummariesForMonth(accountNumber, year, month) {
     return PGSummary.find({ accountNumber, year, month });
+  }
+
+  async function findPVSummariesForDate(accountNumber, year, month, day) {
+    return PVSummary.findOne({
+      accountNumber,
+      year,
+      month,
+      day,
+    });
+  }
+
+  async function findPGSummariesForDate(accountNumber, year, month, day) {
+    return PGSummary.findOne({
+      accountNumber,
+      year,
+      month,
+      day,
+    });
   }
 
   async function findSummaryLog(period) {
@@ -31,8 +49,10 @@ export default function makeSummaryList() {
     addPVSummary,
     addPGSummary,
     addSummaryLog,
-    findPVSummary,
-    findPGSummary,
+    findPVSummariesForMonth,
+    findPGSummariesForMonth,
+    findPVSummariesForDate,
+    findPGSummariesForDate,
     findSummaryLog,
   });
 }

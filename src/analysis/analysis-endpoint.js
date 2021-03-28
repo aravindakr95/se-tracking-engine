@@ -56,12 +56,12 @@ export default function makeAnalysisEndPointHandler({
             billingCategory,
           } = consumer;
 
-          const pvSummaries = await summaryList.findPVSummary(accountNumber, year, month)
+          const pvSummaries = await summaryList.findPVSummariesForMonth(accountNumber, year, month)
             .catch((error) => {
               throw customException(error.message);
             });
 
-          const pgSummaries = await summaryList.findPGSummary(accountNumber, year, month)
+          const pgSummaries = await summaryList.findPGSummariesForMonth(accountNumber, year, month)
             .catch((error) => {
               throw customException(error.message);
             });
