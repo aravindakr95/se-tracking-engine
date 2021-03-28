@@ -174,8 +174,6 @@ export default function makeSummaryEndPointHandler({
           email,
           accountNumber,
           supplier,
-          billingCategory,
-          tariff,
           summaryDate,
           productionToday,
           consumptionToday,
