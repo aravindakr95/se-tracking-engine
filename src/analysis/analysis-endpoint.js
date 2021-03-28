@@ -23,7 +23,7 @@ export default function makeAnalysisEndPointHandler({
   forecastList,
   summaryList,
 }) {
-  // execute on 1st day of the month at 09.00 Hours (IST)
+  // execute on 1st day of the month at 03.30 Hours (IST)
   async function generateReports() {
     const dateNow = new Date();
 
@@ -154,7 +154,7 @@ export default function makeAnalysisEndPointHandler({
     }
   }
 
-  // execute on 1st day of the month at 15.00 Hours (IST)
+  // execute on 1st day of the month at 09.30 Hours (IST)
   async function dispatchReports() {
     try {
       const { billingPeriod } = getPreviousDate();

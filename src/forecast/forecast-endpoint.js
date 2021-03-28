@@ -12,7 +12,7 @@ export default function makeAnalysisEndPointHandler({
   consumerList,
   analysisList,
 }) {
-  // execute on 1st day of the month at 06.00 Hours (IST)
+  // execute on 1st day of the month at 00.30 Hours (IST)
   async function generateForecast() {
     try {
       const date = new Date();

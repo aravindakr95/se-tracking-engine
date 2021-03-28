@@ -128,7 +128,7 @@ export default function makeSummaryEndPointHandler({
     }
   }
 
-  // execute on next day beginning for the previous day at 00.15 Hours (IST)
+  // execute on next day beginning for the previous day at 00.30 Hours (IST)
   async function dispatchSummaries() {
     try {
       const { summaryDate } = getYesterday();
