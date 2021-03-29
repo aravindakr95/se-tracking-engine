@@ -191,7 +191,6 @@ export default function makeSummaryEndPointHandler({
         message: `Daily summaries email sending for '${summaryDate}' is completed`,
       });
     } catch (error) {
-      console.log(error)
       return objectHandler({
         code: error.code,
         message: error.message,
