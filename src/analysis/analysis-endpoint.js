@@ -186,7 +186,7 @@ export default function makeAnalysisEndPointHandler({
 
         const templateReport = { ...report, ...commonDetails };
 
-        for (let i = 0; i <= subscribers.length; i++) {
+        for (let i = 0; i < subscribers.length; i++) {
           if (report && report.tariff === SchemaType.NET_METERING) {
             // WARNING: limited resource use with care
             await sendEmailPostMark(templateReport, subscribers, 'monthly-statement-nm', i).catch((error) => {

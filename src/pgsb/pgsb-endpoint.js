@@ -34,7 +34,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
       }
 
       if (config.distributor.isAllowed) {
-        await distributeStats(body, OperationStatus.GRID_SUCCESS).catch((error) => {
+        await distributeStats(pgDetails, OperationStatus.GRID_SUCCESS).catch((error) => {
           throw customException(error.message);
         });
       }
@@ -58,8 +58,9 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
   }
 
   async function getConsumerPGStats(httpRequest) {
-    const { accountNumber, type } = httpRequest.queryParams;
     let result = [];
+
+    const { accountNumber, type } = httpRequest.queryParams;
     const uniqueDeviceIds = [];
 
     try {
@@ -137,7 +138,7 @@ export default function makePGSBEndPointHandler({ pgsbList, consumerList }) {
       });
 
       if (payload) {
-        await distributeStats(body, OperationStatus.GRID_ERROR).catch((error) => {
+        await distributeStats(pgDetails, OperationStatus.GRID_ERROR).catch((error) => {
           throw customException(error.message);
         });
 

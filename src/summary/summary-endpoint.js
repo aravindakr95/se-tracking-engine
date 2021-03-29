@@ -142,8 +142,6 @@ export default function makeSummaryEndPointHandler({
         const {
           email,
           accountNumber,
-          tariff,
-          billingCategory,
           supplier,
           subscribers,
         } = consumer;
@@ -180,7 +178,7 @@ export default function makeSummaryEndPointHandler({
           ...commonDetails,
         };
 
-        for (let i = 0; i <= subscribers.length; i++) {
+        for (let i = 0; i < subscribers.length; i++) {
           // WARNING: limited resource use with care
           await sendEmailPostMark(summaryTemplate, consumer.subscribers, 'daily-statement', i).catch((error) => {
             throw customException(error.message);
@@ -193,6 +191,7 @@ export default function makeSummaryEndPointHandler({
         message: `Daily summaries email sending for '${summaryDate}' is completed`,
       });
     } catch (error) {
+      console.log(error)
       return objectHandler({
         code: error.code,
         message: error.message,
