@@ -1,18 +1,6 @@
 ## :copyright: Smart Electricity Tracking Engine
  > _Act as the middleware for the PGSB, PVSB devices and serve the content to the users by consuming and listening to RESTful APIs_ 
  
-## :book: Table of Contents
-   <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-   <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-   
-   - [Usage](#usage)
-   - [Getting started](#getting-started)
-   - [Technologies](#technologies)
-   - [How to use](#how-to-use)
-   - [License](#license)
-   
-   <!-- END doctoc generated TOC please keep comment here to allow auto update -->
- 
 ## :sparkles: Usage
  
  Proceed with next steps if your platform meet following prerequisites. 
