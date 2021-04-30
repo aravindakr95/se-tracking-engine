@@ -29,7 +29,11 @@ export default function makeAnalysisEndPointHandler({
 
     try {
       const {
-        dateInstance, billingPeriod, month, year,
+        dateInstance,
+        dueDate,
+        billingPeriod,
+        month,
+        year,
       } = getPreviousDate();
       const billingDuration = daysInPreviousMonth();
 
@@ -108,6 +112,7 @@ export default function makeAnalysisEndPointHandler({
             accountNumber,
             contactNumber,
             email,
+            dueDate,
             billingDuration,
             tariff,
             billingCategory,

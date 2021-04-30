@@ -4,22 +4,11 @@ import config from '../../config/config';
 
 import SchemaType from '../../enums/account/schema-type';
 
-import { getDateString } from '../../helpers/utilities/date-resolver';
-
 const ReportSchema = Schema;
-
-const date = new Date();
-
-date.setDate(0);
-const dueDate = new Date(date.getTime() + 12096e5); // 12096e5 = 14 days (magic number programming)
 
 const reportSchema = new ReportSchema({
   timestamp: {
     type: Number,
-  },
-  dueDate: {
-    type: String,
-    default: getDateString(dueDate),
   },
   supplier: {
     type: String,
@@ -33,6 +22,10 @@ const reportSchema = new ReportSchema({
     type: String,
     required: true,
     enum: [SchemaType.NET_METERING, SchemaType.NET_ACCOUNTING],
+  },
+  dueDate: {
+    type: String,
+    required: true,
   },
   accountNumber: {
     type: Number,
